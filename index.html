@@ -11,10 +11,9 @@
   
   <style>
     :root { 
-      /* 🔵 โทนสี Unilever Corporate */
-      --primary: #001F5B; /* Navy */
-      --secondary: #005EB8; /* Blue */
-      --accent: #00A5D9; /* Light Blue */
+      --primary: #001F5B; 
+      --secondary: #005EB8; 
+      --accent: #00A5D9; 
       --bg: #F4F7F9; 
       --card-bg: #FFFFFF; 
       --text-main: #1A202C;
@@ -27,7 +26,7 @@
     
     body { font-family: 'Prompt', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text-main); padding-bottom: 100px; }
     
-    /* Header Premium Unilever Style */
+    /* Header */
     .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 25px 20px 35px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: var(--shadow-md); margin-bottom: -15px; position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;}
     .header-left { display: flex; align-items: center; gap: 15px; }
     .header-icon { font-size: 32px; background: rgba(255,255,255,0.15); padding: 10px; border-radius: 12px; }
@@ -84,12 +83,10 @@
     .report-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 5px solid var(--accent); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; overflow: hidden;}
     .report-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--secondary); border-left: 5px solid var(--secondary); }
     
-    /* Status Colors */
     .status-F { border-left-color: #38A169 !important; } 
     .status-O { border-left-color: #D69E2E !important; } 
     .status-U { border-left-color: #E53E3E !important; } 
     
-    /* 🔴 ป้ายแจ้งเตือน NEW TASK (48 ชม.) */
     .badge-new { background: #E53E3E; color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; animation: pulseRed 2s infinite; margin-left: 5px; }
     @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.5); } 70% { box-shadow: 0 0 0 6px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
     .report-card.is-new { border: 1px solid #FC8181; background: #FFF5F5; }
@@ -100,7 +97,7 @@
     .report-detail { font-size: 14px; color: #4A5568; line-height: 1.6; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
     .badge-chip { background: #EDF2F7; color: #4A5568; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;}
 
-    /* Full Page Modals for Details/Edit */
+    /* Full Page Modals */
     .page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none; overflow-y: auto; padding-bottom: 80px;}
     .page-header { background: white; padding: 20px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); z-index: 10; margin-bottom: 25px; border-bottom: 2px solid var(--secondary);}
     .btn-close-page { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--primary); transition: 0.2s;}
@@ -113,8 +110,11 @@
     /* Buttons */
     .btn-primary { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; transition: 0.2s; box-shadow: 0 4px 15px rgba(0, 31, 91, 0.25);}
     .btn-primary:active { transform: scale(0.98); }
-    .btn-edit { background: white; color: var(--secondary); border: 2px solid var(--secondary); padding: 12px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Prompt'; margin-top: 20px; transition: 0.2s;}
-    .btn-edit:hover { background: var(--secondary); color: white; }
+    
+    /* 🔴 ขยายปุ่ม Edit/Assign ให้เด่นขึ้น 🔴 */
+    .btn-edit { background: linear-gradient(135deg, var(--secondary), #004a94); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; margin-top: 25px; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0, 94, 184, 0.35);}
+    .btn-edit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 94, 184, 0.45); }
+    .btn-edit:active { transform: translateY(0); }
 
     #loadingScreen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(244, 247, 249, 0.9); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
   </style>
@@ -148,8 +148,6 @@
        หน้าจอที่ 1: Dashboard (หน้าแรก) + ตัวกรองแบบจัดเต็ม
        ============================================== -->
   <div id="dashboardView" class="container" style="display: none;">
-    
-    <!-- ตัวกรองข้อมูลที่ถูกนำกลับมาทั้งหมด -->
     <div class="filter-section">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน</h3>
       <div class="form-row" style="margin-bottom: 0;">
@@ -277,7 +275,12 @@
     </div>
     <div class="container">
       <div class="card" id="jobDetailsContent"></div>
-      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้</button>
+      
+      <!-- 🔴 ปุ่ม Edit ที่เด่นชัดขึ้น -->
+      <button class="btn-edit" onclick="openEditMode()">
+        <span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้
+      </button>
+      
     </div>
   </div>
 
@@ -298,6 +301,15 @@
           <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="edit_cause" rows="2" required></textarea></div>
           <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="edit_solved" rows="2" required></textarea></div>
           <div class="form-group"><label>อัปเดตสถานะงาน (Result)</label><select id="edit_result" required><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
+        </div>
+        
+        <!-- 🔴 ส่วนเพิ่มรูปภาพขณะ Edit -->
+        <div class="card">
+          <div class="card-title">อัปโหลดภาพเพิ่มเติม (ทางเลือก)</div>
+          <div class="form-row">
+            <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">เพิ่มภาพก่อนซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'edit_before')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'edit_before')"></label></div><div id="thumbEditBefore" class="gallery-preview"></div><button type="button" id="clearEditBefore" class="btn-clear" onclick="clearFiles('edit_before')">ล้างรูปภาพ</button></div>
+            <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">เพิ่มภาพหลังซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'edit_after')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'edit_after')"></label></div><div id="thumbEditAfter" class="gallery-preview"></div><button type="button" id="clearEditAfter" class="btn-clear" onclick="clearFiles('edit_after')">ล้างรูปภาพ</button></div>
+          </div>
         </div>
         
         <div class="card">
@@ -324,7 +336,6 @@
     let allReportData = [];
     let currentJobData = null; 
 
-    // 1. Initial Load
     window.onload = async function() {
       try {
         const res = await callAPI("getDashboard", {});
@@ -337,7 +348,6 @@
       } catch(err) { alert("Network Error: " + err.message); }
     };
 
-    // 2. Core API Fetcher
     async function callAPI(actionType, dataPayload) {
       if(!GAS_API_URL || GAS_API_URL.includes("ใส่_URL_ของ")) throw new Error("กรุณาใส่ URL ของ Google Apps Script ก่อนครับ");
       const payload = { action: actionType, data: dataPayload };
@@ -345,7 +355,6 @@
       return await response.json();
     }
 
-    // 3. UI Toggles
     function toggleMainView() {
       const dbView = document.getElementById('dashboardView');
       const formView = document.getElementById('formView');
@@ -386,7 +395,6 @@
       }
     }
 
-    // 4. 🔴 Render Dashboard พร้อมตัวกรองครบชุด + เช็กเวลา 48 ชม.
     function renderReportTable() {
       let fs = document.getElementById('fStart').value;
       let fe = document.getElementById('fEnd').value;
@@ -411,7 +419,6 @@
         let statusFull = item.result === "F" ? "Finished" : (item.result === "O" ? "Ongoing" : "Unfinished");
         let statusColor = item.result === "F" ? "#38A169" : (item.result === "O" ? "#D69E2E" : "#E53E3E");
         
-        // เช็กเวลา 48 ชม.
         let isNew = false;
         if(item.date) {
             let jobDate = new Date(item.date);
@@ -424,7 +431,6 @@
         let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW TASK</div>` : "";
         let cardHighlightClass = isNew ? "is-new" : "";
 
-        // ถ้ายังไม่ได้ระบุช่าง
         let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ย้งไม่ระบุช่าง (Unassigned)</span>';
 
         html += `
@@ -449,7 +455,6 @@
       document.getElementById('reportContent').innerHTML = html;
     }
 
-    // 5. Open Details
     function openJobDetails(numStr) {
       let job = allReportData.find(r => r.num.toString() === numStr.toString()); 
       if(!job) return;
@@ -463,7 +468,7 @@
         return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' ');
       };
 
-      let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มแก้ไขเพื่อระบุช่าง)</span>';
+      let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>';
 
       let html = `
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
@@ -494,7 +499,6 @@
       document.getElementById('jobDetailsPage').style.display = 'block';
     }
 
-    // 6. Open Edit Mode
     function openEditMode() {
       if(!currentJobData) return;
       document.getElementById('editJobNumLabel').innerText = "#" + currentJobData.num;
@@ -503,6 +507,10 @@
       document.getElementById('edit_cause').value = currentJobData.cause;
       document.getElementById('edit_solved').value = currentJobData.solved;
       document.getElementById('edit_result').value = currentJobData.result;
+      
+      // เคลียร์รูปเก่าที่ค้างอยู่ในช่องอัปโหลดของหน้าแก้ไข
+      clearFiles('edit_before');
+      clearFiles('edit_after');
       
       let techString = currentJobData.tech || "";
       let checkboxes = document.querySelectorAll('.edit-tech-cb');
@@ -528,7 +536,7 @@
       document.getElementById('editJobPage').style.display = 'block';
     }
 
-    // 7. Submit Edit (Update)
+    // 🔴 7. Submit Edit (ปรับปรุงให้ส่งภาพที่อัปเดตไปด้วย)
     async function submitEditForm(event) {
       event.preventDefault();
       var btn = document.getElementById('updateBtn'); 
@@ -538,19 +546,27 @@
       document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value));
       if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value);
 
-      var updateData = {
-        num: document.getElementById('editJobNum').value,
-        breakdown: document.getElementById('edit_breakdown').value,
-        cause: document.getElementById('edit_cause').value,
-        solved: document.getElementById('edit_solved').value,
-        result: document.getElementById('edit_result').value,
-        tech: techArray.join(', ')
-      };
-
       try {
+        var baseEditBefore=[], baseEditAfter=[];
+        for(let f of editFilesBefore) baseEditBefore.push(await compressImageAsync(f));
+        for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f));
+
+        var updateData = {
+          num: document.getElementById('editJobNum').value,
+          breakdown: document.getElementById('edit_breakdown').value,
+          cause: document.getElementById('edit_cause').value,
+          solved: document.getElementById('edit_solved').value,
+          result: document.getElementById('edit_result').value,
+          tech: techArray.join(', '),
+          imgsBefore: baseEditBefore,
+          imgsAfter: baseEditAfter
+        };
+
         const res = await callAPI("updateReport", updateData);
         if(res.status === "success") {
           alert(res.message);
+          clearFiles('edit_before'); clearFiles('edit_after');
+          
           document.getElementById('editJobPage').style.display = 'none';
           document.getElementById('jobDetailsPage').style.display = 'none';
           document.getElementById('loadingScreen').style.display = 'flex';
@@ -563,16 +579,22 @@
       btn.innerHTML = '<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false;
     }
 
-    // Helpers (Time, Image handling)
     function formatTime(input, maxVal) { let val = input.value.replace(/[^0-9]/g, ''); if(val!==""){let num=parseInt(val,10);if(num>maxVal)val=maxVal.toString();} input.value=val; if(val.length===2){let nxt=input.nextElementSibling;if(nxt&&nxt.tagName==='SPAN')nxt=nxt.nextElementSibling;if(nxt&&nxt.tagName==='INPUT')nxt.focus();} }
     function getTimeString(p) { return document.getElementById(p+'HH').value.padStart(2,'0')+':'+document.getElementById(p+'MM').value.padStart(2,'0'); }
 
+    // 🔴 8. รองรับ HandleFiles แบบ 4 ประเภท
     let filesBefore = [], filesAfter = [];
+    let editFilesBefore = [], editFilesAfter = [];
+    
     function handleFiles(event, type) {
       const files = event.target.files; if(files.length===0) return;
-      let targetArray = (type === 'before') ? filesBefore : filesAfter;
-      let thumbDiv = document.getElementById(type === 'before' ? 'thumbBefore' : 'thumbAfter');
-      let clearBtn = document.getElementById(type === 'before' ? 'clearBefore' : 'clearAfter');
+      let targetArray; let thumbDiv; let clearBtn;
+      
+      if(type === 'before') { targetArray = filesBefore; thumbDiv = document.getElementById('thumbBefore'); clearBtn = document.getElementById('clearBefore'); }
+      else if(type === 'after') { targetArray = filesAfter; thumbDiv = document.getElementById('thumbAfter'); clearBtn = document.getElementById('clearAfter'); }
+      else if(type === 'edit_before') { targetArray = editFilesBefore; thumbDiv = document.getElementById('thumbEditBefore'); clearBtn = document.getElementById('clearEditBefore'); }
+      else if(type === 'edit_after') { targetArray = editFilesAfter; thumbDiv = document.getElementById('thumbEditAfter'); clearBtn = document.getElementById('clearEditAfter'); }
+
       if (targetArray.length + files.length > 5) { alert("แนบรูปได้สูงสุด 5 ภาพต่อส่วนครับ"); return; }
       for(let i=0; i<files.length; i++) {
         targetArray.push(files[i]); let reader = new FileReader();
@@ -580,17 +602,20 @@
         reader.readAsDataURL(files[i]);
       } clearBtn.style.display="block"; event.target.value=""; 
     }
+    
     function clearFiles(type) {
       if(type==='before'){filesBefore=[];document.getElementById('thumbBefore').innerHTML="";document.getElementById('clearBefore').style.display="none";}
-      else{filesAfter=[];document.getElementById('thumbAfter').innerHTML="";document.getElementById('clearAfter').style.display="none";}
+      else if(type==='after'){filesAfter=[];document.getElementById('thumbAfter').innerHTML="";document.getElementById('clearAfter').style.display="none";}
+      else if(type==='edit_before'){editFilesBefore=[];document.getElementById('thumbEditBefore').innerHTML="";document.getElementById('clearEditBefore').style.display="none";}
+      else if(type==='edit_after'){editFilesAfter=[];document.getElementById('thumbEditAfter').innerHTML="";document.getElementById('clearEditAfter').style.display="none";}
     }
+    
     function compressImageAsync(file) {
       return new Promise((resolve) => {
         var reader=new FileReader(); reader.onload=function(e){ var img=new Image(); img.onload=function(){ var canvas=document.createElement('canvas'); var w=img.width,h=img.height; if(w>h){if(w>1000){h*=1000/w;w=1000;}}else{if(h>1000){w*=1000/h;h=1000;}} canvas.width=w;canvas.height=h; var ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h); resolve(canvas.toDataURL('image/jpeg',0.6).split(',')[1]);}; img.src=e.target.result;}; reader.readAsDataURL(file);
       });
     }
 
-    // Submit New Form
     async function submitForm(event) {
       event.preventDefault(); var btn = document.getElementById('submitBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
       var techArray = []; document.querySelectorAll('.tech-cb:checked').forEach(cb => techArray.push(cb.value));
