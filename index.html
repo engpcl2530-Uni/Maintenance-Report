@@ -3,138 +3,117 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>BPC-Maintenance-Report</title>
-  
-  <!-- 🔴 ป้องกันไม่ให้ Search Engine (เช่น Google) ค้นหาเว็บนี้เจอ -->
+  <title>CMMS Report & Tracker</title>
   <meta name="robots" content="noindex, nofollow">
   
-  <base target="_top">
-  <!-- นำเข้า Google Fonts & Material Symbols -->
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
-  <link rel="icon" type="image/png" href="logo.png">
   
   <style>
     :root { 
-      --primary: #001F5B; 
-      --secondary: #005EB8; 
-      --accent: #00A5D9; 
-      --bg: #F4F7F9; 
-      --card-bg: #FFFFFF; 
-      --text-main: #1A202C;
-      --text-muted: #718096;
-      --border: #E2E8F0;
-      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-      --shadow-md: 0 10px 25px rgba(0, 31, 91, 0.08);
-      --shadow-hover: 0 15px 35px rgba(0, 94, 184, 0.15);
+      --primary: #1e293b; 
+      --secondary: #3b82f6; 
+      --accent: #10b981; 
+      --bg: #f8fafc; 
+      --card-bg: #ffffff; 
+      --text-main: #334155;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.05);
+      --shadow-hover: 0 10px 25px rgba(59, 130, 246, 0.15);
     }
     
     body { font-family: 'Prompt', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text-main); padding-bottom: 100px; }
     
-    /* Header Premium */
-    .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 25px 20px 35px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: var(--shadow-md); margin-bottom: -25px; position: relative; z-index: 10; display: flex; align-items: center; gap: 15px;}
-    .header-icon { font-size: 32px; background: rgba(255,255,255,0.15); padding: 10px; border-radius: 12px; }
-    .header-text h1 { font-size: 22px; font-weight: 700; margin: 0; letter-spacing: 0.5px; }
-    .header-text p { font-size: 13px; color: rgba(255,255,255,0.85); margin: 3px 0 0; }
+    /* Header */
+    .header { background: #ffffff; color: var(--primary); padding: 20px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm);}
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .header-icon { font-size: 28px; color: var(--secondary); background: #eff6ff; padding: 8px; border-radius: 10px; }
+    .header-text h1 { font-size: 18px; font-weight: 700; margin: 0; }
+    .header-text p { font-size: 12px; color: var(--text-muted); margin: 0; }
 
-    .container { padding: 0 15px; max-width: 800px; margin: auto; position: relative; z-index: 20; }
+    .container { padding: 0 15px; max-width: 800px; margin: auto; }
     
-    /* Cards ทั่วไป */
-    .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: var(--shadow-md); margin-bottom: 25px; border: 1px solid rgba(0, 94, 184, 0.05); }
-    .card-title { color: var(--primary); font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+    /* Cards */
+    .card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: var(--shadow-md); margin-bottom: 20px; border: 1px solid var(--border); }
+    .card-title { color: var(--primary); font-size: 16px; font-weight: 700; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
     .card-title .material-symbols-rounded { color: var(--secondary); font-size: 20px; }
     
     /* Forms */
-    .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;}
+    .form-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 15px;}
     .form-group { flex: 1; min-width: 140px; margin-bottom: 15px;}
-    label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 13.5px; color: var(--text-muted); }
-    input[type="text"], input[type="password"], input[type="date"], select, textarea { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14.5px; font-family: 'Prompt', sans-serif; box-sizing: border-box; background-color: #F8FAFC; transition: all 0.3s; color: var(--text-main); }
-    input:focus, select:focus, textarea:focus { border-color: var(--secondary); background: #FFF; box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1); outline: none; }
+    label { display: block; margin-bottom: 6px; font-weight: 600; font-size: 13px; color: var(--text-main); }
+    input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14px; font-family: 'Prompt', sans-serif; box-sizing: border-box; background-color: #f8fafc; transition: 0.2s; color: var(--primary); }
+    input:focus, select:focus, textarea:focus { border-color: var(--secondary); background: #FFF; outline: none; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1); }
 
-    /* Time Input */
-    .time-input-group { display: flex; align-items: center; gap: 8px; }
-    .time-input-group input { text-align: center; padding: 12px; font-weight: 600; letter-spacing: 1px;}
+    .time-input-group { display: flex; align-items: center; gap: 5px; }
+    .time-input-group input { text-align: center; padding: 12px; font-weight: 600; }
     .time-colon { font-weight: bold; color: var(--text-muted); }
 
-    /* Upload UI Premium */
+    /* Upload UI */
     .upload-container { display: flex; flex-direction: column; gap: 15px; }
     @media (min-width: 600px) { .upload-container { flex-direction: row; } }
-    .upload-box { flex: 1; border: 1.5px dashed #CBD5E0; padding: 20px 15px; border-radius: 12px; background: #F8FAFC; transition: 0.3s; }
-    .upload-box:hover { border-color: var(--secondary); background: #F0F7FF; }
-    .upload-title { font-weight: 600; color: var(--primary); font-size: 14px; text-align: center; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; gap: 5px;}
-    .btn-upload-group { display: flex; gap: 8px; }
-    .btn-upload { flex: 1; background: #FFF; color: var(--text-main); border: 1px solid var(--border); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 5px; box-shadow: var(--shadow-sm); transition: 0.2s;}
-    .btn-upload.primary { background: var(--secondary); color: #FFF; border-color: var(--secondary); }
+    .upload-box { flex: 1; border: 1.5px dashed #cbd5e1; padding: 15px; border-radius: 12px; background: #f8fafc; transition: 0.3s; }
+    .btn-upload-group { display: flex; gap: 8px; margin-top: 10px;}
+    .btn-upload { flex: 1; background: #FFF; color: var(--text-main); border: 1px solid var(--border); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 5px; box-shadow: var(--shadow-sm);}
+    .btn-upload.primary { background: #eff6ff; color: var(--secondary); border-color: #bfdbfe; }
     .btn-upload input[type="file"] { display: none; }
-    .btn-upload:active { transform: scale(0.97); }
     
-    /* Thumbnails */
     .gallery-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center;}
-    .thumb-wrap { position: relative; width: 55px; height: 55px; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border);}
+    .thumb-wrap { position: relative; width: 50px; height: 50px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);}
     .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .btn-clear { background: transparent; color: #E53E3E; border: none; font-size: 13px; cursor: pointer; margin-top: 12px; font-weight: 500; text-decoration: underline; display: none; width: 100%; font-family: 'Prompt';}
+    .btn-clear { background: transparent; color: #ef4444; border: none; font-size: 12px; cursor: pointer; margin-top: 10px; font-weight: 500; text-decoration: underline; display: none; width: 100%; font-family: 'Prompt';}
 
     /* Checkbox */
-    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #F8FAFC; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
-    .checkbox-grid label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; cursor: pointer; color: var(--text-main);}
-    .checkbox-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--secondary); }
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: #f8fafc; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+    .checkbox-grid label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; cursor: pointer;}
+    .checkbox-grid input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--secondary); cursor: pointer;}
 
-    /* Sticky Button */
-    .floating-submit-zone { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); padding: 15px; box-sizing: border-box; box-shadow: 0 -4px 25px rgba(0,0,0,0.06); z-index: 90; }
-    .btn-submit { background: var(--primary); color: white; border: none; padding: 15px; width: 100%; max-width: 800px; margin: 0 auto; display: flex; justify-content: center; align-items: center; gap: 10px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0, 31, 91, 0.25); transition: 0.2s; font-family: 'Prompt'; }
-    .btn-submit:active { transform: scale(0.98); }
+    /* FAB (Floating Action Button) */
+    .fab-main { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 50%; background: var(--secondary); color: white; border: none; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 100; transition: 0.3s; }
+    .fab-main:hover { transform: scale(1.05); }
+    .fab-main.close-mode { background: var(--text-muted); box-shadow: var(--shadow-md); }
 
-    /* FAB Menu */
-    .fab-container { position: fixed; bottom: 95px; right: 20px; z-index: 100; display: flex; flex-direction: column; align-items: flex-end; }
-    .fab-menu { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; opacity: 0; visibility: hidden; transform: translateY(20px); transition: 0.3s; }
-    .fab-menu.active { opacity: 1; visibility: visible; transform: translateY(0); }
-    .fab-item { background: white; color: var(--text-main); border: 1px solid var(--border); padding: 12px 20px; border-radius: 30px; box-shadow: var(--shadow-md); font-family: 'Prompt'; font-weight: 500; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 10px; transition: 0.2s;}
-    .fab-item:hover { color: var(--secondary); border-color: var(--secondary); }
-    .fab-main { width: 56px; height: 56px; border-radius: 50%; background: var(--secondary); color: white; border: none; box-shadow: var(--shadow-md); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; }
-    .fab-main.active { transform: rotate(45deg); background: var(--text-muted); }
-
-    /* Modal / Popup ทั่วไป */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 200; display: none; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;}
-    .modal-box { background: white; padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); position: relative;}
-    .modal-title { color: var(--primary); font-size: 18px; font-weight: 600; margin-top: 0; margin-bottom: 25px; text-align: center; display: flex; justify-content: center; align-items: center; gap: 8px;}
-    .btn-login { background: var(--secondary); color: white; width: 100%; border: none; padding: 14px; border-radius: 10px; font-weight: 600; font-size: 15px; cursor: pointer; margin-top: 15px; font-family: 'Prompt';}
-    .btn-cancel { background: transparent; color: var(--text-muted); width: 100%; border: none; padding: 12px; font-size: 14px; cursor: pointer; margin-top: 5px; font-family: 'Prompt';}
-    .close-gallery { position: absolute; top: 15px; right: 15px; background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--text-main); transition: 0.2s;}
-    .close-gallery:hover { background: #E2E8F0; }
-
-    /* 🟢 Admin Dashboard SPA & Interactive Card */
-    .dashboard-header { background: white; padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+    /* Report Card in Dashboard */
+    .filter-section { background: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);}
     
-    .report-card { 
-      background: white; border-radius: 12px; padding: 20px 20px 30px; margin-bottom: 15px; 
-      box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 5px solid var(--accent); 
-      transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-      cursor: pointer; position: relative; overflow: hidden;
-    }
-    .report-card:hover { 
-      transform: translateY(-4px); 
-      box-shadow: var(--shadow-hover); 
-      border-color: var(--secondary); 
-      border-left: 5px solid var(--secondary); 
-    }
-    .report-card:active { transform: scale(0.98); }
+    .report-card { background: white; border-radius: 16px; padding: 18px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); transition: 0.2s; cursor: pointer; position: relative; border-left: 4px solid var(--border);}
+    .report-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); border-color: #bfdbfe; }
     
-    .click-hint {
-      position: absolute; right: 20px; bottom: 15px; color: var(--secondary);
-      font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 4px;
-      opacity: 0; transform: translateX(10px); transition: all 0.3s ease;
-    }
-    .report-card:hover .click-hint { opacity: 1; transform: translateX(0); }
+    /* 🔴 แอนิเมชันสำหรับป้าย NEW TASK 🔴 */
+    .badge-new { background: #ef4444; color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; animation: pulseRed 2s infinite; margin-left: 5px; }
+    @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.5); } 70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    
+    /* 🔴 ไฮไลต์การ์ดที่เพิ่งแจ้งซ่อม < 48 ชม. */
+    .report-card.is-new { border: 1.5px solid #fca5a5; background: #fff8f8; }
+    .report-card.is-new:hover { border-color: #ef4444; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.15); }
 
-    .report-card-head { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
-    .report-card-title { font-weight: 600; color: var(--primary); font-size: 15px;}
-    .report-detail { font-size: 14px; color: #4A5568; line-height: 1.6; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
-    .badge { background: #EDF2F7; color: #4A5568; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;}
+    /* Dynamic Status Colors */
+    .status-F { border-left-color: #10b981 !important; } /* Success */
+    .status-O { border-left-color: #f59e0b !important; } /* Warning */
+    .status-U { border-left-color: #ef4444 !important; } /* Danger */
+
+    .report-card-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .report-card-title { font-weight: 700; color: var(--primary); font-size: 15px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap;}
+    .report-detail { font-size: 13px; color: var(--text-muted); line-height: 1.5; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+    .badge-chip { background: #f1f5f9; color: var(--text-muted); padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; border: 1px solid var(--border);}
+
+    /* Full Page Modals */
+    .page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none; overflow-y: auto; padding-bottom: 80px;}
+    .page-header { background: white; padding: 15px 20px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); z-index: 10; margin-bottom: 20px;}
+    .btn-close-page { background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--primary); }
     
-    /* สไตล์สำหรับหน้าต่างรายละเอียดงานซ่อม */
-    .detail-row { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; }
-    .detail-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 3px; }
-    .detail-value { font-size: 15px; color: var(--text-main); font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
+    .detail-row { margin-bottom: 15px; }
+    .detail-label { font-size: 12px; color: var(--text-muted); margin-bottom: 2px; font-weight: 600; }
+    .detail-value { font-size: 14.5px; color: var(--primary); line-height: 1.5; white-space: pre-wrap; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid var(--border);}
+    
+    /* Buttons */
+    .btn-primary { background: var(--secondary); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Prompt'; transition: 0.2s;}
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-edit { background: white; color: var(--secondary); border: 1.5px solid var(--secondary); padding: 12px; border-radius: 12px; font-size: 14px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 8px; font-family: 'Prompt'; margin-top: 20px;}
+    
+    #loadingScreen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); backdrop-filter: blur(4px); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
 <body>
@@ -144,412 +123,453 @@
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbygLJABXRzeot0Fu5FxdGN_4GwFJnnPMb2ifm4pvrcsTl6TpdvilGeHqOrNpjJo-MyN9w/exec";
   </script>
 
-  <!-- Header -->
-  <div class="header" id="mainHeader">
-    <div class="header-icon"><span class="material-symbols-rounded">engineering</span></div>
-    <div class="header-text">
-      <h1 id="headerTitle">CMMS System</h1>
-      <p id="headerSub">บันทึกประวัติการบำรุงรักษา</p>
+  <!-- Main Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="header-icon"><span class="material-symbols-rounded">build_circle</span></div>
+      <div class="header-text">
+        <h1 id="appTitle">CMMS Tracker</h1>
+        <p>ติดตามและอัปเดตงานซ่อม</p>
+      </div>
     </div>
   </div>
 
+  <!-- Loading Screen -->
+  <div id="loadingScreen">
+    <span class="material-symbols-rounded" style="font-size: 40px; color: var(--secondary); animation: spin 1.5s linear infinite;">sync</span>
+    <p style="margin-top: 10px; font-weight: 600; color: var(--primary);">กำลังโหลดข้อมูล...</p>
+    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+  </div>
+
   <!-- ==============================================
-       ส่วนที่ 1: ฟอร์มแจ้งซ่อมช่าง
+       หน้าจอที่ 1: Dashboard (หน้าแรก)
        ============================================== -->
-  <div id="formContainer" class="container" style="margin-top: 30px;">
+  <div id="dashboardView" class="container" style="display: none; margin-top: 20px;">
+    
+    <div class="filter-section">
+      <div class="form-row" style="margin-bottom: 0;">
+        <div class="form-group"><label>ค้นหา</label><input type="text" id="fText" placeholder="เครื่องจักร, ชื่อช่าง..." oninput="renderReportTable()"></div>
+        <div class="form-group">
+          <label>สถานะงาน</label>
+          <select id="fStatus" onchange="renderReportTable()">
+            <option value="">-- ทุกสถานะ --</option>
+            <option value="F">Finished (เสร็จสมบูรณ์)</option>
+            <option value="O">Ongoing (กำลังดำเนินการ)</option>
+            <option value="U">Unfinished (ยังไม่เสร็จ)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div id="reportContent"></div>
+  </div>
+
+  <!-- ==============================================
+       หน้าจอที่ 2: ฟอร์มสร้างใบแจ้งซ่อมใหม่
+       ============================================== -->
+  <div id="formView" class="container" style="display: none; margin-top: 20px;">
     <form id="maintenanceForm" onsubmit="submitForm(event)">
-      
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">feed</span> ข้อมูลทั่วไป</div>
         <div class="form-row">
           <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="date" required></div>
-          <div class="form-group"><label>กะ (Shift)</label><select id="shift" required><option value="" disabled selected>-- เลือกกะ --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
+          <div class="form-group"><label>กะ (Shift)</label><select id="shift" required><option value="" disabled selected>-- เลือก --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>สายการผลิต (Line)</label>
             <select id="line" onchange="toggleOther('line', 'lineOtherContainer')" required>
               <option value="" disabled selected>-- เลือกไลน์ --</option>
-              <option value="A1">A1</option><option value="A2">A2</option><option value="O1">O1</option><option value="C1">C1</option><option value="C2">C2</option>
-              <option value="SB">SB</option><option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option><option value="R4">R4</option>
-              <option value="R5">R5</option><option value="R6">R6</option><option value="IWK1">IWK1</option><option value="IWK2">IWK2</option><option value="V4">V4</option>
-              <option value="FGI">FGI</option><option value="CF3">CF3</option><option value="M1">M1</option><option value="EOL">EOL</option><option value="Utility">Utility</option>
-              <option value="Packing">Packing</option><option value="Lab">Lab</option><option value="Mixing">Mixing</option><option value="MIX-Utility">MIX-Utility</option>
-              <option value="Pre-Weight">Pre-Weight</option>
-              <option value="MIX#1">MIX#1</option><option value="MIX#2">MIX#2</option><option value="MIX#3">MIX#3</option><option value="MIX#4">MIX#4</option><option value="MIX#5">MIX#5</option><option value="MIX#6">MIX#6</option><option value="MIX#7">MIX#7</option>
-              <option value="อื่นๆ">อื่นๆ</option>
+              <option value="A1">A1</option><option value="A2">A2</option><option value="C1">C1</option><option value="Mixing">Mixing</option><option value="Utility">Utility</option><option value="อื่นๆ">อื่นๆ</option>
             </select>
+            <div id="lineOtherContainer" style="display:none; margin-top:8px;"><input type="text" id="lineOther" placeholder="ระบุ Line อื่นๆ..."></div>
           </div>
-          <div class="form-group"><label>รหัสเครื่องจักร (Machine)</label><input type="text" id="machine" required placeholder="เช่น FILLER-01"></div>
+          <div class="form-group"><label>เครื่องจักร (Machine)</label><input type="text" id="machine" required placeholder="รหัสเครื่อง"></div>
         </div>
-        <div class="form-group" id="lineOtherContainer" style="display:none; margin-top:-10px;"><input type="text" id="lineOther" placeholder="พิมพ์ระบุ Line อื่นๆ..."></div>
       </div>
 
       <div class="card">
-        <div class="card-title"><span class="material-symbols-rounded">schedule</span> ระยะเวลาดำเนินการ</div>
+        <div class="card-title"><span class="material-symbols-rounded">schedule</span> เวลาดำเนินการ</div>
         <div class="form-row">
-          <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="callHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="callMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+          <div class="form-group"><label>แจ้งซ่อม</label><div class="time-input-group"><input type="text" id="callHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="callMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
           <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="startHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="startMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
-          <div class="form-group"><label>ซ่อมเสร็จ</label><div class="time-input-group"><input type="text" id="endHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="endMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+          <div class="form-group"><label>เสร็จสิ้น</label><div class="time-input-group"><input type="text" id="endHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="endMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
         </div>
       </div>
 
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">build_circle</span> รายละเอียดทางเทคนิค</div>
-        <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="breakdown" rows="2" required></textarea></div>
-        <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="cause" rows="2" required></textarea></div>
+        <div class="form-group"><label>อาการที่พบ (Breakdown)</label><textarea id="breakdown" rows="2" required></textarea></div>
+        <div class="form-group"><label>สาเหตุของปัญหา (Cause)</label><textarea id="cause" rows="2" required></textarea></div>
         <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="solved" rows="2" required></textarea></div>
-        <div class="form-group"><label>สถานะ (Result)</label><select id="result" required><option value="" disabled selected>-- เลือกสถานะ --</option><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
+        <div class="form-group"><label>สถานะงาน (Result)</label><select id="result" required><option value="" disabled selected>-- เลือกสถานะ --</option><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
       </div>
 
       <div class="card">
-        <div class="card-title"><span class="material-symbols-rounded">photo_camera</span> ภาพถ่ายอ้างอิง</div>
+        <div class="card-title"><span class="material-symbols-rounded">photo_camera</span> แนบรูปถ่าย</div>
         <div class="form-row">
-          <div class="upload-box">
-            <div class="upload-title"><span class="material-symbols-rounded" style="font-size:18px;">image</span> ภาพก่อนซ่อม</div>
-            <div class="btn-upload-group">
-              <label class="btn-upload primary"><span class="material-symbols-rounded">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'before')"></label>
-              <label class="btn-upload"><span class="material-symbols-rounded">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'before')"></label>
-            </div>
-            <div id="thumbBefore" class="gallery-preview"></div>
-            <button type="button" id="clearBefore" class="btn-clear" onclick="clearFiles('before')">ล้างรูปภาพทั้งหมด</button>
-          </div>
-
-          <div class="upload-box">
-            <div class="upload-title"><span class="material-symbols-rounded" style="font-size:18px;">imagesmode</span> ภาพหลังซ่อม</div>
-            <div class="btn-upload-group">
-              <label class="btn-upload primary"><span class="material-symbols-rounded">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'after')"></label>
-              <label class="btn-upload"><span class="material-symbols-rounded">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'after')"></label>
-            </div>
-            <div id="thumbAfter" class="gallery-preview"></div>
-            <button type="button" id="clearAfter" class="btn-clear" onclick="clearFiles('after')">ล้างรูปภาพทั้งหมด</button>
-          </div>
+          <div class="upload-box"><div style="font-size:13px; font-weight:600; text-align:center;">ภาพก่อนซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:16px;">photo_camera</span><input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'before')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:16px;">photo_library</span><input type="file" accept="image/*" multiple onchange="handleFiles(event, 'before')"></label></div><div id="thumbBefore" class="gallery-preview"></div><button type="button" id="clearBefore" class="btn-clear" onclick="clearFiles('before')">ล้าง</button></div>
+          <div class="upload-box"><div style="font-size:13px; font-weight:600; text-align:center;">ภาพหลังซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:16px;">photo_camera</span><input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'after')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:16px;">photo_library</span><input type="file" accept="image/*" multiple onchange="handleFiles(event, 'after')"></label></div><div id="thumbAfter" class="gallery-preview"></div><button type="button" id="clearAfter" class="btn-clear" onclick="clearFiles('after')">ล้าง</button></div>
         </div>
       </div>
 
       <div class="card">
-        <div class="card-title"><span class="material-symbols-rounded">group</span> บุคลากร</div>
+        <div class="card-title"><span class="material-symbols-rounded">group</span> ทีมช่างผู้ปฏิบัติงาน</div>
         <div class="form-group">
-          <label>วิศวกร/ช่างซ่อมบำรุง</label>
           <div class="checkbox-grid">
             <label><input type="checkbox" class="tech-cb" value="ภูวรินทร์"> ภูวรินทร์</label>
             <label><input type="checkbox" class="tech-cb" value="วิเชียร"> วิเชียร</label>
             <label><input type="checkbox" class="tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
             <label><input type="checkbox" class="tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
-            <label><input type="checkbox" class="tech-cb" value="สันติ"> สันติ</label>
-            <label><input type="checkbox" class="tech-cb" value="บัณฑิต"> บัณฑิต</label>
-            <label><input type="checkbox" class="tech-cb" value="ลิขิต"> ลิขิต</label>
-            <label><input type="checkbox" class="tech-cb" value="ศุภสิทธิ์"> ศุภสิทธิ์</label>
-            <label><input type="checkbox" class="tech-cb" value="ธงชัย"> ธงชัย</label>
-            <label><input type="checkbox" class="tech-cb" value="สุพรชัย"> สุพรชัย</label>
-            <label><input type="checkbox" class="tech-cb" value="วุฒิเดช"> วุฒิเดช</label>
-            <label><input type="checkbox" class="tech-cb" value="สัญญา"> สัญญา</label>
             <label><input type="checkbox" class="tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
-            <label><input type="checkbox" class="tech-cb" value="ศิวกร"> ศิวกร</label>
-            <label><input type="checkbox" class="tech-cb" value="กิตติพงษ์"> กิตติพงษ์</label>
-            <label><input type="checkbox" class="tech-cb" value="ไชยยา"> ไชยยา</label>
-            <label><input type="checkbox" class="tech-cb" value="นิรุตต์"> นิรุตต์</label>
-            <label><input type="checkbox" class="tech-cb" value="เศรษฐศักดิ์"> เศรษฐศักดิ์</label>
-            <label style="grid-column: span 2;"><input type="checkbox" id="cbOther" onchange="toggleOtherTech()"> ระบุชื่ออื่น</label>
+            <label><input type="checkbox" class="tech-cb" value="สัญญา"> สัญญา</label>
+            <label style="grid-column: span 2;"><input type="checkbox" id="cbOther" onchange="toggleOtherTech('add')"> ช่างคนอื่นๆ (ระบุ)</label>
           </div>
-          <div id="techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="techOther" placeholder="พิมพ์ชื่อผู้ปฏิบัติงาน..."></div>
+          <div id="techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="techOther" placeholder="พิมพ์ชื่อช่าง..."></div>
         </div>
         <div class="form-row">
           <div class="form-group"><label>ผู้รับมอบงาน</label><input type="text" id="handover" required></div>
           <div class="form-group"><label>แผนก</label><select id="dept" required><option value="CO">CO</option><option value="PCL">PCL</option></select></div>
         </div>
-        <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุเพิ่มเติม (ถ้ามี)</label><textarea id="remark" rows="2"></textarea></div>
+        <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุ</label><textarea id="remark" rows="1"></textarea></div>
       </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn"><span class="material-symbols-rounded">cloud_upload</span> บันทึกแจ้งซ่อมใหม่</button>
     </form>
   </div>
 
-  <div class="floating-submit-zone" id="submitZone">
-    <button type="submit" form="maintenanceForm" class="btn-submit" id="submitBtn">
-      <span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ
-    </button>
+  <!-- FAB Button -->
+  <button class="fab-main" id="fabMainBtn" onclick="toggleMainView()">
+    <span class="material-symbols-rounded" id="fabIcon" style="font-size: 28px;">add</span>
+  </button>
+
+  <!-- ==============================================
+       หน้าจอที่ 3: ดูรายละเอียดงาน (Job Details)
+       ============================================== -->
+  <div class="page-overlay" id="jobDetailsPage">
+    <div class="page-header">
+      <h2 style="margin:0; font-size:16px; font-weight:700; color:var(--primary);">ข้อมูลใบแจ้งซ่อม <span id="detailJobNum" style="color:var(--secondary);"></span></h2>
+      <button class="btn-close-page" onclick="document.getElementById('jobDetailsPage').style.display='none'"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="container">
+      <div class="card" id="jobDetailsContent"></div>
+      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้</button>
+    </div>
   </div>
 
   <!-- ==============================================
-       ส่วนที่ 2: Admin Dashboard
+       หน้าจอที่ 4: แก้ไขอัปเดตงาน (Edit Mode)
        ============================================== -->
-  <div id="adminDashboard" class="container" style="display:none; margin-top: 30px;">
-    <div class="dashboard-header">
-      <div><h2 style="margin:0; color:var(--primary); font-size:20px; display:flex; align-items:center; gap:8px;"><span class="material-symbols-rounded">monitoring</span> ประวัติการปฏิบัติงาน</h2></div>
-      <button onclick="closeDashboard()" style="background:#F1F5F9; border:none; padding:8px 15px; border-radius:8px; font-family:'Prompt'; font-weight:500; cursor:pointer; display:flex; align-items:center; gap:5px; color:var(--text-main);"><span class="material-symbols-rounded" style="font-size:18px;">arrow_back</span> กลับ</button>
+  <div class="page-overlay" id="editJobPage" style="z-index: 250;">
+    <div class="page-header">
+      <h2 style="margin:0; font-size:16px; font-weight:700; color:var(--primary);">อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
+      <button class="btn-close-page" onclick="document.getElementById('editJobPage').style.display='none'"><span class="material-symbols-rounded">close</span></button>
     </div>
-
-    <div class="card" style="padding:20px;">
-      <div class="form-row" style="margin-bottom:0;">
-        <div class="form-group"><label>วันที่เริ่ม</label><input type="date" id="fStart"></div>
-        <div class="form-group"><label>วันที่สิ้นสุด</label><input type="date" id="fEnd"></div>
-        <div class="form-group">
-          <label>Line</label>
-          <select id="fLine">
-            <option value="">-- ทั้งหมด --</option>
-            <option value="A1">A1</option><option value="A2">A2</option><option value="O1">O1</option><option value="C1">C1</option><option value="C2">C2</option>
-            <option value="SB">SB</option><option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option><option value="R4">R4</option>
-            <option value="R5">R5</option><option value="R6">R6</option><option value="IWK1">IWK1</option><option value="IWK2">IWK2</option><option value="V4">V4</option>
-            <option value="FGI">FGI</option><option value="CF3">CF3</option><option value="M1">M1</option><option value="EOL">EOL</option><option value="Utility">Utility</option>
-            <option value="Packing">Packing</option><option value="Lab">Lab</option><option value="Mixing">Mixing</option><option value="MIX-Utility">MIX-Utility</option>
-            <option value="Pre-Weight">Pre-Weight</option>
-            <option value="MIX#1">MIX#1</option><option value="MIX#2">MIX#2</option><option value="MIX#3">MIX#3</option><option value="MIX#4">MIX#4</option><option value="MIX#5">MIX#5</option><option value="MIX#6">MIX#6</option><option value="MIX#7">MIX#7</option>
-          </select>
+    <div class="container">
+      <form id="editForm" onsubmit="submitEditForm(event)">
+        <input type="hidden" id="editJobNum">
+        <div class="card">
+          <div class="form-group"><label>อาการที่พบ (Breakdown)</label><textarea id="edit_breakdown" rows="2" required></textarea></div>
+          <div class="form-group"><label>สาเหตุของปัญหา (Cause)</label><textarea id="edit_cause" rows="2" required></textarea></div>
+          <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="edit_solved" rows="2" required></textarea></div>
+          <div class="form-group"><label>อัปเดตสถานะงาน</label><select id="edit_result" required><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
         </div>
-        <div class="form-group"><label>กะ (Shift)</label><select id="fShift"><option value="">-- ทั้งหมด --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
-        <div class="form-group"><label>ค้นหา (ช่าง, เครื่องจักร)</label><input type="text" id="fText" placeholder="พิมพ์แล้วกด Enter..." onkeypress="if(event.key === 'Enter') renderReportTable()"></div>
-      </div>
-      <button class="btn-submit" onclick="renderReportTable()" style="padding:12px; margin-top:10px; border-radius:8px;"><span class="material-symbols-rounded">filter_list</span> กรองข้อมูล</button>
-    </div>
-
-    <div id="reportLoading" style="text-align:center; padding: 40px 20px; color:var(--text-muted); display:none;"><span class="material-symbols-rounded" style="font-size:40px; animation: spin 2s linear infinite;">sync</span><p>กำลังดึงข้อมูลจากฐานข้อมูล...</p></div>
-    <div id="reportContent"></div>
-  </div>
-
-  <div class="fab-container" id="fabArea">
-    <div class="fab-menu" id="fabMenu"><button class="fab-item" onclick="openAdminFunction('report')"><span class="material-symbols-rounded">admin_panel_settings</span> ผู้ดูแลระบบ</button></div>
-    <button class="fab-main" id="fabMainBtn" onclick="toggleFab()"><span class="material-symbols-rounded">menu</span></button>
-  </div>
-
-  <!-- Modal Login (คลิกพื้นที่ข้างนอกเพื่อปิดได้) -->
-  <div class="modal-overlay" id="loginModal">
-    <div class="modal-box">
-      <h3 class="modal-title"><span class="material-symbols-rounded">lock</span> ยืนยันตัวตน</h3>
-      <div class="form-group"><label>Username</label><input type="text" id="adminUser" onkeypress="if(event.key === 'Enter') checkLogin()"></div>
-      <div class="form-group"><label>Password</label><input type="password" id="adminPass" onkeypress="if(event.key === 'Enter') checkLogin()"></div>
-      <button class="btn-login" id="btnLogin" onclick="checkLogin()">เข้าสู่ระบบ</button>
-      <button class="btn-cancel" onclick="closeLogin()">ยกเลิก</button>
+        
+        <div class="card">
+          <div class="card-title">แก้ไขทีมช่าง (แจกงาน)</div>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" class="edit-tech-cb" value="ภูวรินทร์"> ภูวรินทร์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="วิเชียร"> วิเชียร</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สัญญา"> สัญญา</label>
+            <label style="grid-column: span 2;"><input type="checkbox" id="edit_cbOther" onchange="toggleOtherTech('edit')"> ช่างคนอื่นๆ (ระบุ)</label>
+          </div>
+          <div id="edit_techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="edit_techOther" placeholder="พิมพ์ชื่อช่าง..."></div>
+        </div>
+        <button type="submit" class="btn-primary" id="updateBtn"><span class="material-symbols-rounded">save</span> บันทึกการอัปเดต</button>
+      </form>
     </div>
   </div>
 
-  <!-- Modal ดูรายละเอียดแบบเต็ม (คลิกพื้นที่ข้างนอกเพื่อปิดได้) -->
-  <div class="modal-overlay" id="jobDetailsModal" style="z-index: 200;">
-    <div class="modal-box" style="background:#F8FAFC; max-width:650px; padding:25px; max-height:90vh; overflow-y:auto;">
-      <button class="close-gallery" onclick="document.getElementById('jobDetailsModal').style.display='none'"><span class="material-symbols-rounded">close</span></button>
-      <h3 class="modal-title" style="justify-content:flex-start; font-size:18px; border-bottom: 2px solid var(--secondary); padding-bottom: 12px; margin-bottom: 20px;">
-        <span class="material-symbols-rounded">assignment</span> รายละเอียดงานซ่อม <span id="detailJobNum" style="color:var(--secondary); margin-left:8px;"></span>
-      </h3>
-      <div id="jobDetailsContent"></div>
-    </div>
-  </div>
-
+  <!-- 🟢 SCRIPT LOGIC 🟢 -->
   <script>
     document.getElementById('date').valueAsDate = new Date();
+    let allReportData = [];
+    let currentJobData = null; 
 
-    // 🔴 2. ฟังก์ชัน API Fetcher (สื่อสารกับ Google Script)
+    // 1. Initial Load
+    window.onload = async function() {
+      try {
+        const res = await callAPI("getDashboard", {});
+        if(res.status === "success") { 
+          allReportData = res.data; 
+          document.getElementById('loadingScreen').style.display = 'none';
+          document.getElementById('dashboardView').style.display = 'block';
+          renderReportTable(); 
+        } else { alert("Error: " + res.message); }
+      } catch(err) { alert("Network Error: " + err.message); }
+    };
+
+    // 2. Core API Fetcher
     async function callAPI(actionType, dataPayload) {
-      if(!GAS_API_URL || GAS_API_URL.includes("ใส่_URL_ของ")) {
-        throw new Error("กรุณาใส่ URL ของ Google Apps Script ในบรรทัดที่ 119 ก่อนครับ");
-      }
+      if(!GAS_API_URL || GAS_API_URL.includes("ใส่_URL_ของ")) throw new Error("กรุณาใส่ URL ของ Google Apps Script ในบรรทัดที่ 126 ก่อนครับ");
       const payload = { action: actionType, data: dataPayload };
-      
-      const response = await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      });
+      const response = await fetch(GAS_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       return await response.json();
     }
 
-    // ฟังก์ชันดักจับการคลิกนอกกรอบ (Overlay) เพื่อปิด Modal
-    window.onclick = function(event) {
-      if (event.target === document.getElementById('loginModal')) closeLogin();
-      if (event.target === document.getElementById('jobDetailsModal')) document.getElementById('jobDetailsModal').style.display = "none";
+    // 3. UI Toggles
+    function toggleMainView() {
+      const dbView = document.getElementById('dashboardView');
+      const formView = document.getElementById('formView');
+      const fabBtn = document.getElementById('fabMainBtn');
+      const fabIcon = document.getElementById('fabIcon');
+      
+      if(formView.style.display === 'none') {
+        dbView.style.display = 'none'; formView.style.display = 'block';
+        fabBtn.classList.add('close-mode'); fabIcon.innerText = 'close';
+        document.getElementById('appTitle').innerText = "สร้างแจ้งซ่อมใหม่";
+      } else {
+        formView.style.display = 'none'; dbView.style.display = 'block';
+        fabBtn.classList.remove('close-mode'); fabIcon.innerText = 'add';
+        document.getElementById('appTitle').innerText = "CMMS Tracker";
+      }
+      window.scrollTo(0,0);
     }
-
-    function formatTime(input, maxVal) {
-      let val = input.value.replace(/[^0-9]/g, '');
-      if (val !== "") { let num = parseInt(val, 10); if (num > maxVal) val = maxVal.toString(); }
-      input.value = val;
-      if(val.length === 2) { let nxt = input.nextElementSibling; if(nxt && nxt.tagName === 'SPAN') nxt = nxt.nextElementSibling; if(nxt && nxt.tagName === 'INPUT') nxt.focus(); }
-    }
-    function getTimeString(p) { return document.getElementById(p+'HH').value.padStart(2,'0') + ':' + document.getElementById(p+'MM').value.padStart(2,'0'); }
 
     function toggleOther(selectId, containerId) {
       var val = document.getElementById(selectId).value;
-      document.getElementById(containerId).style.display = (val === 'อื่นๆ') ? 'block' : 'none';
-      var inputField = document.querySelector('#' + containerId + ' input');
-      if(val === 'อื่นๆ') { inputField.required = true; } else { inputField.required = false; inputField.value = ''; }
+      var container = document.getElementById(containerId);
+      var input = container.querySelector('input');
+      if(val === 'อื่นๆ') { container.style.display = 'block'; input.required = true; } 
+      else { container.style.display = 'none'; input.required = false; input.value = ''; }
     }
-    function toggleOtherTech() {
-      var isChecked = document.getElementById('cbOther').checked;
-      var input = document.getElementById('techOther');
-      if(isChecked) { input.style.display = 'block'; input.required = true; } 
-      else { input.style.display = 'none'; input.required = false; input.value = ''; }
+
+    function toggleOtherTech(mode) {
+      const prefix = mode === 'edit' ? 'edit_' : '';
+      const cb = document.getElementById(prefix + 'cbOther');
+      const container = document.getElementById(prefix + 'techOtherContainer');
+      const input = document.getElementById(prefix + 'techOther');
+      if(cb.checked) { 
+        container.style.display = 'block'; input.required = true; input.focus();
+      } else { 
+        container.style.display = 'none'; input.required = false; input.value = ''; 
+      }
     }
+
+    // 4. 🔴 Render Dashboard (เพิ่มระบบเช็กเวลา 48 ชม.)
+    function renderReportTable() {
+      let statusFilter = document.getElementById('fStatus').value;
+      let textFilter = document.getElementById('fText').value.toLowerCase();
+
+      let filtered = allReportData.filter(r => {
+        if (statusFilter && r.result !== statusFilter) return false;
+        if (textFilter && !(r.tech.toLowerCase().includes(textFilter) || r.machine.toLowerCase().includes(textFilter) || r.breakdown.toLowerCase().includes(textFilter))) return false;
+        return true;
+      });
+
+      let html = `<p style="font-size:13px; color:var(--text-muted); margin-bottom:15px;">แสดงผล ${filtered.length} รายการ</p>`;
+      
+      filtered.forEach(item => {
+        let statusFull = item.result === "F" ? "Finished" : (item.result === "O" ? "Ongoing" : "Unfinished");
+        
+        // เช็กเวลา 48 ชม. เพื่อไฮไลต์ (คำนวณจากวันที่แจ้งซ่อม)
+        let isNew = false;
+        if(item.date) {
+            let jobDate = new Date(item.date);
+            let diffHours = (new Date() - jobDate) / (1000 * 60 * 60);
+            if(diffHours >= 0 && diffHours <= 48) {
+                isNew = true;
+            }
+        }
+        
+        let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:11px;">campaign</span> NEW TASK</div>` : "";
+        let cardHighlightClass = isNew ? "is-new" : "";
+
+        // ถ้ายังไม่ได้จ่ายงาน (ไม่มีชื่อช่าง) ให้โชว์ว่า "ยังไม่ระบุช่าง" เพื่อให้เด่นขึ้นในการประชุม
+        let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#ef4444;">ย้งไม่ระบุช่าง (Unassigned)</span>';
+
+        html += `
+          <div class="report-card status-${item.result} ${cardHighlightClass}" onclick="openJobDetails('${item.num}')">
+            <div class="report-card-head">
+              <div class="report-card-title">
+                  <span class="badge-chip">#${item.num}</span> 
+                  ${item.machine} 
+                  <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span>
+                  ${newBadgeHtml}
+              </div>
+              <div style="font-size:12px; font-weight:700; color:var(--text-main);">${statusFull}</div>
+            </div>
+            <p class="report-detail"><b>อาการ:</b> ${item.breakdown}</p>
+            <div style="margin-top:12px; display:flex; gap:6px; flex-wrap:wrap;">
+              <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:13px;">person</span> ${techDisplay}</span>
+              <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:13px;">calendar_month</span> ${item.date}</span>
+            </div>
+          </div>
+        `;
+      }); 
+      document.getElementById('reportContent').innerHTML = html;
+    }
+
+    // 5. Open Details
+    function openJobDetails(numStr) {
+      let job = allReportData.find(r => r.num.toString() === numStr.toString()); 
+      if(!job) return;
+      currentJobData = job; 
+      
+      document.getElementById('detailJobNum').innerText = "#" + job.num;
+      let statusFull = job.result === 'F' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'O' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)');
+      
+      let getImgHtml = (urls) => {
+        if(!urls) return '<span style="color:var(--text-muted); font-size:12px;">-ไม่มีรูป-</span>';
+        return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:70px; width:70px; object-fit:cover; border-radius:8px; border:1px solid var(--border);">`).join(' ');
+      };
+
+      let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#ef4444; font-weight:700;">รอจ่ายงาน (คลิกปุ่มแก้ไขเพื่อระบุช่าง)</span>';
+
+      let html = `
+        <div class="detail-row"><div class="detail-label">เครื่องจักร / ไลน์</div><div class="detail-value fw-bold">${job.machine} (${job.line})</div></div>
+        <div class="detail-row"><div class="detail-label">สถานะงานซ่อม</div><div class="detail-value fw-bold">${statusFull}</div></div>
+        <div class="detail-row"><div class="detail-label">อาการ (Breakdown)</div><div class="detail-value">${job.breakdown}</div></div>
+        <div class="detail-row"><div class="detail-label">สาเหตุ (Cause)</div><div class="detail-value">${job.cause || '-'}</div></div>
+        <div class="detail-row"><div class="detail-label">วิธีแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div>
+        <div class="detail-row"><div class="detail-label">ทีมช่าง</div><div class="detail-value">${techDisplay}</div></div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <div><div class="detail-label">ก่อนซ่อม</div>${getImgHtml(job.imgBefore)}</div>
+          <div><div class="detail-label">หลังซ่อม</div>${getImgHtml(job.imgAfter)}</div>
+        </div>
+      `;
+      document.getElementById('jobDetailsContent').innerHTML = html; 
+      document.getElementById('jobDetailsPage').style.display = 'block';
+    }
+
+    // 6. Open Edit Mode
+    function openEditMode() {
+      if(!currentJobData) return;
+      document.getElementById('editJobNumLabel').innerText = "#" + currentJobData.num;
+      document.getElementById('editJobNum').value = currentJobData.num;
+      document.getElementById('edit_breakdown').value = currentJobData.breakdown;
+      document.getElementById('edit_cause').value = currentJobData.cause;
+      document.getElementById('edit_solved').value = currentJobData.solved;
+      document.getElementById('edit_result').value = currentJobData.result;
+      
+      // จัดการ Checkbox ช่าง
+      let techString = currentJobData.tech || "";
+      let checkboxes = document.querySelectorAll('.edit-tech-cb');
+      let otherNames = [];
+      
+      checkboxes.forEach(cb => cb.checked = false);
+      document.getElementById('edit_cbOther').checked = false;
+      toggleOtherTech('edit');
+
+      let techArray = techString.split(',').map(t => t.trim());
+      techArray.forEach(tech => {
+        let found = false;
+        checkboxes.forEach(cb => { if(cb.value === tech) { cb.checked = true; found = true; }});
+        if(!found && tech !== "") otherNames.push(tech);
+      });
+
+      if(otherNames.length > 0) {
+        document.getElementById('edit_cbOther').checked = true;
+        toggleOtherTech('edit');
+        document.getElementById('edit_techOther').value = otherNames.join(', ');
+      }
+
+      document.getElementById('editJobPage').style.display = 'block';
+    }
+
+    // 7. Submit Edit (Update)
+    async function submitEditForm(event) {
+      event.preventDefault();
+      var btn = document.getElementById('updateBtn'); 
+      btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
+
+      var techArray = [];
+      document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value));
+      if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value);
+      
+      // ตอนแจกงานสามารถไม่ระบุช่างได้ชั่วคราว หรือถ้าต้องการบังคับก็ตรวจสอบตรงนี้
+      // if(techArray.length === 0) { alert("กรุณาระบุช่างผู้ปฏิบัติงาน"); btn.innerHTML = 'บันทึกการอัปเดต'; btn.disabled = false; return; }
+
+      var updateData = {
+        num: document.getElementById('editJobNum').value,
+        breakdown: document.getElementById('edit_breakdown').value,
+        cause: document.getElementById('edit_cause').value,
+        solved: document.getElementById('edit_solved').value,
+        result: document.getElementById('edit_result').value,
+        tech: techArray.join(', ')
+      };
+
+      try {
+        const res = await callAPI("updateReport", updateData);
+        if(res.status === "success") {
+          alert(res.message);
+          document.getElementById('editJobPage').style.display = 'none';
+          document.getElementById('jobDetailsPage').style.display = 'none';
+          document.getElementById('loadingScreen').style.display = 'flex';
+          const newRes = await callAPI("getDashboard", {});
+          if(newRes.status === "success") { allReportData = newRes.data; renderReportTable(); }
+          document.getElementById('loadingScreen').style.display = 'none';
+        } else { alert("เกิดข้อผิดพลาด: " + res.message); }
+      } catch(err) { alert("Error: " + err.message); }
+      
+      btn.innerHTML = '<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false;
+    }
+
+    // Helpers (Time, Image handling)
+    function formatTime(input, maxVal) { let val = input.value.replace(/[^0-9]/g, ''); if(val!==""){let num=parseInt(val,10);if(num>maxVal)val=maxVal.toString();} input.value=val; if(val.length===2){let nxt=input.nextElementSibling;if(nxt&&nxt.tagName==='SPAN')nxt=nxt.nextElementSibling;if(nxt&&nxt.tagName==='INPUT')nxt.focus();} }
+    function getTimeString(p) { return document.getElementById(p+'HH').value.padStart(2,'0')+':'+document.getElementById(p+'MM').value.padStart(2,'0'); }
 
     let filesBefore = [], filesAfter = [];
     function handleFiles(event, type) {
-      const files = event.target.files; if (files.length === 0) return;
+      const files = event.target.files; if(files.length===0) return;
       let targetArray = (type === 'before') ? filesBefore : filesAfter;
       let thumbDiv = document.getElementById(type === 'before' ? 'thumbBefore' : 'thumbAfter');
       let clearBtn = document.getElementById(type === 'before' ? 'clearBefore' : 'clearAfter');
-      if (targetArray.length + files.length > 5) { alert("แนบรูปได้สูงสุด 5 ภาพต่อส่วนครับ"); return; }
-      
-      for(let i = 0; i < files.length; i++) {
-        targetArray.push(files[i]);
-        let reader = new FileReader();
-        reader.onload = function(e) {
-          let wrap = document.createElement('div'); wrap.className = 'thumb-wrap'; wrap.innerHTML = `<img src="${e.target.result}">`; thumbDiv.appendChild(wrap);
-        }
+      if (targetArray.length + files.length > 5) { alert("สูงสุด 5 ภาพครับ"); return; }
+      for(let i=0; i<files.length; i++) {
+        targetArray.push(files[i]); let reader = new FileReader();
+        reader.onload = e => { let wrap=document.createElement('div'); wrap.className='thumb-wrap'; wrap.innerHTML=`<img src="${e.target.result}">`; thumbDiv.appendChild(wrap); }
         reader.readAsDataURL(files[i]);
-      }
-      clearBtn.style.display = "block"; event.target.value = ""; 
+      } clearBtn.style.display="block"; event.target.value=""; 
     }
     function clearFiles(type) {
-      if(type === 'before') { filesBefore = []; document.getElementById('thumbBefore').innerHTML = ""; document.getElementById('clearBefore').style.display = "none"; } 
-      else { filesAfter = []; document.getElementById('thumbAfter').innerHTML = ""; document.getElementById('clearAfter').style.display = "none"; }
+      if(type==='before'){filesBefore=[];document.getElementById('thumbBefore').innerHTML="";document.getElementById('clearBefore').style.display="none";}
+      else{filesAfter=[];document.getElementById('thumbAfter').innerHTML="";document.getElementById('clearAfter').style.display="none";}
     }
     function compressImageAsync(file) {
       return new Promise((resolve) => {
-        var reader = new FileReader();
-        reader.onload = function(e) {
-          var img = new Image(); img.onload = function() {
-            var canvas = document.createElement('canvas'); var w = img.width, h = img.height;
-            if (w > h) { if (w > 1000) { h *= 1000 / w; w = 1000; } } else { if (h > 1000) { w *= 1000 / h; h = 1000; } }
-            canvas.width = w; canvas.height = h; var ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, w, h);
-            resolve(canvas.toDataURL('image/jpeg', 0.6).split(',')[1]); 
-          }
-          img.src = e.target.result;
-        }
-        reader.readAsDataURL(file);
+        var reader=new FileReader(); reader.onload=function(e){ var img=new Image(); img.onload=function(){ var canvas=document.createElement('canvas'); var w=img.width,h=img.height; if(w>h){if(w>1000){h*=1000/w;w=1000;}}else{if(h>1000){w*=1000/h;h=1000;}} canvas.width=w;canvas.height=h; var ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h); resolve(canvas.toDataURL('image/jpeg',0.6).split(',')[1]);}; img.src=e.target.result;}; reader.readAsDataURL(file);
       });
     }
 
+    // Submit New Form
     async function submitForm(event) {
-      event.preventDefault();
-      var btn = document.getElementById('submitBtn'); 
-      btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 2s linear infinite;">sync</span> กำลังดำเนินการ...'; btn.disabled = true;
-
-      var techArray = [];
-      document.querySelectorAll('.tech-cb:checked').forEach(cb => techArray.push(cb.value));
+      event.preventDefault(); var btn = document.getElementById('submitBtn'); btn.innerHTML = 'กำลังบันทึก...'; btn.disabled = true;
+      var techArray = []; document.querySelectorAll('.tech-cb:checked').forEach(cb => techArray.push(cb.value));
       if(document.getElementById('cbOther').checked) techArray.push(document.getElementById('techOther').value);
-      if(techArray.length === 0) { alert("กรุณาระบุช่างผู้ปฏิบัติงาน"); btn.innerHTML = '<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false; return; }
 
       try {
-        var baseBefore = [], baseAfter = [];
+        var baseBefore=[], baseAfter=[];
         for(let f of filesBefore) baseBefore.push(await compressImageAsync(f));
         for(let f of filesAfter) baseAfter.push(await compressImageAsync(f));
 
         var formData = {
-          date: document.getElementById('date').value, dept: document.getElementById('dept').value,
-          line: document.getElementById('line').value, lineOther: document.getElementById('lineOther') ? document.getElementById('lineOther').value : '',
-          machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value,
-          solved: document.getElementById('solved').value, result: document.getElementById('result').value,
-          callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'),
-          shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), 
-          handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, 
-          imgsBefore: baseBefore, imgsAfter: baseAfter
+          date: document.getElementById('date').value, dept: document.getElementById('dept').value, line: document.getElementById('line').value, lineOther: document.getElementById('lineOther')?document.getElementById('lineOther').value:'', machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value, solved: document.getElementById('solved').value, result: document.getElementById('result').value, callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'), shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, imgsBefore: baseBefore, imgsAfter: baseAfter
         };
 
         const res = await callAPI("saveReport", formData);
-        if(res.status === "success") {
-          alert(res.message);
-          document.getElementById('maintenanceForm').reset();
-          document.getElementById('date').valueAsDate = new Date(); 
-          clearFiles('before'); clearFiles('after');
-          document.querySelectorAll('[id$="OtherContainer"]').forEach(el => el.style.display = 'none');
-          window.scrollTo(0, 0);
-        } else { alert("เกิดข้อผิดพลาด: " + res.message); }
-      } catch(err) { alert("Error: " + err.message); }
-      
-      btn.innerHTML = '<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false;
-    }
-
-    let isAdminLoggedIn = false; let allReportData = [];
-    function toggleFab() { document.getElementById('fabMenu').classList.toggle('active'); document.getElementById('fabMainBtn').classList.toggle('active'); }
-    function openAdminFunction(funcName) { toggleFab(); if (isAdminLoggedIn) showDashboard(); else document.getElementById('loginModal').style.display = 'flex'; }
-    function closeLogin() { document.getElementById('loginModal').style.display = 'none'; document.getElementById('adminPass').value = ''; }
-
-    async function checkLogin() {
-      const u = document.getElementById('adminUser').value, p = document.getElementById('adminPass').value;
-      if(!u || !p) { alert("กรุณากรอก Username และ Password"); return; }
-      
-      const btn = document.getElementById('btnLogin'); btn.innerText = "ตรวจสอบข้อมูล..."; btn.disabled = true;
-
-      try {
-        const res = await callAPI("verifyLogin", {user: u, pass: p});
-        if (res.success) {
-          isAdminLoggedIn = true; closeLogin(); showDashboard();
-        } else { alert(res.message); }
-      } catch(err) { alert("Error: " + err.message); }
-      btn.innerText = "เข้าสู่ระบบ"; btn.disabled = false;
-    }
-
-    async function showDashboard() {
-      document.getElementById('formContainer').style.display = 'none'; document.getElementById('submitZone').style.display = 'none'; document.getElementById('fabArea').style.display = 'none';
-      document.getElementById('headerTitle').innerText = "Dashboard"; document.getElementById('headerSub').innerText = "ศูนย์กลางข้อมูลการบำรุงรักษา"; document.getElementById('adminDashboard').style.display = 'block';
-      window.scrollTo(0, 0); document.getElementById('reportLoading').style.display = 'block';
-      
-      try {
-        const res = await callAPI("getDashboard", {});
-        if(res.status === "success") { allReportData = res.data; renderReportTable(); }
-        else { alert("Error: " + res.message); }
-      } catch(err) { alert("Network Error: " + err.message); }
-      document.getElementById('reportLoading').style.display = 'none';
-    }
-
-    function closeDashboard() {
-      document.getElementById('adminDashboard').style.display = 'none'; document.getElementById('formContainer').style.display = 'block';
-      document.getElementById('submitZone').style.display = 'block'; document.getElementById('fabArea').style.display = 'flex';
-      document.getElementById('headerTitle').innerText = "CMMS System"; document.getElementById('headerSub').innerText = "บันทึกประวัติการบำรุงรักษา";
-    }
-
-    function renderReportTable() {
-      let fs = document.getElementById('fStart').value, fe = document.getElementById('fEnd').value, fl = document.getElementById('fLine').value, shift = document.getElementById('fShift').value, ft = document.getElementById('fText').value.toLowerCase();
-      let filtered = allReportData.filter(r => {
-        if (fs && r.date < fs) return false; if (fe && r.date > fe) return false; if (fl && r.line !== fl) return false; if (shift && r.shift !== shift) return false;
-        if (ft && !(r.tech.toLowerCase().includes(ft) || r.machine.toLowerCase().includes(ft))) return false; return true;
-      });
-
-      let html = `<p style="color:var(--text-muted); font-size:14px;">แสดงผล <b>${filtered.length}</b> รายการ</p>`;
-      filtered.forEach(item => {
-        let statusColor = item.result === "F" ? "#38A169" : (item.result === "O" ? "#D69E2E" : "#E53E3E");
-        html += `
-          <div class="report-card" onclick="openJobDetails('${item.num}')">
-            <div class="report-card-head"><div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.num}</span> ${item.machine} <span style="color:#A0AEC0; font-size:13px; font-weight:400; margin-left:5px;">(${item.line})</span></div><div style="color:${statusColor}; font-weight:700; font-size:14px;">${item.result}</div></div>
-            <p class="report-detail"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:text-bottom;">build</span> <b>อาการ:</b> ${item.breakdown}</p>
-            <p class="report-detail"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:text-bottom;">check_circle</span> <b>แก้ไข:</b> ${item.solved}</p>
-            <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;"><span class="badge"><span class="material-symbols-rounded" style="font-size:14px;">person</span> ${item.tech}</span><span class="badge"><span class="material-symbols-rounded" style="font-size:14px;">calendar_month</span> ${item.date}</span></div>
-            <div class="click-hint">ดูรายละเอียด <span class="material-symbols-rounded" style="font-size:16px;">arrow_forward</span></div>
-          </div>
-        `;
-      }); document.getElementById('reportContent').innerHTML = html;
-    }
-
-    function openJobDetails(numStr) {
-      let job = allReportData.find(r => r.num.toString() === numStr.toString()); if(!job) return;
-      document.getElementById('detailJobNum').innerText = "#" + job.num;
-      let statusFull = job.result === 'F' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'O' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)');
-      let statusColor = job.result === "F" ? "#38A169" : (job.result === "O" ? "#D69E2E" : "#E53E3E");
-      let getImgHtml = (urls) => {
-        if(!urls) return '<span style="color:#A0AEC0; font-size:13px;">ไม่มีรูปภาพแนบ</span>';
-        return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="event.stopPropagation(); window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; cursor:pointer; border:1px solid #E2E8F0; box-shadow:var(--shadow-sm); transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">`).join('');
-      };
-
-      let html = `
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-          <div class="detail-row"><div class="detail-label">วันที่แจ้งซ่อม</div><div class="detail-value">${job.date}</div></div>
-          <div class="detail-row"><div class="detail-label">กะการทำงาน</div><div class="detail-value">${job.shift}</div></div>
-          <div class="detail-row"><div class="detail-label">สายการผลิต</div><div class="detail-value">${job.line}</div></div>
-          <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value">${job.machine}</div></div>
-        </div>
-        <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid #E2E8F0;">
-            <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value" style="color:${statusColor}; font-weight:700; font-size:16px;">${statusFull}</div>
-        </div>
-        <div class="detail-row" style="margin-top:15px;"><div class="detail-label">อาการที่พบ (Breakdown)</div><div class="detail-value">${job.breakdown}</div></div>
-        <div class="detail-row"><div class="detail-label">สาเหตุของปัญหา (Root Cause)</div><div class="detail-value">${job.cause || '-'}</div></div>
-        <div class="detail-row"><div class="detail-label">วิธีการแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div>
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;">
-            <div class="detail-row"><div class="detail-label">วิศวกร/ช่างซ่อมบำรุง</div><div class="detail-value">${job.tech}</div></div><div class="detail-row"><div class="detail-label">ผู้รับมอบงาน</div><div class="detail-value">${job.handover || '-'}</div></div>
-        </div>
-        <div class="detail-row"><div class="detail-label">หมายเหตุเพิ่มเติม</div><div class="detail-value">${job.remark || '-'}</div></div>
-        <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed #E2E8F0;">
-          <div class="detail-label" style="color:var(--primary); font-weight:600; font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม (คลิกเพื่อดูรูปใหญ่)</div>
-          <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">${getImgHtml(job.imgBefore)}</div>
-          <div class="detail-label" style="color:var(--primary); font-weight:600; font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">imagesmode</span> ภาพหลังซ่อม (คลิกเพื่อดูรูปใหญ่)</div>
-          <div style="display:flex; gap:12px; flex-wrap:wrap;">${getImgHtml(job.imgAfter)}</div>
-        </div>
-      `;
-      document.getElementById('jobDetailsContent').innerHTML = html; document.getElementById('jobDetailsModal').style.display = 'flex';
+        if(res.status==="success") {
+          alert(res.message); document.getElementById('maintenanceForm').reset(); document.getElementById('date').valueAsDate=new Date(); clearFiles('before'); clearFiles('after');
+          toggleMainView(); 
+          document.getElementById('loadingScreen').style.display = 'flex';
+          const newRes = await callAPI("getDashboard", {});
+          if(newRes.status==="success"){allReportData=newRes.data; renderReportTable();}
+          document.getElementById('loadingScreen').style.display = 'none';
+        } else { alert("เกิดข้อผิดพลาด: "+res.message); }
+      } catch(err) { alert("Error: "+err.message); }
+      btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกแจ้งซ่อมใหม่'; btn.disabled=false;
     }
   </script>
 </body>
