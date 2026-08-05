@@ -9,7 +9,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
   
-  <!-- อิมพอร์ต Chart.js สำหรับสร้างกราฟ Dashboard -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
@@ -89,9 +88,9 @@
     .stat-card { background: white; padding: 15px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center;}
     .stat-card h3 { font-size: 12px; color: var(--text-muted); margin: 0 0 5px; font-weight: 600;}
     .stat-card .value { font-size: 28px; font-weight: 700; color: var(--primary); margin: 0;}
-    .chart-card { background: white; padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 20px;}
+    
+    .chart-card { background: white; padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 20px; transition: 0.3s;}
     .chart-wrapper { position: relative; height: 220px; width: 100%; }
-    .chart-card { background: white; padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 20px;}
     
     /* 🧑‍🔧 Tech Feed Scroll */
     .tech-feed-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;}
@@ -170,24 +169,19 @@
         <p id="appSub">ศูนย์กลางติดตามและแจกงานซ่อม</p>
       </div>
     </div>
-    
-    <!-- ปุ่มกลับหน้า Hub -->
     <div class="header-right">
       <a href="https://engpcl2530-uni.github.io/BPC-Background-system-Unilever/" class="btn-hub">
-        <span class="material-symbols-rounded" style="font-size: 20px;">apps</span>
-        Hub
+        <span class="material-symbols-rounded" style="font-size: 20px;">apps</span> Hub
       </a>
     </div>
   </div>
 
-  <!-- Loading Screen -->
   <div id="loadingScreen">
     <span class="material-symbols-rounded" style="font-size: 45px; color: var(--secondary); animation: spin 1.5s linear infinite;">sync</span>
     <p style="margin-top: 15px; font-weight: 600; color: var(--primary);">กำลังดึงข้อมูลจากระบบ...</p>
     <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
   </div>
 
-  <!-- Toast Notification สำหรับร่างออฟไลน์ -->
   <div id="toast">บันทึกข้อมูลฉบับร่างอัตโนมัติแล้ว</div>
 
   <!-- ==============================================
@@ -195,7 +189,6 @@
        ============================================== -->
   <div id="dashboardView" class="container" style="display: none;">
     
-    <!-- 📊 Stats Section -->
     <div class="dashboard-stats">
       <div class="stat-card">
         <h3>งานใหม่ (48 ชม.)</h3>
@@ -207,10 +200,10 @@
       </div>
     </div>
 
-    <!-- 📈 Chart Section -->
-    <div class="chart-card">
+    <!-- 📈 Chart Section (เพิ่ม ID chartSection ไว้สำหรับซ่อน) -->
+    <div class="chart-card" id="chartSection">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
-        <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line
+        <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line (Top 10)
       </h3>
       <div class="chart-wrapper">
         <canvas id="lineIssueChart"></canvas>
@@ -219,22 +212,18 @@
 
     <!-- 🧑‍🔧 Tech Latest Job Feed -->
     <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; padding-left: 5px;">งานล่าสุดของทีมช่าง</h3>
-    <div class="tech-feed-container" id="techFeed">
-        <!-- Tech chips จะถูกฉีด (Inject) เข้ามาตรงนี้ -->
-    </div>
+    <div class="tech-feed-container" id="techFeed"></div>
 
     <!-- 🔍 Filters Section -->
     <div class="filter-section" style="margin-top: 25px;">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน</h3>
       
-      <!-- Quick Filters ปุ่มกด -->
       <div class="quick-filters">
         <button class="btn-quick" onclick="setQuickFilter('week')">สัปดาห์นี้</button>
         <button class="btn-quick" onclick="setQuickFilter('month')">เดือนนี้</button>
         <button class="btn-quick active" onclick="setQuickFilter('all')">ทั้งหมด</button>
       </div>
 
-      <!-- ฟอร์มกรองข้อมูล -->
       <div class="form-row" style="margin-bottom: 0;">
         <div class="form-group"><label>วันที่เริ่ม</label><input type="date" id="fStart" onchange="renderReportTable(1)"></div>
         <div class="form-group"><label>วันที่สิ้นสุด</label><input type="date" id="fEnd" onchange="renderReportTable(1)"></div>
@@ -247,26 +236,16 @@
             <option value="Mixing">Mixing</option><option value="Utility">Utility</option><option value="Packing">Packing</option>
           </select>
         </div>
-        
-        <!-- 🔴 กล่องกรอง กะ (Shift) ที่เพิ่มกลับมา -->
         <div class="form-group">
           <label>กะ (Shift)</label>
           <select id="fShift" onchange="renderReportTable(1)">
-            <option value="">-- ทั้งหมด --</option>
-            <option value="M">M</option>
-            <option value="A">A</option>
-            <option value="N">N</option>
-            <option value="DW">DW</option>
+            <option value="">-- ทั้งหมด --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option>
           </select>
         </div>
-
         <div class="form-group">
           <label>สถานะงาน</label>
           <select id="fStatus" onchange="renderReportTable(1)">
-            <option value="">-- ทุกสถานะ --</option>
-            <option value="F">Finished</option>
-            <option value="O">Ongoing</option>
-            <option value="U">Unfinished</option>
+            <option value="">-- ทุกสถานะ --</option><option value="F">Finished</option><option value="O">Ongoing</option><option value="U">Unfinished</option>
           </select>
         </div>
         <div class="form-group" style="flex: 2;"><label>ค้นหา (ชื่อช่าง, เครื่อง)</label><input type="text" id="fText" placeholder="พิมพ์ข้อความ..." oninput="renderReportTable(1)"></div>
@@ -373,13 +352,12 @@
     </form>
   </div>
 
-  <!-- FAB Button (สำหรับสลับหน้าจอ Dashboard <-> แบบฟอร์ม) -->
   <button class="fab-main" id="fabMainBtn" onclick="toggleMainView()">
     <span class="material-symbols-rounded" id="fabIcon" style="font-size: 30px;">add</span>
   </button>
 
   <!-- ==============================================
-       หน้าจอที่ 3: ดูรายละเอียดงาน (Job Details Modal)
+       หน้าจอที่ 3 & 4: รายละเอียดงาน และ แก้ไข (Modal)
        ============================================== -->
   <div class="page-overlay" id="jobDetailsPage">
     <div class="page-header">
@@ -388,16 +366,10 @@
     </div>
     <div class="container">
       <div class="card" id="jobDetailsContent"></div>
-      <!-- ปุ่มเปิดเข้าสู่โหมดแก้ไข -->
-      <button class="btn-edit" onclick="openEditMode()">
-        <span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้
-      </button>
+      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้</button>
     </div>
   </div>
 
-  <!-- ==============================================
-       หน้าจอที่ 4: แก้ไขอัปเดตงาน (Edit Mode Modal)
-       ============================================== -->
   <div class="page-overlay" id="editJobPage" style="z-index: 250;">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">update</span> อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
@@ -463,7 +435,49 @@
     const itemsPerPage = 200; // แบ่งหน้าละ 200 รายการ
     let currentFilteredData = [];
 
-    // 🔴 1. ระบบ Offline Storage (Cache) เก็บฉบับร่าง 6 ชั่วโมง
+    // 🔴 1. ระบบจัดการและแปลงวันที่ (ฉลาดขึ้น รองรับทั้ง DD/MM/YYYY และ YYYY-MM-DD)
+    function parseDateSafely(dateStr) {
+        if (!dateStr) return new Date(0); // กันค่าว่าง
+        let str = dateStr.toString().trim();
+        
+        // ถ้ารูปแบบเป็น YYYY-MM-DD
+        if (str.includes('-')) {
+            let d = new Date(str);
+            if (!isNaN(d.getTime())) return d;
+        }
+        // ถ้ารูปแบบเป็น DD/MM/YYYY จากการดึงข้อมูล Sheet เก่า
+        if (str.includes('/')) {
+            let parts = str.split('/');
+            if (parts.length === 3) {
+                let p0 = parseInt(parts[0], 10);
+                let p1 = parseInt(parts[1], 10);
+                let p2 = parseInt(parts[2], 10);
+                if (p2 < 100) p2 += 2000;
+                // ในไทยมักจะเป็น วัน/เดือน/ปี
+                return new Date(p2, p1 - 1, p0); 
+            }
+        }
+        let fallback = new Date(str);
+        return isNaN(fallback.getTime()) ? new Date(0) : fallback;
+    }
+
+    // แปลงวันที่สำหรับใส่ในกล่อง Input (YYYY-MM-DD)
+    function toLocalYYYYMMDD(d) {
+        let y = d.getFullYear();
+        let m = (d.getMonth() + 1).toString().padStart(2, '0');
+        let day = d.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    // ตรวจสอบว่าเป็นงานใหม่ภายใน 48 ชม. แบบแม่นยำเป๊ะๆ
+    function isNewJob(dateStr) {
+        if (!dateStr) return false;
+        let jobDate = parseDateSafely(dateStr);
+        let diffHours = (new Date() - jobDate) / (1000 * 60 * 60);
+        return (diffHours >= -24 && diffHours <= 48); // เผื่อการคลาดเคลื่อนเวลาอนาคตนิดหน่อย
+    }
+
+    // 🔴 2. ระบบ Offline Storage (Cache) เก็บฉบับร่าง 6 ชั่วโมง
     const CACHE_KEY = "cmms_draft_v1";
     
     function saveDraft() {
@@ -480,8 +494,6 @@
             handover: document.getElementById('handover').value, dept: document.getElementById('dept').value, remark: document.getElementById('remark').value
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(draft));
-        
-        // Show Toast แจ้งเตือนการเซฟร่าง
         let t = document.getElementById('toast');
         t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500);
     }
@@ -490,32 +502,31 @@
         let saved = localStorage.getItem(CACHE_KEY);
         if(saved) {
             let data = JSON.parse(saved);
-            if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { // ถ้าร่างยังไม่เกิน 6 ชม. ให้โหลดมาใส่ช่อง
+            if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { 
                 ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','handover','dept','remark'].forEach(id => {
                     if(data[id] && document.getElementById(id)) document.getElementById(id).value = data[id];
                 });
                 if(data.line === 'อื่นๆ') toggleOther('line', 'lineOtherContainer');
             } else {
-                localStorage.removeItem(CACHE_KEY); // ลบทิ้งถ้าเกิน 6 ชม.
+                localStorage.removeItem(CACHE_KEY); 
             }
         }
         if(!document.getElementById('date').value) document.getElementById('date').valueAsDate = new Date();
     }
 
-    // เซฟลง Cache ทันทีที่ผู้ใช้พิมพ์หรือเปลี่ยนค่าในฟอร์ม
     document.getElementById('maintenanceForm').addEventListener('input', saveDraft);
     document.getElementById('maintenanceForm').addEventListener('change', saveDraft);
 
     // Initial Load เมื่อเปิดเว็บ
     window.onload = async function() {
-      loadDraft(); // โหลดแคชที่ค้างไว้
+      loadDraft(); 
       try {
         const res = await callAPI("getDashboard", {});
         if(res.status === "success") { 
           allReportData = res.data; 
           document.getElementById('loadingScreen').style.display = 'none';
           document.getElementById('dashboardView').style.display = 'block';
-          renderReportTable(1); // แสดงข้อมูลหน้า 1
+          renderReportTable(1); 
         } else { alert("Error: " + res.message); }
       } catch(err) { alert("Network Error: " + err.message); }
     };
@@ -527,7 +538,7 @@
       return await response.json();
     }
 
-    // 🔴 2. Quick Filters (ปุ่มกรอง สัปดาห์นี้ / เดือนนี้ อย่างรวดเร็ว)
+    // 🔴 3. Quick Filters (ปุ่มกรอง สัปดาห์นี้ / เดือนนี้ อย่างรวดเร็ว)
     function setQuickFilter(type) {
         document.querySelectorAll('.btn-quick').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
@@ -536,22 +547,24 @@
         let fs = document.getElementById('fStart');
         let fe = document.getElementById('fEnd');
         
-        if (type === 'all') { fs.value = ''; fe.value = ''; }
+        if (type === 'all') { 
+            fs.value = ''; fe.value = ''; 
+        }
         else if (type === 'month') {
             let firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            fs.value = firstDay.toISOString().split('T')[0];
-            fe.value = today.toISOString().split('T')[0];
+            fs.value = toLocalYYYYMMDD(firstDay);
+            fe.value = toLocalYYYYMMDD(today);
         }
         else if (type === 'week') {
-            let first = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1); // Monday
+            let first = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
             let firstDay = new Date(today.setDate(first));
-            fs.value = firstDay.toISOString().split('T')[0];
-            fe.value = new Date().toISOString().split('T')[0];
+            fs.value = toLocalYYYYMMDD(firstDay);
+            fe.value = toLocalYYYYMMDD(new Date());
         }
         renderReportTable(1);
     }
 
-    // 🔴 3. ระบบ Pagination และ กรองข้อมูลหลัก
+    // 🔴 4. ระบบ Pagination และ กรองข้อมูลหลัก
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; 
       let fe = document.getElementById('fEnd').value;
@@ -560,19 +573,27 @@
       let statusFilter = document.getElementById('fStatus').value; 
       let textFilter = document.getElementById('fText').value.toLowerCase();
 
-      // กรองข้อมูลทั้งหมดที่มี
+      // แปลงวันที่สำหรับเทียบกัน
+      let fsVal = fs ? parseDateSafely(fs).setHours(0,0,0,0) : null;
+      let feVal = fe ? parseDateSafely(fe).setHours(23,59,59,999) : null;
+
+      // กรองข้อมูลทั้งหมดที่มี (แก้บัค กรองวันที่แล้วไม่แสดงข้อมูล)
       currentFilteredData = allReportData.filter(r => {
-        if (fs && r.date < fs) return false;
-        if (fe && r.date > fe) return false;
+        let jDateObj = parseDateSafely(r.date);
+        let jDate = jDateObj.getTime();
+        
+        if (fsVal && jDate < fsVal) return false;
+        if (feVal && jDate > feVal) return false;
         if (fl && r.line !== fl) return false;
         if (shift && r.shift !== shift) return false;
         if (statusFilter && r.result !== statusFilter) return false;
         if (textFilter && !(r.tech.toLowerCase().includes(textFilter) || r.machine.toLowerCase().includes(textFilter) || r.breakdown.toLowerCase().includes(textFilter))) return false;
+        
         return true;
       });
 
       // 📊 อัปเดต Dashboard Stats จากข้อมูลที่ถูกกรอง
-      updateDashboardStats(currentFilteredData);
+      updateDashboardStats(currentFilteredData, fl);
 
       // 📄 Pagination Logic
       currentPage = pageNumber || 1;
@@ -585,11 +606,9 @@
       paginated.forEach(item => {
         let statusFull = item.result === "F" ? "Finished" : (item.result === "O" ? "Ongoing" : "Unfinished");
         let statusColor = item.result === "F" ? "#38A169" : (item.result === "O" ? "#D69E2E" : "#E53E3E");
-        let isNew = false;
-        if(item.date) {
-            let jobDate = new Date(item.date);
-            if((new Date() - jobDate) / (1000 * 60 * 60) <= 48) isNew = true;
-        }
+        
+        let isNew = isNewJob(item.date); // ใช้วิธีเช็กงานใหม่แบบใหม่
+        
         let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
         let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
 
@@ -623,24 +642,20 @@
 
     function changePage(step) { 
       renderReportTable(currentPage + step); 
-      // เลื่อนหน้าจอกลับขึ้นไปด้านบนของลิสต์
       window.scrollTo(0, document.getElementById('dashboardView').offsetTop); 
     }
 
-    // 🔴 4. ฟังก์ชันอัปเดต Dashboard (กราฟแท่ง & สรุป)
-    function updateDashboardStats(data) {
+    // 🔴 5. ฟังก์ชันอัปเดต Dashboard (กราฟแท่ง โชว์ Top 10 & ซ่อนกราฟเมื่อเลือก Line)
+    function updateDashboardStats(data, selectedLine) {
         let newCount = 0; let doneCount = 0;
         let lineCounts = {}; let techLatest = {};
 
         data.forEach(job => {
-            // คำนวณ Stats (งานใหม่, งานเสร็จ)
             if(job.result === 'F') doneCount++;
-            if(job.date && (new Date() - new Date(job.date)) / 3600000 <= 48) newCount++;
+            if(isNewJob(job.date)) newCount++; // นับตามระบบใหม่ (แก้บัคจำนวน 282)
             
-            // คำนวณความถี่แยกตาม Line สำหรับวาดกราฟ
             if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
             
-            // ค้นหางานล่าสุดของช่างแต่ละคน
             if(job.tech) {
                 let techs = job.tech.split(',').map(t => t.trim());
                 techs.forEach(t => {
@@ -651,26 +666,40 @@
             }
         });
 
-        // อัปเดตตัวเลข
         document.getElementById('statNewTask').innerText = newCount;
         let p = data.length ? Math.round((doneCount/data.length)*100) : 0;
         document.getElementById('statDone').innerText = p + "%";
 
-        // วาดกราฟ Chart.js
-        let ctx = document.getElementById('lineIssueChart').getContext('2d');
-        if(lineChartInstance) lineChartInstance.destroy();
-        lineChartInstance = new Chart(ctx, {
-            type: 'bar',
-            data: { 
-                labels: Object.keys(lineCounts), 
-                datasets: [{ label: 'จำนวนปัญหา', data: Object.values(lineCounts), backgroundColor: '#00A5D9', borderRadius: 6 }] 
-            },
-            options: { 
-                responsive: true, maintainAspectRatio: false, 
-                plugins: { legend: { display: false } }, 
-                scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } 
-            }
-        });
+        // 🔴 ซ่อน/แสดง กราฟ ถ้ามีการเจาะจงเลือก Line ให้พับกราฟเก็บไป
+        let chartSection = document.getElementById('chartSection');
+        if (selectedLine !== "" && selectedLine !== undefined) {
+            chartSection.style.display = 'none';
+        } else {
+            chartSection.style.display = 'block';
+            
+            // จัดเรียงหา Top 10 Line ที่มีปัญหาเยอะสุด
+            let lineArray = Object.keys(lineCounts).map(k => ({line: k, count: lineCounts[k]}));
+            lineArray.sort((a,b) => b.count - a.count); // เรียงจากมากไปน้อย
+            lineArray = lineArray.slice(0, 10); // ตัดเอาเฉพาะ 10 อันดับแรก
+            
+            let chartLabels = lineArray.map(i => i.line);
+            let chartData = lineArray.map(i => i.count);
+
+            let ctx = document.getElementById('lineIssueChart').getContext('2d');
+            if(lineChartInstance) lineChartInstance.destroy();
+            lineChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: { 
+                    labels: chartLabels, 
+                    datasets: [{ label: 'จำนวนปัญหา', data: chartData, backgroundColor: '#00A5D9', borderRadius: 6 }] 
+                },
+                options: { 
+                    responsive: true, maintainAspectRatio: false, 
+                    plugins: { legend: { display: false } }, 
+                    scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } 
+                }
+            });
+        }
 
         // Render Tech Feed (งานล่าสุดของทีมช่าง)
         let feedHtml = "";
@@ -681,12 +710,11 @@
         document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
 
-    // 🔴 5. Data Validation (ป้องกันการใส่เวลาผิด) และการ Submit
+    // 🔴 6. Data Validation (ป้องกันการใส่เวลาผิด) และการ Submit
     async function submitForm(event) {
       event.preventDefault(); 
       var btn = document.getElementById('submitBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
       
-      // --- Time Logic Validation ---
       let cHH = parseInt(document.getElementById('callHH').value); let cMM = parseInt(document.getElementById('callMM').value);
       let sHH = parseInt(document.getElementById('startHH').value); let sMM = parseInt(document.getElementById('startMM').value);
       
@@ -695,11 +723,11 @@
 
       // ตรวจสอบ: เวลาเริ่มน้อยกว่าเวลาแจ้งหรือไม่?
       if (startTotal < callTotal) {
-          // ข้อยกเว้น: ให้ผ่านได้ถ้าเป็นการแจ้งข้ามคืนของกะดึก (เช่น แจ้ง 23:00 เริ่มซ่อม 01:00)
+          // ข้อยกเว้น: กะดึกข้ามวัน (แจ้ง 23:00 เริ่มซ่อม 01:00)
           if (!(cHH >= 18 && sHH <= 6)) {
               alert("⚠️ ข้อผิดพลาด: 'เวลาเริ่มซ่อม' เร็วกว่า 'เวลาที่รับแจ้ง'\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง (ยกเว้นเป็นการปฏิบัติงานข้ามคืนในช่วงกะดึก)");
               btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false;
-              return; // หยุดการทำงานถ้ากรอกผิด
+              return; 
           }
       }
 
@@ -722,7 +750,6 @@
           document.getElementById('date').valueAsDate=new Date(); 
           clearFiles('before'); clearFiles('after');
           
-          // ส่งงานสำเร็จ เคลียร์ Offline Cache ทิ้ง
           localStorage.removeItem(CACHE_KEY); 
           
           toggleMainView(); 
