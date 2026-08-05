@@ -8,7 +8,8 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
-  <!-- 🔴 อิมพอร์ต Chart.js สำหรับสร้างกราฟ Dashboard -->
+  
+  <!-- อิมพอร์ต Chart.js สำหรับสร้างกราฟ Dashboard -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
   <style>
@@ -41,9 +42,12 @@
 
     .container { padding: 0 15px; max-width: 800px; margin: auto; position: relative; z-index: 20; }
     
+    /* Cards ทั่วไป */
     .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: var(--shadow-md); margin-bottom: 25px; border: 1px solid rgba(0, 94, 184, 0.05); }
     .card-title { color: var(--primary); font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+    .card-title .material-symbols-rounded { color: var(--secondary); font-size: 20px; }
     
+    /* Forms */
     .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;}
     .form-group { flex: 1; min-width: 140px; margin-bottom: 15px;}
     label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 13.5px; color: var(--text-muted); }
@@ -54,22 +58,30 @@
     .time-input-group input { text-align: center; padding: 12px; font-weight: 600; letter-spacing: 1px;}
     .time-colon { font-weight: bold; color: var(--text-muted); }
 
+    /* Upload UI Premium */
     .upload-container { display: flex; flex-direction: column; gap: 15px; }
     @media (min-width: 600px) { .upload-container { flex-direction: row; } }
     .upload-box { flex: 1; border: 1.5px dashed #CBD5E0; padding: 20px 15px; border-radius: 12px; background: #F8FAFC; transition: 0.3s; }
+    .upload-box:hover { border-color: var(--secondary); background: #F0F7FF; }
     .btn-upload-group { display: flex; gap: 8px; margin-top: 15px; }
-    .btn-upload { flex: 1; background: #FFF; border: 1px solid var(--border); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 5px;}
+    .btn-upload { flex: 1; background: #FFF; border: 1px solid var(--border); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 5px; box-shadow: var(--shadow-sm); transition: 0.2s;}
     .btn-upload.primary { background: var(--secondary); color: #FFF; border-color: var(--secondary); }
     .btn-upload input[type="file"] { display: none; }
-    .gallery-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center;}
-    .thumb-wrap { width: 55px; height: 55px; border-radius: 8px; overflow: hidden; }
-    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
-    .btn-clear { background: transparent; color: #E53E3E; border: none; font-size: 13px; cursor: pointer; margin-top: 12px; text-decoration: underline; display: none; width: 100%;}
-
-    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #F8FAFC; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
-    .checkbox-grid label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; cursor: pointer;}
+    .btn-upload:active { transform: scale(0.97); }
     
+    .gallery-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center;}
+    .thumb-wrap { position: relative; width: 55px; height: 55px; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border);}
+    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-clear { background: transparent; color: #E53E3E; border: none; font-size: 13px; cursor: pointer; margin-top: 12px; font-weight: 500; text-decoration: underline; display: none; width: 100%; font-family: 'Prompt';}
+
+    /* Checkbox */
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #F8FAFC; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+    .checkbox-grid label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; cursor: pointer; color: var(--text-main);}
+    .checkbox-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--secondary); cursor: pointer;}
+
+    /* FAB Menu */
     .fab-main { position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; border-radius: 50%; background: var(--secondary); color: white; border: none; box-shadow: var(--shadow-md); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; z-index: 100;}
+    .fab-main:hover { transform: scale(1.05); }
     .fab-main.close-mode { background: var(--text-muted); transform: rotate(45deg); }
 
     /* 📊 Analytics Dashboard CSS */
@@ -87,44 +99,63 @@
     .tech-chip-name { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: flex; align-items: center; gap: 5px;}
     .tech-chip-job { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
+    /* Dashboard & Filters */
     .filter-section { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(0, 94, 184, 0.05); }
+    
     .quick-filters { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
     .btn-quick { background: #EDF2F7; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; font-family: 'Prompt';}
     .btn-quick.active { background: var(--secondary); color: white; }
 
-    .report-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 5px solid var(--accent); transition: all 0.3s; cursor: pointer;}
-    .status-F { border-left-color: #38A169 !important; } .status-O { border-left-color: #D69E2E !important; } .status-U { border-left-color: #E53E3E !important; }
+    .report-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 5px solid var(--accent); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; overflow: hidden;}
+    .report-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--secondary); border-left: 5px solid var(--secondary); }
+    
+    .status-F { border-left-color: #38A169 !important; } 
+    .status-O { border-left-color: #D69E2E !important; } 
+    .status-U { border-left-color: #E53E3E !important; } 
+    
     .badge-new { background: #E53E3E; color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; animation: pulseRed 2s infinite; margin-left: 5px; }
     @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.5); } 70% { box-shadow: 0 0 0 6px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
-    
+    .report-card.is-new { border: 1px solid #FC8181; background: #FFF5F5; }
+    .report-card.is-new:hover { border-color: #E53E3E; box-shadow: 0 10px 25px rgba(229, 62, 62, 0.15); border-left: 5px solid #E53E3E; }
+
     .report-card-head { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
-    .report-card-title { font-weight: 600; color: var(--primary); font-size: 15px;}
-    .report-detail { font-size: 14px; color: #4A5568; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+    .report-card-title { font-weight: 600; color: var(--primary); font-size: 15px; display: flex; align-items: center; flex-wrap: wrap;}
+    .report-detail { font-size: 14px; color: #4A5568; line-height: 1.6; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
     .badge-chip { background: #EDF2F7; color: #4A5568; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;}
 
     /* 📄 Pagination CSS */
     .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-top: 10px; border-top: 1px solid var(--border);}
-    .btn-page { background: white; border: 1px solid var(--border); padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--primary); cursor: pointer; font-family: 'Prompt';}
+    .btn-page { background: white; border: 1px solid var(--border); padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--primary); cursor: pointer; font-family: 'Prompt'; transition: 0.2s;}
+    .btn-page:hover:not(:disabled) { background: #F8FAFC; border-color: var(--secondary); }
     .btn-page:disabled { background: #F1F5F9; color: #CBD5E0; cursor: not-allowed; }
 
+    /* Full Page Modals */
     .page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none; overflow-y: auto; padding-bottom: 80px;}
     .page-header { background: white; padding: 20px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); z-index: 10; margin-bottom: 25px; border-bottom: 2px solid var(--secondary);}
-    .btn-close-page { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--primary);}
+    .btn-close-page { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--primary); transition: 0.2s;}
+    .btn-close-page:hover { background: #E2E8F0; }
+    
     .detail-row { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; }
     .detail-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
     .detail-value { font-size: 15px; color: var(--primary); font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
     
-    .btn-primary { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt';}
-    .btn-edit { background: linear-gradient(135deg, var(--secondary), #004a94); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; margin-top: 25px;}
+    /* Buttons */
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; transition: 0.2s; box-shadow: 0 4px 15px rgba(0, 31, 91, 0.25);}
+    .btn-primary:active { transform: scale(0.98); }
+    
+    .btn-edit { background: linear-gradient(135deg, var(--secondary), #004a94); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; margin-top: 25px; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0, 94, 184, 0.35);}
+    .btn-edit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 94, 184, 0.45); }
+    .btn-edit:active { transform: translateY(0); }
 
     /* Notification Toast (สำหรับการเซฟ Cache) */
-    #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 12px; display: none; z-index: 1000;}
+    #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 12px; display: none; z-index: 1000; box-shadow: var(--shadow-sm);}
 
     #loadingScreen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(244, 247, 249, 0.9); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
 <body>
 
+  <!-- 🔴 ตั้งค่า URL ของ API Google Apps Script ตรงนี้ -->
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbygLJABXRzeot0Fu5FxdGN_4GwFJnnPMb2ifm4pvrcsTl6TpdvilGeHqOrNpjJo-MyN9w/exec";
   </script>
@@ -138,18 +169,25 @@
         <p id="appSub">ศูนย์กลางติดตามและแจกงานซ่อม</p>
       </div>
     </div>
+    
+    <!-- ปุ่มกลับหน้า Hub -->
     <div class="header-right">
-      <a href="https://engpcl2530-uni.github.io/BPC-Background-system-Unilever/" class="btn-hub"><span class="material-symbols-rounded" style="font-size: 20px;">apps</span> Hub</a>
+      <a href="https://engpcl2530-uni.github.io/BPC-Background-system-Unilever/" class="btn-hub">
+        <span class="material-symbols-rounded" style="font-size: 20px;">apps</span>
+        Hub
+      </a>
     </div>
   </div>
 
+  <!-- Loading Screen -->
   <div id="loadingScreen">
     <span class="material-symbols-rounded" style="font-size: 45px; color: var(--secondary); animation: spin 1.5s linear infinite;">sync</span>
     <p style="margin-top: 15px; font-weight: 600; color: var(--primary);">กำลังดึงข้อมูลจากระบบ...</p>
     <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
   </div>
 
-  <div id="toast">บันทึกข้อมูลฉบับร่างแล้ว</div>
+  <!-- Toast Notification สำหรับร่างออฟไลน์ -->
+  <div id="toast">บันทึกข้อมูลฉบับร่างอัตโนมัติแล้ว</div>
 
   <!-- ==============================================
        หน้าจอที่ 1: Dashboard Analytics & Data Table
@@ -177,19 +215,21 @@
     <!-- 🧑‍🔧 Tech Latest Job Feed -->
     <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; padding-left: 5px;">งานล่าสุดของทีมช่าง</h3>
     <div class="tech-feed-container" id="techFeed">
-        <!-- Tech chips injected here -->
+        <!-- Tech chips จะถูกฉีด (Inject) เข้ามาตรงนี้ -->
     </div>
 
-    <!-- 🔍 Filters -->
+    <!-- 🔍 Filters Section -->
     <div class="filter-section" style="margin-top: 25px;">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน</h3>
       
+      <!-- Quick Filters ปุ่มกด -->
       <div class="quick-filters">
         <button class="btn-quick" onclick="setQuickFilter('week')">สัปดาห์นี้</button>
         <button class="btn-quick" onclick="setQuickFilter('month')">เดือนนี้</button>
         <button class="btn-quick active" onclick="setQuickFilter('all')">ทั้งหมด</button>
       </div>
 
+      <!-- ฟอร์มกรองข้อมูล -->
       <div class="form-row" style="margin-bottom: 0;">
         <div class="form-group"><label>วันที่เริ่ม</label><input type="date" id="fStart" onchange="renderReportTable(1)"></div>
         <div class="form-group"><label>วันที่สิ้นสุด</label><input type="date" id="fEnd" onchange="renderReportTable(1)"></div>
@@ -202,16 +242,33 @@
             <option value="Mixing">Mixing</option><option value="Utility">Utility</option><option value="Packing">Packing</option>
           </select>
         </div>
+        
+        <!-- 🔴 กล่องกรอง กะ (Shift) ที่เพิ่มกลับมา -->
         <div class="form-group">
-          <label>สถานะ</label>
+          <label>กะ (Shift)</label>
+          <select id="fShift" onchange="renderReportTable(1)">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="M">M</option>
+            <option value="A">A</option>
+            <option value="N">N</option>
+            <option value="DW">DW</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>สถานะงาน</label>
           <select id="fStatus" onchange="renderReportTable(1)">
-            <option value="">-- ทุกสถานะ --</option><option value="F">Finished</option><option value="O">Ongoing</option><option value="U">Unfinished</option>
+            <option value="">-- ทุกสถานะ --</option>
+            <option value="F">Finished</option>
+            <option value="O">Ongoing</option>
+            <option value="U">Unfinished</option>
           </select>
         </div>
         <div class="form-group" style="flex: 2;"><label>ค้นหา (ชื่อช่าง, เครื่อง)</label><input type="text" id="fText" placeholder="พิมพ์ข้อความ..." oninput="renderReportTable(1)"></div>
       </div>
     </div>
 
+    <!-- ส่วนที่ใช้แสดงรายการงาน (Card) -->
     <div id="reportContent"></div>
     
     <!-- 📄 Pagination -->
@@ -311,13 +368,13 @@
     </form>
   </div>
 
+  <!-- FAB Button (สำหรับสลับหน้าจอ Dashboard <-> แบบฟอร์ม) -->
   <button class="fab-main" id="fabMainBtn" onclick="toggleMainView()">
     <span class="material-symbols-rounded" id="fabIcon" style="font-size: 30px;">add</span>
   </button>
 
   <!-- ==============================================
-       หน้าจอที่ 3 & 4: รายละเอียดงาน และ แก้ไข (Modal)
-       (โครงสร้าง HTML เดิม ไม่เปลี่ยนแปลง)
+       หน้าจอที่ 3: ดูรายละเอียดงาน (Job Details Modal)
        ============================================== -->
   <div class="page-overlay" id="jobDetailsPage">
     <div class="page-header">
@@ -326,10 +383,16 @@
     </div>
     <div class="container">
       <div class="card" id="jobDetailsContent"></div>
-      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้</button>
+      <!-- ปุ่มเปิดเข้าสู่โหมดแก้ไข -->
+      <button class="btn-edit" onclick="openEditMode()">
+        <span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้
+      </button>
     </div>
   </div>
 
+  <!-- ==============================================
+       หน้าจอที่ 4: แก้ไขอัปเดตงาน (Edit Mode Modal)
+       ============================================== -->
   <div class="page-overlay" id="editJobPage" style="z-index: 250;">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">update</span> อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
@@ -345,6 +408,7 @@
           <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="edit_solved" rows="2" required></textarea></div>
           <div class="form-group"><label>อัปเดตสถานะงาน (Result)</label><select id="edit_result" required><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
         </div>
+        
         <div class="card">
           <div class="card-title">อัปโหลดภาพเพิ่มเติม (ทางเลือก)</div>
           <div class="form-row">
@@ -352,6 +416,7 @@
             <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">เพิ่มภาพหลังซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'edit_after')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'edit_after')"></label></div><div id="thumbEditAfter" class="gallery-preview"></div><button type="button" id="clearEditAfter" class="btn-clear" onclick="clearFiles('edit_after')">ล้างรูปภาพ</button></div>
           </div>
         </div>
+        
         <div class="card">
           <div class="card-title">แก้ไขผู้รับผิดชอบ / แจกงาน</div>
           <div class="checkbox-grid">
@@ -382,7 +447,7 @@
     </div>
   </div>
 
-  <!-- 🟢 SCRIPT LOGIC 🟢 -->
+  <!-- 🟢 SCRIPT LOGIC (จาวาสคริปต์ควบคุมการทำงานทั้งหมด) 🟢 -->
   <script>
     let allReportData = [];
     let currentJobData = null; 
@@ -390,10 +455,10 @@
     
     // ตั้งค่า Pagination
     let currentPage = 1;
-    const itemsPerPage = 200;
+    const itemsPerPage = 200; // แบ่งหน้าละ 200 รายการ
     let currentFilteredData = [];
 
-    // 🔴 1. ระบบ Offline Storage (Cache) 6 ชั่วโมง
+    // 🔴 1. ระบบ Offline Storage (Cache) เก็บฉบับร่าง 6 ชั่วโมง
     const CACHE_KEY = "cmms_draft_v1";
     
     function saveDraft() {
@@ -411,7 +476,7 @@
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(draft));
         
-        // Show Toast
+        // Show Toast แจ้งเตือนการเซฟร่าง
         let t = document.getElementById('toast');
         t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500);
     }
@@ -420,32 +485,32 @@
         let saved = localStorage.getItem(CACHE_KEY);
         if(saved) {
             let data = JSON.parse(saved);
-            if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { // ไม่เกิน 6 ชม.
+            if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { // ถ้าร่างยังไม่เกิน 6 ชม. ให้โหลดมาใส่ช่อง
                 ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','handover','dept','remark'].forEach(id => {
                     if(data[id] && document.getElementById(id)) document.getElementById(id).value = data[id];
                 });
                 if(data.line === 'อื่นๆ') toggleOther('line', 'lineOtherContainer');
             } else {
-                localStorage.removeItem(CACHE_KEY); // หมดอายุ
+                localStorage.removeItem(CACHE_KEY); // ลบทิ้งถ้าเกิน 6 ชม.
             }
         }
         if(!document.getElementById('date').value) document.getElementById('date').valueAsDate = new Date();
     }
 
-    // Bind Event เซฟแคชทุกครั้งที่มีการพิมพ์หรือเปลี่ยนค่า
+    // เซฟลง Cache ทันทีที่ผู้ใช้พิมพ์หรือเปลี่ยนค่าในฟอร์ม
     document.getElementById('maintenanceForm').addEventListener('input', saveDraft);
     document.getElementById('maintenanceForm').addEventListener('change', saveDraft);
 
-    // Initial Load
+    // Initial Load เมื่อเปิดเว็บ
     window.onload = async function() {
-      loadDraft(); // โหลดแคช
+      loadDraft(); // โหลดแคชที่ค้างไว้
       try {
         const res = await callAPI("getDashboard", {});
         if(res.status === "success") { 
           allReportData = res.data; 
           document.getElementById('loadingScreen').style.display = 'none';
           document.getElementById('dashboardView').style.display = 'block';
-          renderReportTable(1); // เริ่มที่หน้า 1
+          renderReportTable(1); // แสดงข้อมูลหน้า 1
         } else { alert("Error: " + res.message); }
       } catch(err) { alert("Network Error: " + err.message); }
     };
@@ -457,7 +522,7 @@
       return await response.json();
     }
 
-    // 🔴 2. Quick Filters (สัปดาห์นี้ / เดือนนี้)
+    // 🔴 2. Quick Filters (ปุ่มกรอง สัปดาห์นี้ / เดือนนี้ อย่างรวดเร็ว)
     function setQuickFilter(type) {
         document.querySelectorAll('.btn-quick').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
@@ -481,13 +546,16 @@
         renderReportTable(1);
     }
 
-    // 🔴 3. ระบบ Pagination และ 📊 4. อัปเดต Dashboard
+    // 🔴 3. ระบบ Pagination และ กรองข้อมูลหลัก
     function renderReportTable(pageNumber) {
-      let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
-      let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
-      let statusFilter = document.getElementById('fStatus').value; let textFilter = document.getElementById('fText').value.toLowerCase();
+      let fs = document.getElementById('fStart').value; 
+      let fe = document.getElementById('fEnd').value;
+      let fl = document.getElementById('fLine').value; 
+      let shift = document.getElementById('fShift').value;
+      let statusFilter = document.getElementById('fStatus').value; 
+      let textFilter = document.getElementById('fText').value.toLowerCase();
 
-      // กรองข้อมูลจาก "ข้อมูลทั้งหมดที่มี"
+      // กรองข้อมูลทั้งหมดที่มี
       currentFilteredData = allReportData.filter(r => {
         if (fs && r.date < fs) return false;
         if (fe && r.date > fe) return false;
@@ -498,10 +566,10 @@
         return true;
       });
 
-      // --- อัปเดต Dashboard Stats จากข้อมูลที่ถูกกรอง ---
+      // 📊 อัปเดต Dashboard Stats จากข้อมูลที่ถูกกรอง
       updateDashboardStats(currentFilteredData);
 
-      // --- Pagination Logic ---
+      // 📄 Pagination Logic
       currentPage = pageNumber || 1;
       let totalPages = Math.ceil(currentFilteredData.length / itemsPerPage) || 1;
       let startIndex = (currentPage - 1) * itemsPerPage;
@@ -518,7 +586,7 @@
             if((new Date() - jobDate) / (1000 * 60 * 60) <= 48) isNew = true;
         }
         let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
-        let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ย้งไม่ระบุช่าง</span>';
+        let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
 
         html += `
           <div class="report-card status-${item.result} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
@@ -536,31 +604,38 @@
 
       document.getElementById('reportContent').innerHTML = html;
       
-      // ควบคุมปุ่ม Pagination
+      // ควบคุมปุ่ม Pagination ด้านล่าง
       let pageWrapper = document.getElementById('paginationWrapper');
       if(totalPages > 1) {
           pageWrapper.style.display = "flex";
           document.getElementById('pageIndicator').innerText = `หน้า ${currentPage} / ${totalPages}`;
           document.getElementById('btnPrev').disabled = (currentPage === 1);
           document.getElementById('btnNext').disabled = (currentPage === totalPages);
-      } else { pageWrapper.style.display = "none"; }
+      } else { 
+          pageWrapper.style.display = "none"; 
+      }
     }
 
-    function changePage(step) { renderReportTable(currentPage + step); window.scrollTo(0, document.getElementById('dashboardView').offsetTop); }
+    function changePage(step) { 
+      renderReportTable(currentPage + step); 
+      // เลื่อนหน้าจอกลับขึ้นไปด้านบนของลิสต์
+      window.scrollTo(0, document.getElementById('dashboardView').offsetTop); 
+    }
 
+    // 🔴 4. ฟังก์ชันอัปเดต Dashboard (กราฟแท่ง & สรุป)
     function updateDashboardStats(data) {
         let newCount = 0; let doneCount = 0;
         let lineCounts = {}; let techLatest = {};
 
         data.forEach(job => {
-            // Stats
+            // คำนวณ Stats (งานใหม่, งานเสร็จ)
             if(job.result === 'F') doneCount++;
             if(job.date && (new Date() - new Date(job.date)) / 3600000 <= 48) newCount++;
             
-            // Chart Data
+            // คำนวณความถี่แยกตาม Line สำหรับวาดกราฟ
             if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
             
-            // Tech Feed
+            // ค้นหางานล่าสุดของช่างแต่ละคน
             if(job.tech) {
                 let techs = job.tech.split(',').map(t => t.trim());
                 techs.forEach(t => {
@@ -571,21 +646,28 @@
             }
         });
 
-        // Update Text
+        // อัปเดตตัวเลข
         document.getElementById('statNewTask').innerText = newCount;
         let p = data.length ? Math.round((doneCount/data.length)*100) : 0;
         document.getElementById('statDone').innerText = p + "%";
 
-        // Render Chart
+        // วาดกราฟ Chart.js
         let ctx = document.getElementById('lineIssueChart').getContext('2d');
         if(lineChartInstance) lineChartInstance.destroy();
         lineChartInstance = new Chart(ctx, {
             type: 'bar',
-            data: { labels: Object.keys(lineCounts), datasets: [{ label: 'จำนวนปัญหา', data: Object.values(lineCounts), backgroundColor: '#00A5D9', borderRadius: 6 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } }
+            data: { 
+                labels: Object.keys(lineCounts), 
+                datasets: [{ label: 'จำนวนปัญหา', data: Object.values(lineCounts), backgroundColor: '#00A5D9', borderRadius: 6 }] 
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, 
+                plugins: { legend: { display: false } }, 
+                scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } 
+            }
         });
 
-        // Render Tech Feed
+        // Render Tech Feed (งานล่าสุดของทีมช่าง)
         let feedHtml = "";
         for (const [tech, info] of Object.entries(techLatest)) {
             let col = info.result==='F'?'#38A169':(info.result==='O'?'#D69E2E':'#E53E3E');
@@ -594,7 +676,7 @@
         document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
 
-    // 🔴 5. Data Validation (ป้องกันเวลาเริ่มเร็วกว่าเวลาแจ้ง) 
+    // 🔴 5. Data Validation (ป้องกันการใส่เวลาผิด) และการ Submit
     async function submitForm(event) {
       event.preventDefault(); 
       var btn = document.getElementById('submitBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
@@ -606,13 +688,13 @@
       let callTotal = cHH * 60 + cMM;
       let startTotal = sHH * 60 + sMM;
 
-      // ถ้าเวลาเริ่มน้อยกว่าเวลาแจ้ง (หลักนาที) 
+      // ตรวจสอบ: เวลาเริ่มน้อยกว่าเวลาแจ้งหรือไม่?
       if (startTotal < callTotal) {
-          // เช็กว่าเป็นกะดึกข้ามวันหรือไม่ (แจ้งรอบดึกหลัง 18:00, ซ่อมเช้ามือไม่เกิน 06:00)
+          // ข้อยกเว้น: ให้ผ่านได้ถ้าเป็นการแจ้งข้ามคืนของกะดึก (เช่น แจ้ง 23:00 เริ่มซ่อม 01:00)
           if (!(cHH >= 18 && sHH <= 6)) {
               alert("⚠️ ข้อผิดพลาด: 'เวลาเริ่มซ่อม' เร็วกว่า 'เวลาที่รับแจ้ง'\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง (ยกเว้นเป็นการปฏิบัติงานข้ามคืนในช่วงกะดึก)");
               btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false;
-              return; // หยุดการส่งฟอร์ม
+              return; // หยุดการทำงานถ้ากรอกผิด
           }
       }
 
@@ -631,19 +713,30 @@
         const res = await callAPI("saveReport", formData);
         if(res.status==="success") {
           alert(res.message); 
-          document.getElementById('maintenanceForm').reset(); document.getElementById('date').valueAsDate=new Date(); clearFiles('before'); clearFiles('after');
-          localStorage.removeItem(CACHE_KEY); // เคลียร์แคชเมื่อส่งสำเร็จ
+          document.getElementById('maintenanceForm').reset(); 
+          document.getElementById('date').valueAsDate=new Date(); 
+          clearFiles('before'); clearFiles('after');
+          
+          // ส่งงานสำเร็จ เคลียร์ Offline Cache ทิ้ง
+          localStorage.removeItem(CACHE_KEY); 
+          
           toggleMainView(); 
           document.getElementById('loadingScreen').style.display = 'flex';
           const newRes = await callAPI("getDashboard", {});
-          if(newRes.status==="success"){allReportData=newRes.data; renderReportTable(1);}
+          if(newRes.status==="success"){
+              allReportData=newRes.data; 
+              renderReportTable(1);
+          }
           document.getElementById('loadingScreen').style.display = 'none';
         } else { alert("เกิดข้อผิดพลาด: "+res.message); }
       } catch(err) { alert("Error: "+err.message); }
+      
       btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled=false;
     }
 
-    // Modal & UI Utils
+    // ==========================================
+    // UI Utility Functions (ฟังก์ชันสลับหน้าต่างและกล่องข้อความ)
+    // ==========================================
     function toggleMainView() { const dbView = document.getElementById('dashboardView'); const formView = document.getElementById('formView'); const fabBtn = document.getElementById('fabMainBtn'); const fabIcon = document.getElementById('fabIcon'); if(formView.style.display === 'none') { dbView.style.display = 'none'; formView.style.display = 'block'; fabBtn.classList.add('close-mode'); fabIcon.style.transform = "rotate(45deg)"; document.getElementById('appTitle').innerText = "แจ้งซ่อมใหม่"; document.getElementById('appSub').innerText = "กรอกรายละเอียดปัญหาเครื่องจักร"; } else { formView.style.display = 'none'; dbView.style.display = 'block'; fabBtn.classList.remove('close-mode'); fabIcon.style.transform = "rotate(0deg)"; document.getElementById('appTitle').innerText = "CMMS System"; document.getElementById('appSub').innerText = "ศูนย์กลางติดตามและแจกงานซ่อม"; } window.scrollTo(0,0); }
     function toggleOther(selectId, containerId) { var val = document.getElementById(selectId).value; var container = document.getElementById(containerId); var input = container.querySelector('input'); if(val === 'อื่นๆ') { container.style.display = 'block'; input.required = true; } else { container.style.display = 'none'; input.required = false; input.value = ''; } }
     function toggleOtherTech(mode) { const prefix = mode === 'edit' ? 'edit_' : ''; const cb = document.getElementById(prefix + 'cbOther'); const container = document.getElementById(prefix + 'techOtherContainer'); const input = document.getElementById(prefix + 'techOther'); if(cb.checked) { container.style.display = 'block'; input.required = true; input.focus(); } else { container.style.display = 'none'; input.required = false; input.value = ''; } }
@@ -655,6 +748,9 @@
     function formatTime(input, maxVal) { let val = input.value.replace(/[^0-9]/g, ''); if(val!==""){let num=parseInt(val,10);if(num>maxVal)val=maxVal.toString();} input.value=val; if(val.length===2){let nxt=input.nextElementSibling;if(nxt&&nxt.tagName==='SPAN')nxt=nxt.nextElementSibling;if(nxt&&nxt.tagName==='INPUT')nxt.focus();} }
     function getTimeString(p) { return document.getElementById(p+'HH').value.padStart(2,'0')+':'+document.getElementById(p+'MM').value.padStart(2,'0'); }
 
+    // ==========================================
+    // Image Handling Functions (จัดการรูปและบีบอัดภาพ)
+    // ==========================================
     let filesBefore = [], filesAfter = []; let editFilesBefore = [], editFilesAfter = [];
     function handleFiles(event, type) { const files = event.target.files; if(files.length===0) return; let targetArray; let thumbDiv; let clearBtn; if(type === 'before') { targetArray = filesBefore; thumbDiv = document.getElementById('thumbBefore'); clearBtn = document.getElementById('clearBefore'); } else if(type === 'after') { targetArray = filesAfter; thumbDiv = document.getElementById('thumbAfter'); clearBtn = document.getElementById('clearAfter'); } else if(type === 'edit_before') { targetArray = editFilesBefore; thumbDiv = document.getElementById('thumbEditBefore'); clearBtn = document.getElementById('clearEditBefore'); } else if(type === 'edit_after') { targetArray = editFilesAfter; thumbDiv = document.getElementById('thumbEditAfter'); clearBtn = document.getElementById('clearEditAfter'); } if (targetArray.length + files.length > 5) { alert("แนบรูปได้สูงสุด 5 ภาพต่อส่วนครับ"); return; } for(let i=0; i<files.length; i++) { targetArray.push(files[i]); let reader = new FileReader(); reader.onload = e => { let wrap=document.createElement('div'); wrap.className='thumb-wrap'; wrap.innerHTML=`<img src="${e.target.result}">`; thumbDiv.appendChild(wrap); }; reader.readAsDataURL(files[i]); } clearBtn.style.display="block"; event.target.value=""; }
     function clearFiles(type) { if(type==='before'){filesBefore=[];document.getElementById('thumbBefore').innerHTML="";document.getElementById('clearBefore').style.display="none";} else if(type==='after'){filesAfter=[];document.getElementById('thumbAfter').innerHTML="";document.getElementById('clearAfter').style.display="none";} else if(type==='edit_before'){editFilesBefore=[];document.getElementById('thumbEditBefore').innerHTML="";document.getElementById('clearEditBefore').style.display="none";} else if(type==='edit_after'){editFilesAfter=[];document.getElementById('thumbEditAfter').innerHTML="";document.getElementById('clearEditAfter').style.display="none";} }
