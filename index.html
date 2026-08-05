@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>CMMS Report & Tracker</title>
+  <title>BPC Maintenance Report & Tracker</title>
   <meta name="robots" content="noindex, nofollow">
   
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -116,6 +116,29 @@
     .btn-edit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 94, 184, 0.45); }
     .btn-edit:active { transform: translateY(0); }
 
+    /* 🔴 ปุ่ม Back to Hub บน Header 🔴 */
+    .btn-hub {
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13.5px;
+      font-weight: 600;
+      transition: all 0.3s;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .btn-hub:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+    .btn-hub:active {
+      transform: translateY(0);
+    }
+
     #loadingScreen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(244, 247, 249, 0.9); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
@@ -134,6 +157,14 @@
         <h1 id="appTitle">CMMS System</h1>
         <p id="appSub">ศูนย์กลางติดตามและแจกงานซ่อม</p>
       </div>
+    </div>
+    
+    <!-- 🔴 ส่วนที่เพิ่มใหม่: ปุ่มกลับหน้า Hub ไว้มุมขวา -->
+    <div class="header-right">
+      <a href="https://engpcl2530-uni.github.io/BPC-Background-system-Unilever/" class="btn-hub">
+        <span class="material-symbols-rounded" style="font-size: 20px;">apps</span>
+        Hub
+      </a>
     </div>
   </div>
 
@@ -236,27 +267,17 @@
 
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">group</span> บุคลากร</div>
-        <div class="checkbox-grid">
-          <label><input type="checkbox" class="tech-cb" value="ภูวรินทร์"> ภูวรินทร์</label>
-          <label><input type="checkbox" class="tech-cb" value="วิเชียร"> วิเชียร</label>
-          <label><input type="checkbox" class="tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
-          <label><input type="checkbox" class="tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
-          <label><input type="checkbox" class="tech-cb" value="สันติ"> สันติ</label>
-          <label><input type="checkbox" class="tech-cb" value="บัณฑิต"> บัณฑิต</label>
-          <label><input type="checkbox" class="tech-cb" value="ลิขิต"> ลิขิต</label>
-          <label><input type="checkbox" class="tech-cb" value="ศุภสิทธิ์"> ศุภสิทธิ์</label>
-          <label><input type="checkbox" class="tech-cb" value="ธงชัย"> ธงชัย</label>
-          <label><input type="checkbox" class="tech-cb" value="สุพรชัย"> สุพรชัย</label>
-          <label><input type="checkbox" class="tech-cb" value="วุฒิเดช"> วุฒิเดช</label>
-          <label><input type="checkbox" class="tech-cb" value="สัญญา"> สัญญา</label>
-          <label><input type="checkbox" class="tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
-          <label><input type="checkbox" class="tech-cb" value="ศิวกร"> ศิวกร</label>
-          <label><input type="checkbox" class="tech-cb" value="กิตติพงษ์"> กิตติพงษ์</label>
-          <label><input type="checkbox" class="tech-cb" value="ไชยยา"> ไชยยา</label>
-          <label><input type="checkbox" class="tech-cb" value="นิรุตต์"> นิรุตต์</label>
-          <label><input type="checkbox" class="tech-cb" value="เศรษฐศักดิ์"> เศรษฐศักดิ์</label>
-          <label style="grid-column: span 2;"><input type="checkbox" id="cbOther" onchange="toggleOtherTech('add')"> ระบุชื่ออื่น</label>
-        </div>
+        <div class="form-group">
+          <label>วิศวกร/ช่างซ่อมบำรุง</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" class="tech-cb" value="ภูวรินทร์"> ภูวรินทร์</label>
+            <label><input type="checkbox" class="tech-cb" value="วิเชียร"> วิเชียร</label>
+            <label><input type="checkbox" class="tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
+            <label><input type="checkbox" class="tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
+            <label><input type="checkbox" class="tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
+            <label><input type="checkbox" class="tech-cb" value="สัญญา"> สัญญา</label>
+            <label style="grid-column: span 2;"><input type="checkbox" id="cbOther" onchange="toggleOtherTech('add')"> ระบุชื่ออื่น</label>
+          </div>
           <div id="techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="techOther" placeholder="พิมพ์ชื่อผู้ปฏิบัติงาน..."></div>
         </div>
         <div class="form-row">
@@ -329,20 +350,8 @@
             <label><input type="checkbox" class="edit-tech-cb" value="วิเชียร"> วิเชียร</label>
             <label><input type="checkbox" class="edit-tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
             <label><input type="checkbox" class="edit-tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="สันติ"> สันติ</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="บัณฑิต"> บัณฑิต</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="ลิขิต"> ลิขิต</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="ศุภสิทธิ์"> ศุภสิทธิ์</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="ธงชัย"> ธงชัย</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="สุพรชัย"> สุพรชัย</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="วุฒิเดช"> วุฒิเดช</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="สัญญา"> สัญญา</label>
             <label><input type="checkbox" class="edit-tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="ศิวกร"> ศิวกร</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="กิตติพงษ์"> กิตติพงษ์</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="ไชยยา"> ไชยยา</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="นิรุตต์"> นิรุตต์</label>
-            <label><input type="checkbox" class="edit-tech-cb" value="เศรษฐศักดิ์"> เศรษฐศักดิ์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สัญญา"> สัญญา</label>
             <label style="grid-column: span 2;"><input type="checkbox" id="edit_cbOther" onchange="toggleOtherTech('edit')"> ระบุชื่ออื่น</label>
           </div>
           <div id="edit_techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="edit_techOther" placeholder="พิมพ์ชื่อช่าง..."></div>
