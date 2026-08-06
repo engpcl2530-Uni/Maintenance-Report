@@ -165,7 +165,7 @@
 </head>
 <body>
 
-  <!-- 🔴 ใส่ URL หลังบ้าน (GAS) ของคุณตรงนี้ -->
+  <!-- 🔴 ใส่ URL ของคุณตรงนี้ -->
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbygLJABXRzeot0Fu5FxdGN_4GwFJnnPMb2ifm4pvrcsTl6TpdvilGeHqOrNpjJo-MyN9w/exec";
   </script>
@@ -491,6 +491,7 @@
           </div>
         </div>
         
+        <!-- 🔴 ใส่กล่องผู้รับมอบงาน กับ หมายเหตุ คืนมาในโหมด Edit ให้ครบถ้วนแล้วครับ -->
         <div class="card">
           <div class="card-title">แก้ไขผู้รับผิดชอบ / แจกงาน</div>
           <div class="checkbox-grid">
@@ -515,6 +516,12 @@
             <label style="grid-column: span 2;"><input type="checkbox" id="edit_cbOther" onchange="toggleOtherTech('edit')"> ระบุชื่ออื่น</label>
           </div>
           <div id="edit_techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="edit_techOther" placeholder="พิมพ์ชื่อช่าง..."></div>
+          
+          <div class="form-row" style="margin-top: 15px;">
+            <div class="form-group"><label>ผู้รับมอบงาน</label><input type="text" id="edit_handover" required></div>
+            <div class="form-group"><label>แผนก</label><select id="edit_dept" required><option value="CO">CO</option><option value="PCL">PCL</option></select></div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุเพิ่มเติม (ถ้ามี)</label><textarea id="edit_remark" rows="2"></textarea></div>
         </div>
         <button type="submit" class="btn-primary" id="updateBtn"><span class="material-symbols-rounded">save</span> บันทึกการอัปเดต</button>
       </form>
@@ -667,57 +674,44 @@
         renderReportTable(1);
     }
 
-   // 🔴 ฟังก์ชัน Export CSV แบบไร้ขีดจำกัด และเรียงคอลัมน์ตรงกับ Google Sheets เป๊ะๆ
+    // 🔴 ฟังก์ชัน Export CSV แยกช่องหมายเหตุและผู้รับมอบงานชัดเจน (23 คอลัมน์)
     function exportToCSV() {
-        // ตรวจสอบว่ามีข้อมูลหรือไม่
         if(!currentFilteredData || currentFilteredData.length === 0) { 
             alert("ไม่พบข้อมูลสำหรับ Export"); 
             return; 
         }
         
-        // ใส่ \uFEFF (BOM) เพื่อให้ Excel เปิดอ่านภาษาไทยได้ไม่เพี้ยน
         let csvContent = "\uFEFF";
         
-        // 🔴 ล็อกหัวตารางให้ตรงกับ Google Sheets ทั้ง 22 คอลัมน์
+        // 🔴 ล็อกหัวตารางให้ตรงกับ Google Sheets เป๊ะๆ 23 ช่อง
         let headers = [
             "Num", "วันที่", "แผนก", "Line", "Machine", 
             "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
             "Start Time", "End Time", "Repair Time", "Shift", "Service by", 
-            "หมายเหตุผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
+            "หมายเหตุ", "ผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
             "PM Detail", "PM Interval", "PM Completed"
         ];
         csvContent += headers.join(",") + "\n";
         
-        // ดึงข้อมูลทั้งหมดที่ผ่านการกรองแล้ว
         currentFilteredData.forEach(r => {
-            // แปลงสถานะให้เป็นคำเต็ม
             let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
             
-            // นำหมายเหตุและผู้รับมอบงาน มัดรวมกันให้เหมือนในฐานข้อมูลเป๊ะๆ
-            let combinedRemark = r.remark || "";
-            if (r.handover) {
-                combinedRemark = combinedRemark + (combinedRemark ? " | " : "") + "ผู้รับมอบ: " + r.handover;
-            }
-            
-            // 🔴 จัดเรียงข้อมูลให้ตรงกับหัวตาราง 22 ช่องเป๊ะ
             let rowData = [
                 r.num, r.date, r.dept, r.line, r.machine,
                 r.breakdown, r.cause, r.solved, mappedResult, r.callTime,
                 r.startTime, r.endTime, r.repairTime, r.shift, r.tech,
-                combinedRemark, r.imgBefore, r.imgAfter, r.pmUpdate,
+                r.remark, r.handover, r.imgBefore, r.imgAfter, r.pmUpdate,
                 r.pmDetail, r.pmInterval, r.pmCompleted
             ];
             
-            // ป้องกัน Error จาก , หรือ " ในข้อความ
             let formattedRow = rowData.map(v => {
                 let str = (v || '').toString();
-                return `"${str.replace(/"/g, '""')}"`; // ครอบด้วย "" เสมอ
+                return `"${str.replace(/"/g, '""')}"`;
             });
             
             csvContent += formattedRow.join(",") + "\n";
         });
 
-        // สร้างไฟล์จำลองในหน่วยความจำเบราว์เซอร์
         let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         let url = URL.createObjectURL(blob);
         
@@ -730,9 +724,9 @@
         link.click();
         document.body.removeChild(link);
         
-        // คืนหน่วยความจำเพื่อไม่ให้เบราว์เซอร์หน่วง
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
+
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
       let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
@@ -748,7 +742,7 @@
         if (fl && r.line !== fl) return false;
         if (shift && r.shift !== shift) return false;
         
-        let mappedStatus = r.result === 'F' ? 'Finished' : (r.result === 'O' ? 'Ongoing' : (r.result === 'U' ? 'Unfinished' : r.result));
+        let mappedStatus = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
         if (statusFilter && mappedStatus !== statusFilter) return false;
         
         if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || (r.tech || "").toLowerCase().includes(textFilter) || (r.machine || "").toLowerCase().includes(textFilter) || (r.breakdown || "").toLowerCase().includes(textFilter))) return false;
@@ -808,7 +802,7 @@
         let lineCounts = {}; let techLatest = {};
 
         data.forEach(job => {
-            let mappedStatus = job.result === 'F' ? 'Finished' : (job.result === 'O' ? 'Ongoing' : (job.result === 'U' ? 'Unfinished' : job.result));
+            let mappedStatus = job.result === 'F' || job.result === 'Finished' ? 'Finished' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing' : 'Unfinished');
             if(mappedStatus === 'Finished') doneCount++;
             if(isNewJob(job.date)) newCount++; 
             if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
@@ -993,6 +987,10 @@
            </div>
         </div>
 
+        <!-- 🔴 โชว์ผู้รับมอบงาน และหมายเหตุที่แยกออกมาแล้ว -->
+        <div class="detail-row"><div class="detail-label">ผู้รับมอบงาน</div><div class="detail-value">${job.handover || '-'}</div></div> 
+        <div class="detail-row"><div class="detail-label">หมายเหตุ</div><div class="detail-value">${job.remark || '-'}</div></div> 
+
         <div class="detail-row"><div class="detail-label">ทีมช่าง / ผู้ปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> 
         <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed var(--border);"> 
             <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม</div> 
@@ -1036,6 +1034,11 @@
         document.getElementById('edit_pmCompleted').value = currentJobData.pmCompleted || "";
         document.getElementById('edit_pmInterval').value = currentJobData.pmInterval || "";
         document.getElementById('edit_pmDetail').value = currentJobData.pmDetail || "";
+
+        // 🔴 ดึงผู้รับมอบงาน และ หมายเหตุ ไปใส่ในช่อง Edit
+        document.getElementById('edit_handover').value = currentJobData.handover || "";
+        document.getElementById('edit_dept').value = currentJobData.dept || "CO";
+        document.getElementById('edit_remark').value = currentJobData.remark || "";
 
         clearFiles('edit_before'); clearFiles('edit_after'); 
         
@@ -1088,7 +1091,11 @@
                 repairTime: calculatedRepairTime,
                 breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
                 pmUpdate: document.getElementById('edit_pmUpdate').value, pmCompleted: document.getElementById('edit_pmCompleted').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
-                tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter 
+                tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter,
+                // 🔴 ส่งข้อมูลผู้รับมอบงาน และหมายเหตุ ไปอัปเดตด้วย
+                handover: document.getElementById('edit_handover').value,
+                dept: document.getElementById('edit_dept').value,
+                remark: document.getElementById('edit_remark').value
             }; 
             
             const res = await callAPI("updateReport", updateData); 
