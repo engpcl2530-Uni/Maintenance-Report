@@ -200,7 +200,7 @@
       </div>
     </div>
 
-    <!-- 📈 Chart Section (เพิ่ม ID chartSection ไว้สำหรับซ่อน) -->
+    <!-- 📈 Chart Section -->
     <div class="chart-card" id="chartSection">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
         <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line (Top 10)
@@ -216,7 +216,15 @@
 
     <!-- 🔍 Filters Section -->
     <div class="filter-section" style="margin-top: 25px;">
-      <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;"><span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน</h3>
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
+            <span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน
+        </h3>
+        <!-- ปุ่ม Export CSV -->
+        <button class="btn-primary" style="background:#28a745; width:auto; padding:6px 12px; font-size:12px; border-radius: 8px;" onclick="exportToCSV()">
+            <span class="material-symbols-rounded" style="font-size:16px;">download</span> Export CSV
+        </button>
+      </div>
       
       <div class="quick-filters">
         <button class="btn-quick" onclick="setQuickFilter('week')">สัปดาห์นี้</button>
@@ -248,7 +256,7 @@
             <option value="">-- ทุกสถานะ --</option><option value="F">Finished</option><option value="O">Ongoing</option><option value="U">Unfinished</option>
           </select>
         </div>
-        <div class="form-group" style="flex: 2;"><label>ค้นหา (ชื่อช่าง, เครื่อง)</label><input type="text" id="fText" placeholder="พิมพ์ข้อความ..." oninput="renderReportTable(1)"></div>
+        <div class="form-group" style="flex: 2;"><label>ค้นหา (Job No, ชื่อช่าง, เครื่อง)</label><input type="text" id="fText" placeholder="พิมพ์ข้อความ..." oninput="renderReportTable(1)"></div>
       </div>
     </div>
 
@@ -378,6 +386,27 @@
     <div class="container">
       <form id="editForm" onsubmit="submitEditForm(event)">
         <input type="hidden" id="editJobNum">
+        
+        <!-- ข้อมูลทั่วไปที่สามารถแก้ไขได้ -->
+        <div class="card">
+          <div class="card-title">ข้อมูลทั่วไป (แก้ไขได้)</div>
+          <div class="form-row">
+            <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="edit_date" required></div>
+            <div class="form-group"><label>กะ (Shift)</label><select id="edit_shift" required><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
+          </div>
+          <div class="form-group"><label>รหัสเครื่องจักร (Machine)</label><input type="text" id="edit_machine" required></div>
+        </div>
+
+        <!-- เวลาดำเนินการที่สามารถแก้ไขได้ -->
+        <div class="card">
+          <div class="card-title">ระยะเวลาดำเนินการ (แก้ไขได้)</div>
+          <div class="form-row">
+            <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="edit_callHH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="edit_callMM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+            <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="edit_startHH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="edit_startMM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+            <div class="form-group"><label>ซ่อมเสร็จ</label><div class="time-input-group"><input type="text" id="edit_endHH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="edit_endMM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+          </div>
+        </div>
+
         <div class="card">
           <div class="card-title">รายละเอียดปัญหา</div>
           <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="edit_breakdown" rows="2" required></textarea></div>
@@ -430,22 +459,19 @@
     let currentJobData = null; 
     let lineChartInstance = null;
     
-    // ตั้งค่า Pagination
     let currentPage = 1;
-    const itemsPerPage = 200; // แบ่งหน้าละ 200 รายการ
+    const itemsPerPage = 200; 
     let currentFilteredData = [];
 
-    // 🔴 1. ระบบจัดการและแปลงวันที่ (ฉลาดขึ้น รองรับทั้ง DD/MM/YYYY และ YYYY-MM-DD)
+    // 🔴 1. ระบบจัดการและแปลงวันที่ 
     function parseDateSafely(dateStr) {
-        if (!dateStr) return new Date(0); // กันค่าว่าง
+        if (!dateStr) return new Date(0); 
         let str = dateStr.toString().trim();
         
-        // ถ้ารูปแบบเป็น YYYY-MM-DD
         if (str.includes('-')) {
             let d = new Date(str);
             if (!isNaN(d.getTime())) return d;
         }
-        // ถ้ารูปแบบเป็น DD/MM/YYYY จากการดึงข้อมูล Sheet เก่า
         if (str.includes('/')) {
             let parts = str.split('/');
             if (parts.length === 3) {
@@ -453,7 +479,6 @@
                 let p1 = parseInt(parts[1], 10);
                 let p2 = parseInt(parts[2], 10);
                 if (p2 < 100) p2 += 2000;
-                // ในไทยมักจะเป็น วัน/เดือน/ปี
                 return new Date(p2, p1 - 1, p0); 
             }
         }
@@ -461,7 +486,6 @@
         return isNaN(fallback.getTime()) ? new Date(0) : fallback;
     }
 
-    // แปลงวันที่สำหรับใส่ในกล่อง Input (YYYY-MM-DD)
     function toLocalYYYYMMDD(d) {
         let y = d.getFullYear();
         let m = (d.getMonth() + 1).toString().padStart(2, '0');
@@ -469,15 +493,28 @@
         return `${y}-${m}-${day}`;
     }
 
-    // ตรวจสอบว่าเป็นงานใหม่ภายใน 48 ชม. แบบแม่นยำเป๊ะๆ
     function isNewJob(dateStr) {
         if (!dateStr) return false;
         let jobDate = parseDateSafely(dateStr);
         let diffHours = (new Date() - jobDate) / (1000 * 60 * 60);
-        return (diffHours >= -24 && diffHours <= 48); // เผื่อการคลาดเคลื่อนเวลาอนาคตนิดหน่อย
+        return (diffHours >= -24 && diffHours <= 48); 
     }
 
-    // 🔴 2. ระบบ Offline Storage (Cache) เก็บฉบับร่าง 6 ชั่วโมง
+    // ฟังก์ชันตรวจสอบความถูกต้องของเวลาทั้ง Start และ End (รองรับข้ามวัน)
+    function validateTimes(cHH, cMM, sHH, sMM, eHH, eMM) {
+        let c = parseInt(cHH)*60 + parseInt(cMM);
+        let s = parseInt(sHH)*60 + parseInt(sMM);
+        let e = parseInt(eHH)*60 + parseInt(eMM);
+        
+        if (s < c && c >= 18*60 && s <= 6*60) s += 24*60;
+        if (e < s && s >= 18*60 && e <= 12*60) e += 24*60; 
+        
+        if (s < c) return "เวลา 'เริ่มซ่อม' เร็วกว่าเวลา 'ที่รับแจ้ง'";
+        if (e < s) return "เวลา 'ซ่อมเสร็จ' เร็วกว่าเวลา 'เริ่มซ่อม'";
+        return null; 
+    }
+
+    // 🔴 2. ระบบ Offline Storage
     const CACHE_KEY = "cmms_draft_v1";
     
     function saveDraft() {
@@ -517,7 +554,6 @@
     document.getElementById('maintenanceForm').addEventListener('input', saveDraft);
     document.getElementById('maintenanceForm').addEventListener('change', saveDraft);
 
-    // Initial Load เมื่อเปิดเว็บ
     window.onload = async function() {
       loadDraft(); 
       try {
@@ -538,7 +574,7 @@
       return await response.json();
     }
 
-    // 🔴 3. Quick Filters (ปุ่มกรอง สัปดาห์นี้ / เดือนนี้ อย่างรวดเร็ว)
+    // 🔴 3. Quick Filters & Export CSV
     function setQuickFilter(type) {
         document.querySelectorAll('.btn-quick').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
@@ -564,7 +600,34 @@
         renderReportTable(1);
     }
 
-    // 🔴 4. ระบบ Pagination และ กรองข้อมูลหลัก
+    function exportToCSV() {
+        if(currentFilteredData.length === 0) {
+            alert("ไม่พบข้อมูลสำหรับ Export");
+            return;
+        }
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        csvContent += "Job No,Date,Shift,Line,Machine,Breakdown Detail,Cause,Action Taken,Result,Call Time,Start Time,End Time,Service By\n";
+        
+        currentFilteredData.forEach(r => {
+            let rowData = [
+                r.num, r.date, r.shift, r.line, r.machine, r.breakdown, 
+                r.cause, r.solved, r.result, r.callTime, r.startTime, r.endTime, r.tech
+            ];
+            // Format for CSV (handle commas and newlines in text)
+            let formattedRow = rowData.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`);
+            csvContent += formattedRow.join(",") + "\n";
+        });
+
+        let encodedUri = encodeURI(csvContent);
+        let link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `CMMS_Export_${toLocalYYYYMMDD(new Date())}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // 🔴 4. Pagination & Data Render
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; 
       let fe = document.getElementById('fEnd').value;
@@ -573,11 +636,9 @@
       let statusFilter = document.getElementById('fStatus').value; 
       let textFilter = document.getElementById('fText').value.toLowerCase();
 
-      // แปลงวันที่สำหรับเทียบกัน
       let fsVal = fs ? parseDateSafely(fs).setHours(0,0,0,0) : null;
       let feVal = fe ? parseDateSafely(fe).setHours(23,59,59,999) : null;
 
-      // กรองข้อมูลทั้งหมดที่มี (แก้บัค กรองวันที่แล้วไม่แสดงข้อมูล)
       currentFilteredData = allReportData.filter(r => {
         let jDateObj = parseDateSafely(r.date);
         let jDate = jDateObj.getTime();
@@ -587,15 +648,14 @@
         if (fl && r.line !== fl) return false;
         if (shift && r.shift !== shift) return false;
         if (statusFilter && r.result !== statusFilter) return false;
-        if (textFilter && !(r.tech.toLowerCase().includes(textFilter) || r.machine.toLowerCase().includes(textFilter) || r.breakdown.toLowerCase().includes(textFilter))) return false;
+        // ค้นหาครอบคลุมถึงเลข Num แล้ว
+        if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || r.tech.toLowerCase().includes(textFilter) || r.machine.toLowerCase().includes(textFilter) || r.breakdown.toLowerCase().includes(textFilter))) return false;
         
         return true;
       });
 
-      // 📊 อัปเดต Dashboard Stats จากข้อมูลที่ถูกกรอง
       updateDashboardStats(currentFilteredData, fl);
 
-      // 📄 Pagination Logic
       currentPage = pageNumber || 1;
       let totalPages = Math.ceil(currentFilteredData.length / itemsPerPage) || 1;
       let startIndex = (currentPage - 1) * itemsPerPage;
@@ -606,9 +666,7 @@
       paginated.forEach(item => {
         let statusFull = item.result === "F" ? "Finished" : (item.result === "O" ? "Ongoing" : "Unfinished");
         let statusColor = item.result === "F" ? "#38A169" : (item.result === "O" ? "#D69E2E" : "#E53E3E");
-        
-        let isNew = isNewJob(item.date); // ใช้วิธีเช็กงานใหม่แบบใหม่
-        
+        let isNew = isNewJob(item.date); 
         let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
         let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
 
@@ -628,7 +686,6 @@
 
       document.getElementById('reportContent').innerHTML = html;
       
-      // ควบคุมปุ่ม Pagination ด้านล่าง
       let pageWrapper = document.getElementById('paginationWrapper');
       if(totalPages > 1) {
           pageWrapper.style.display = "flex";
@@ -645,14 +702,13 @@
       window.scrollTo(0, document.getElementById('dashboardView').offsetTop); 
     }
 
-    // 🔴 5. ฟังก์ชันอัปเดต Dashboard (กราฟแท่ง โชว์ Top 10 & ซ่อนกราฟเมื่อเลือก Line)
     function updateDashboardStats(data, selectedLine) {
         let newCount = 0; let doneCount = 0;
         let lineCounts = {}; let techLatest = {};
 
         data.forEach(job => {
             if(job.result === 'F') doneCount++;
-            if(isNewJob(job.date)) newCount++; // นับตามระบบใหม่ (แก้บัคจำนวน 282)
+            if(isNewJob(job.date)) newCount++; 
             
             if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
             
@@ -670,17 +726,15 @@
         let p = data.length ? Math.round((doneCount/data.length)*100) : 0;
         document.getElementById('statDone').innerText = p + "%";
 
-        // 🔴 ซ่อน/แสดง กราฟ ถ้ามีการเจาะจงเลือก Line ให้พับกราฟเก็บไป
         let chartSection = document.getElementById('chartSection');
         if (selectedLine !== "" && selectedLine !== undefined) {
             chartSection.style.display = 'none';
         } else {
             chartSection.style.display = 'block';
             
-            // จัดเรียงหา Top 10 Line ที่มีปัญหาเยอะสุด
             let lineArray = Object.keys(lineCounts).map(k => ({line: k, count: lineCounts[k]}));
-            lineArray.sort((a,b) => b.count - a.count); // เรียงจากมากไปน้อย
-            lineArray = lineArray.slice(0, 10); // ตัดเอาเฉพาะ 10 อันดับแรก
+            lineArray.sort((a,b) => b.count - a.count); 
+            lineArray = lineArray.slice(0, 10); 
             
             let chartLabels = lineArray.map(i => i.line);
             let chartData = lineArray.map(i => i.count);
@@ -701,7 +755,6 @@
             });
         }
 
-        // Render Tech Feed (งานล่าสุดของทีมช่าง)
         let feedHtml = "";
         for (const [tech, info] of Object.entries(techLatest)) {
             let col = info.result==='F'?'#38A169':(info.result==='O'?'#D69E2E':'#E53E3E');
@@ -710,25 +763,20 @@
         document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
 
-    // 🔴 6. Data Validation (ป้องกันการใส่เวลาผิด) และการ Submit
+    // 🔴 5. Submit New Report
     async function submitForm(event) {
       event.preventDefault(); 
       var btn = document.getElementById('submitBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
       
-      let cHH = parseInt(document.getElementById('callHH').value); let cMM = parseInt(document.getElementById('callMM').value);
-      let sHH = parseInt(document.getElementById('startHH').value); let sMM = parseInt(document.getElementById('startMM').value);
+      let cHH = document.getElementById('callHH').value; let cMM = document.getElementById('callMM').value;
+      let sHH = document.getElementById('startHH').value; let sMM = document.getElementById('startMM').value;
+      let eHH = document.getElementById('endHH').value; let eMM = document.getElementById('endMM').value;
       
-      let callTotal = cHH * 60 + cMM;
-      let startTotal = sHH * 60 + sMM;
-
-      // ตรวจสอบ: เวลาเริ่มน้อยกว่าเวลาแจ้งหรือไม่?
-      if (startTotal < callTotal) {
-          // ข้อยกเว้น: กะดึกข้ามวัน (แจ้ง 23:00 เริ่มซ่อม 01:00)
-          if (!(cHH >= 18 && sHH <= 6)) {
-              alert("⚠️ ข้อผิดพลาด: 'เวลาเริ่มซ่อม' เร็วกว่า 'เวลาที่รับแจ้ง'\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง (ยกเว้นเป็นการปฏิบัติงานข้ามคืนในช่วงกะดึก)");
-              btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false;
-              return; 
-          }
+      let timeError = validateTimes(cHH, cMM, sHH, sMM, eHH, eMM);
+      if(timeError) {
+          alert("⚠️ ข้อผิดพลาดเวลา: " + timeError + "\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง (ยกเว้นเป็นการปฏิบัติงานข้ามคืนในช่วงกะดึก)");
+          btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false;
+          return; 
       }
 
       var techArray = []; document.querySelectorAll('.tech-cb:checked').forEach(cb => techArray.push(cb.value));
@@ -766,16 +814,163 @@
       btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled=false;
     }
 
-    // ==========================================
-    // UI Utility Functions (ฟังก์ชันสลับหน้าต่างและกล่องข้อความ)
-    // ==========================================
     function toggleMainView() { const dbView = document.getElementById('dashboardView'); const formView = document.getElementById('formView'); const fabBtn = document.getElementById('fabMainBtn'); const fabIcon = document.getElementById('fabIcon'); if(formView.style.display === 'none') { dbView.style.display = 'none'; formView.style.display = 'block'; fabBtn.classList.add('close-mode'); fabIcon.style.transform = "rotate(45deg)"; document.getElementById('appTitle').innerText = "แจ้งซ่อมใหม่"; document.getElementById('appSub').innerText = "กรอกรายละเอียดปัญหาเครื่องจักร"; } else { formView.style.display = 'none'; dbView.style.display = 'block'; fabBtn.classList.remove('close-mode'); fabIcon.style.transform = "rotate(0deg)"; document.getElementById('appTitle').innerText = "CMMS System"; document.getElementById('appSub').innerText = "ศูนย์กลางติดตามและแจกงานซ่อม"; } window.scrollTo(0,0); }
     function toggleOther(selectId, containerId) { var val = document.getElementById(selectId).value; var container = document.getElementById(containerId); var input = container.querySelector('input'); if(val === 'อื่นๆ') { container.style.display = 'block'; input.required = true; } else { container.style.display = 'none'; input.required = false; input.value = ''; } }
     function toggleOtherTech(mode) { const prefix = mode === 'edit' ? 'edit_' : ''; const cb = document.getElementById(prefix + 'cbOther'); const container = document.getElementById(prefix + 'techOtherContainer'); const input = document.getElementById(prefix + 'techOther'); if(cb.checked) { container.style.display = 'block'; input.required = true; input.focus(); } else { container.style.display = 'none'; input.required = false; input.value = ''; } }
     
-    function openJobDetails(numStr) { let job = allReportData.find(r => r.num.toString() === numStr.toString()); if(!job) return; currentJobData = job; document.getElementById('detailJobNum').innerText = "#" + job.num; let statusFull = job.result === 'F' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'O' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)'); let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; let html = ` <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;"> <div class="detail-row"><div class="detail-label">วันที่แจ้งซ่อม</div><div class="detail-value">${job.date}</div></div> <div class="detail-row"><div class="detail-label">สายการผลิต / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> </div> <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value fw-bold">${job.machine}</div></div> <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> </div> <div class="detail-row" style="margin-top:15px;"><div class="detail-label">อาการที่พบ (Breakdown)</div><div class="detail-value">${job.breakdown}</div></div> <div class="detail-row"><div class="detail-label">สาเหตุ (Root Cause)</div><div class="detail-value">${job.cause || '-'}</div></div> <div class="detail-row"><div class="detail-label">วิธีแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div> <div class="detail-row"><div class="detail-label">ทีมช่าง / ผู้ปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed var(--border);"> <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม</div> <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">${getImgHtml(job.imgBefore)}</div> <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">imagesmode</span> ภาพหลังซ่อม</div> <div style="display:flex; gap:12px; flex-wrap:wrap;">${getImgHtml(job.imgAfter)}</div> </div> `; document.getElementById('jobDetailsContent').innerHTML = html; document.getElementById('jobDetailsPage').style.display = 'block'; }
-    function openEditMode() { if(!currentJobData) return; document.getElementById('editJobNumLabel').innerText = "#" + currentJobData.num; document.getElementById('editJobNum').value = currentJobData.num; document.getElementById('edit_breakdown').value = currentJobData.breakdown; document.getElementById('edit_cause').value = currentJobData.cause; document.getElementById('edit_solved').value = currentJobData.solved; document.getElementById('edit_result').value = currentJobData.result; clearFiles('edit_before'); clearFiles('edit_after'); let techString = currentJobData.tech || ""; let checkboxes = document.querySelectorAll('.edit-tech-cb'); let otherNames = []; checkboxes.forEach(cb => cb.checked = false); document.getElementById('edit_cbOther').checked = false; toggleOtherTech('edit'); let techArray = techString.split(',').map(t => t.trim()); techArray.forEach(tech => { let found = false; checkboxes.forEach(cb => { if(cb.value === tech) { cb.checked = true; found = true; }}); if(!found && tech !== "") otherNames.push(tech); }); if(otherNames.length > 0) { document.getElementById('edit_cbOther').checked = true; toggleOtherTech('edit'); document.getElementById('edit_techOther').value = otherNames.join(', '); } document.getElementById('editJobPage').style.display = 'block'; }
-    async function submitEditForm(event) { event.preventDefault(); var btn = document.getElementById('updateBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true; var techArray = []; document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value)); if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value); try { var baseEditBefore=[], baseEditAfter=[]; for(let f of editFilesBefore) baseEditBefore.push(await compressImageAsync(f)); for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); var updateData = { num: document.getElementById('editJobNum').value, breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter }; const res = await callAPI("updateReport", updateData); if(res.status === "success") { alert(res.message); clearFiles('edit_before'); clearFiles('edit_after'); document.getElementById('editJobPage').style.display = 'none'; document.getElementById('jobDetailsPage').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; const newRes = await callAPI("getDashboard", {}); if(newRes.status === "success") { allReportData = newRes.data; renderReportTable(currentPage); } document.getElementById('loadingScreen').style.display = 'none'; } else { alert("เกิดข้อผิดพลาด: " + res.message); } } catch(err) { alert("Error: " + err.message); } btn.innerHTML = '<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false; }
+    function openJobDetails(numStr) { 
+        let job = allReportData.find(r => r.num.toString() === numStr.toString()); 
+        if(!job) return; 
+        currentJobData = job; 
+        document.getElementById('detailJobNum').innerText = "#" + job.num; 
+        let statusFull = job.result === 'F' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'O' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)'); 
+        let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; 
+        let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
+        
+        // 🔴 คำนวณ Downtime
+        let downTimeStr = "-";
+        if(job.callTime && job.endTime) {
+            let ct = job.callTime.toString().split(':');
+            let et = job.endTime.toString().split(':');
+            if(ct.length===2 && et.length===2) {
+                let cM = parseInt(ct[0])*60 + parseInt(ct[1]);
+                let eM = parseInt(et[0])*60 + parseInt(et[1]);
+                if(eM < cM) eM += 24*60; // ข้ามวัน
+                let diff = eM - cM;
+                downTimeStr = `${Math.floor(diff/60)} ชั่วโมง ${diff%60} นาที`;
+            }
+        }
+
+        let html = ` 
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;"> 
+            <div class="detail-row"><div class="detail-label">วันที่แจ้งซ่อม</div><div class="detail-value">${job.date}</div></div> 
+            <div class="detail-row"><div class="detail-label">สายการผลิต / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> 
+        </div> 
+        <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value fw-bold">${job.machine}</div></div> 
+        <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> 
+            <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
+        </div> 
+        
+        <div class="detail-row" style="background:#FFF5F5; padding:12px; border-radius:10px; border:1px solid #FC8181; margin-top:15px;"> 
+            <div class="detail-label" style="color:#E53E3E;">ระยะเวลาหยุดเครื่อง (Total Downtime)</div>
+            <div class="detail-value fw-bold" style="color:#C53030;">${downTimeStr}</div> 
+        </div>
+
+        <div class="detail-row" style="margin-top:15px;"><div class="detail-label">อาการที่พบ (Breakdown)</div><div class="detail-value">${job.breakdown}</div></div> 
+        <div class="detail-row"><div class="detail-label">สาเหตุ (Root Cause)</div><div class="detail-value">${job.cause || '-'}</div></div> 
+        <div class="detail-row"><div class="detail-label">วิธีแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div> 
+        <div class="detail-row"><div class="detail-label">ทีมช่าง / ผู้ปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> 
+        <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed var(--border);"> 
+            <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม</div> 
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">${getImgHtml(job.imgBefore)}</div> 
+            <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">imagesmode</span> ภาพหลังซ่อม</div> 
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">${getImgHtml(job.imgAfter)}</div> 
+        </div> `; 
+        document.getElementById('jobDetailsContent').innerHTML = html; 
+        document.getElementById('jobDetailsPage').style.display = 'block'; 
+    }
+
+    function openEditMode() { 
+        if(!currentJobData) return; 
+        document.getElementById('editJobNumLabel').innerText = "#" + currentJobData.num; 
+        document.getElementById('editJobNum').value = currentJobData.num; 
+        
+        // Populate new editable fields
+        let dObj = parseDateSafely(currentJobData.date);
+        document.getElementById('edit_date').value = toLocalYYYYMMDD(dObj);
+        document.getElementById('edit_shift').value = currentJobData.shift;
+        document.getElementById('edit_machine').value = currentJobData.machine;
+        
+        let ct = currentJobData.callTime ? currentJobData.callTime.toString().split(':') : ['',''];
+        let st = currentJobData.startTime ? currentJobData.startTime.toString().split(':') : ['',''];
+        let et = currentJobData.endTime ? currentJobData.endTime.toString().split(':') : ['',''];
+        
+        document.getElementById('edit_callHH').value = ct[0]||''; document.getElementById('edit_callMM').value = ct[1]||'';
+        document.getElementById('edit_startHH').value = st[0]||''; document.getElementById('edit_startMM').value = st[1]||'';
+        document.getElementById('edit_endHH').value = et[0]||''; document.getElementById('edit_endMM').value = et[1]||'';
+
+        document.getElementById('edit_breakdown').value = currentJobData.breakdown; 
+        document.getElementById('edit_cause').value = currentJobData.cause; 
+        document.getElementById('edit_solved').value = currentJobData.solved; 
+        document.getElementById('edit_result').value = currentJobData.result; 
+        
+        clearFiles('edit_before'); clearFiles('edit_after'); 
+        
+        let techString = currentJobData.tech || ""; 
+        let checkboxes = document.querySelectorAll('.edit-tech-cb'); 
+        let otherNames = []; 
+        checkboxes.forEach(cb => cb.checked = false); 
+        document.getElementById('edit_cbOther').checked = false; 
+        toggleOtherTech('edit'); 
+        
+        let techArray = techString.split(',').map(t => t.trim()); 
+        techArray.forEach(tech => { 
+            let found = false; 
+            checkboxes.forEach(cb => { if(cb.value === tech) { cb.checked = true; found = true; }}); 
+            if(!found && tech !== "") otherNames.push(tech); 
+        }); 
+        if(otherNames.length > 0) { 
+            document.getElementById('edit_cbOther').checked = true; 
+            toggleOtherTech('edit'); 
+            document.getElementById('edit_techOther').value = otherNames.join(', '); 
+        } 
+        document.getElementById('editJobPage').style.display = 'block'; 
+    }
+
+    async function submitEditForm(event) { 
+        event.preventDefault(); 
+        var btn = document.getElementById('updateBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true; 
+        
+        let cHH = document.getElementById('edit_callHH').value; let cMM = document.getElementById('edit_callMM').value;
+        let sHH = document.getElementById('edit_startHH').value; let sMM = document.getElementById('edit_startMM').value;
+        let eHH = document.getElementById('edit_endHH').value; let eMM = document.getElementById('edit_endMM').value;
+        
+        let timeError = validateTimes(cHH, cMM, sHH, sMM, eHH, eMM);
+        if(timeError) {
+            alert("⚠️ ข้อผิดพลาดเวลา: " + timeError + "\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง");
+            btn.innerHTML='<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false;
+            return; 
+        }
+
+        var techArray = []; document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value)); 
+        if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value); 
+        
+        try { 
+            var baseEditBefore=[], baseEditAfter=[]; 
+            for(let f of editFilesBefore) baseEditBefore.push(await compressImageAsync(f)); 
+            for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); 
+            
+            var updateData = { 
+                num: document.getElementById('editJobNum').value,
+                date: document.getElementById('edit_date').value,
+                shift: document.getElementById('edit_shift').value,
+                machine: document.getElementById('edit_machine').value,
+                callTime: document.getElementById('edit_callHH').value.padStart(2,'0')+':'+document.getElementById('edit_callMM').value.padStart(2,'0'),
+                startTime: document.getElementById('edit_startHH').value.padStart(2,'0')+':'+document.getElementById('edit_startMM').value.padStart(2,'0'),
+                endTime: document.getElementById('edit_endHH').value.padStart(2,'0')+':'+document.getElementById('edit_endMM').value.padStart(2,'0'),
+                breakdown: document.getElementById('edit_breakdown').value, 
+                cause: document.getElementById('edit_cause').value, 
+                solved: document.getElementById('edit_solved').value, 
+                result: document.getElementById('edit_result').value, 
+                tech: techArray.join(', '), 
+                imgsBefore: baseEditBefore, 
+                imgsAfter: baseEditAfter 
+            }; 
+            
+            const res = await callAPI("updateReport", updateData); 
+            if(res.status === "success") { 
+                alert(res.message); 
+                clearFiles('edit_before'); clearFiles('edit_after'); 
+                document.getElementById('editJobPage').style.display = 'none'; 
+                document.getElementById('jobDetailsPage').style.display = 'none'; 
+                document.getElementById('loadingScreen').style.display = 'flex'; 
+                const newRes = await callAPI("getDashboard", {}); 
+                if(newRes.status === "success") { allReportData = newRes.data; renderReportTable(currentPage); } 
+                document.getElementById('loadingScreen').style.display = 'none'; 
+            } else { alert("เกิดข้อผิดพลาด: " + res.message); } 
+        } catch(err) { alert("Error: " + err.message); } 
+        btn.innerHTML = '<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false; 
+    }
     
     function formatTime(input, maxVal) { let val = input.value.replace(/[^0-9]/g, ''); if(val!==""){let num=parseInt(val,10);if(num>maxVal)val=maxVal.toString();} input.value=val; if(val.length===2){let nxt=input.nextElementSibling;if(nxt&&nxt.tagName==='SPAN')nxt=nxt.nextElementSibling;if(nxt&&nxt.tagName==='INPUT')nxt.focus();} }
     function getTimeString(p) { return document.getElementById(p+'HH').value.padStart(2,'0')+':'+document.getElementById(p+'MM').value.padStart(2,'0'); }
