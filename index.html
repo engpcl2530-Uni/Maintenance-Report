@@ -194,11 +194,7 @@
 
   <div id="toast">บันทึกข้อมูลฉบับร่างอัตโนมัติแล้ว</div>
 
-  <!-- ==============================================
-       หน้าจอที่ 1: Dashboard Analytics & Data Table
-       ============================================== -->
   <div id="dashboardView" class="container" style="display: none;">
-    
     <div class="dashboard-stats">
       <div class="stat-card">
         <h3>งานใหม่ (48 ชม.)</h3>
@@ -210,7 +206,6 @@
       </div>
     </div>
 
-    <!-- 📈 Chart Section -->
     <div class="chart-card" id="chartSection">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
         <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line (Top 10)
@@ -220,11 +215,9 @@
       </div>
     </div>
 
-    <!-- 🧑‍🔧 Tech Latest Job Feed -->
     <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; padding-left: 5px;">งานล่าสุดของทีมช่าง</h3>
     <div class="tech-feed-container" id="techFeed"></div>
 
-    <!-- 🔍 Filters Section -->
     <div class="filter-section" style="margin-top: 25px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
@@ -272,10 +265,8 @@
       </div>
     </div>
 
-    <!-- ส่วนที่ใช้แสดงรายการงาน (Card) -->
     <div id="reportContent"></div>
     
-    <!-- 📄 Pagination -->
     <div class="pagination-container" id="paginationWrapper" style="display:none;">
         <button class="btn-page" id="btnPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
         <span style="font-size:14px; font-weight:600; color:var(--text-muted);" id="pageIndicator">หน้า 1 / 1</span>
@@ -283,9 +274,6 @@
     </div>
   </div>
 
-  <!-- ==============================================
-       หน้าจอที่ 2: ฟอร์มสร้างใบแจ้งซ่อมใหม่ 
-       ============================================== -->
   <div id="formView" class="container" style="display: none; margin-top: 25px;">
     <form id="maintenanceForm" onsubmit="submitForm(event)">
       <div class="card">
@@ -313,7 +301,6 @@
 
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">schedule</span> ระยะเวลาดำเนินการ</div>
-        <!-- ลบช่องกรอก Repair Time ทิ้ง เพื่อให้ระบบคำนวณอัตโนมัติ -->
         <div class="form-row">
           <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="callHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="callMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
           <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="startHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="startMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
@@ -418,9 +405,6 @@
     <span class="material-symbols-rounded" id="fabIcon" style="font-size: 30px;">add</span>
   </button>
 
-  <!-- ==============================================
-       หน้าจอที่ 3 & 4: รายละเอียดงาน และ แก้ไข (Modal)
-       ============================================== -->
   <div class="page-overlay" id="jobDetailsPage">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">assignment</span> รายละเอียดงาน <span id="detailJobNum" style="color:var(--secondary);"></span></h2>
@@ -491,7 +475,6 @@
           </div>
         </div>
         
-        <!-- 🔴 ใส่กล่องผู้รับมอบงาน กับ หมายเหตุ คืนมาในโหมด Edit ให้ครบถ้วนแล้วครับ -->
         <div class="card">
           <div class="card-title">แก้ไขผู้รับผิดชอบ / แจกงาน</div>
           <div class="checkbox-grid">
@@ -647,7 +630,7 @@
     };
 
     async function callAPI(actionType, dataPayload) {
-      if(!GAS_API_URL || GAS_API_URL.includes("ใส่_URL_ของ")) throw new Error("กรุณาใส่ URL ของ Google Apps Script ก่อนครับ");
+      if(!GAS_API_URL || GAS_API_URL.includes("ใส่_URL_ใหม่_ของ")) throw new Error("กรุณาใส่ URL ของ Google Apps Script ก่อนครับ");
       const payload = { action: actionType, data: dataPayload };
       const response = await fetch(GAS_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
       return await response.json();
@@ -674,7 +657,6 @@
         renderReportTable(1);
     }
 
-    // 🔴 ฟังก์ชัน Export CSV แยกช่องหมายเหตุและผู้รับมอบงานชัดเจน (23 คอลัมน์)
     function exportToCSV() {
         if(!currentFilteredData || currentFilteredData.length === 0) { 
             alert("ไม่พบข้อมูลสำหรับ Export"); 
@@ -682,8 +664,6 @@
         }
         
         let csvContent = "\uFEFF";
-        
-        // 🔴 ล็อกหัวตารางให้ตรงกับ Google Sheets เป๊ะๆ 23 ช่อง
         let headers = [
             "Num", "วันที่", "แผนก", "Line", "Machine", 
             "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
@@ -806,11 +786,20 @@
             if(mappedStatus === 'Finished') doneCount++;
             if(isNewJob(job.date)) newCount++; 
             if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
+            
             if(job.tech) {
                 let techs = job.tech.split(',').map(t => t.trim());
                 techs.forEach(t => {
-                    if(!techLatest[t] || job.num > techLatest[t].num) {
-                        techLatest[t] = { num: job.num, machine: job.machine, line: job.line, result: mappedStatus };
+                    // 🔴 ใช้ Last Update Timestamp ในการเทียบหา "งานที่เพิ่งถูกแก้ล่าสุดจริงๆ"
+                    let jobTime = job.lastUpdateMs || 0;
+                    if(!techLatest[t] || jobTime > techLatest[t].lastUpdateMs) {
+                        techLatest[t] = { 
+                            num: job.num, 
+                            machine: job.machine, 
+                            line: job.line, 
+                            result: mappedStatus,
+                            lastUpdateMs: jobTime // เก็บเวลาไว้เทียบตัวถัดไป
+                        };
                     }
                 });
             }
@@ -838,11 +827,15 @@
             });
         }
 
+        // 🔴 เรียงลำดับการ์ดช่าง: เอาคนที่ "อัปเดตงานล่าสุด" มาโชว์ด้านซ้ายสุดเสมอ
+        let techArr = Object.entries(techLatest).map(([tech, info]) => ({tech, ...info}));
+        techArr.sort((a, b) => b.lastUpdateMs - a.lastUpdateMs);
+
         let feedHtml = "";
-        for (const [tech, info] of Object.entries(techLatest)) {
+        techArr.forEach(info => {
             let col = info.result==='Finished'?'#38A169':(info.result==='Ongoing'?'#D69E2E':'#E53E3E');
-            feedHtml += `<div class="tech-chip" onclick="openJobDetails('${info.num}')" style="cursor:pointer; border-left: 4px solid ${col};"><div class="tech-chip-name"><span class="material-symbols-rounded" style="font-size:16px;">build</span> ${tech}</div><div class="tech-chip-job">#${info.num} ${info.machine}</div></div>`;
-        }
+            feedHtml += `<div class="tech-chip" onclick="openJobDetails('${info.num}')" style="cursor:pointer; border-left: 4px solid ${col};"><div class="tech-chip-name"><span class="material-symbols-rounded" style="font-size:16px;">build</span> ${info.tech}</div><div class="tech-chip-job">#${info.num} ${info.machine}</div></div>`;
+        });
         document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
 
@@ -987,7 +980,6 @@
            </div>
         </div>
 
-        <!-- 🔴 โชว์ผู้รับมอบงาน และหมายเหตุที่แยกออกมาแล้ว -->
         <div class="detail-row"><div class="detail-label">ผู้รับมอบงาน</div><div class="detail-value">${job.handover || '-'}</div></div> 
         <div class="detail-row"><div class="detail-label">หมายเหตุ</div><div class="detail-value">${job.remark || '-'}</div></div> 
 
@@ -1035,7 +1027,6 @@
         document.getElementById('edit_pmInterval').value = currentJobData.pmInterval || "";
         document.getElementById('edit_pmDetail').value = currentJobData.pmDetail || "";
 
-        // 🔴 ดึงผู้รับมอบงาน และ หมายเหตุ ไปใส่ในช่อง Edit
         document.getElementById('edit_handover').value = currentJobData.handover || "";
         document.getElementById('edit_dept').value = currentJobData.dept || "CO";
         document.getElementById('edit_remark').value = currentJobData.remark || "";
@@ -1092,7 +1083,6 @@
                 breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
                 pmUpdate: document.getElementById('edit_pmUpdate').value, pmCompleted: document.getElementById('edit_pmCompleted').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
                 tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter,
-                // 🔴 ส่งข้อมูลผู้รับมอบงาน และหมายเหตุ ไปอัปเดตด้วย
                 handover: document.getElementById('edit_handover').value,
                 dept: document.getElementById('edit_dept').value,
                 remark: document.getElementById('edit_remark').value
