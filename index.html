@@ -112,7 +112,6 @@
     .status-Finished { border-left-color: #38A169 !important; } 
     .status-Ongoing { border-left-color: #D69E2E !important; } 
     .status-Unfinished { border-left-color: #E53E3E !important; } 
-    /* เผื่อมีข้อมูลเก่าหลงเหลือ */
     .status-F { border-left-color: #38A169 !important; } 
     .status-O { border-left-color: #D69E2E !important; } 
     .status-U { border-left-color: #E53E3E !important; } 
@@ -142,6 +141,15 @@
     .detail-row { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; }
     .detail-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
     .detail-value { font-size: 15px; color: var(--primary); font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
+    
+    /* Metrics Box */
+    .metrics-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+    .metric-box { flex: 1; min-width: 100px; background: #FFF; border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; box-shadow: var(--shadow-sm); }
+    .metric-box.downtime { border-bottom: 4px solid #E53E3E; }
+    .metric-box.repair { border-bottom: 4px solid #38A169; }
+    .metric-box.response { border-bottom: 4px solid #D69E2E; }
+    .metric-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .metric-val { font-size: 18px; font-weight: 700; color: var(--text-main); }
     
     /* Buttons */
     .btn-primary { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; transition: 0.2s; box-shadow: 0 4px 15px rgba(0, 31, 91, 0.25);}
@@ -202,7 +210,6 @@
       </div>
     </div>
 
-    <!-- 📈 Chart Section -->
     <div class="chart-card" id="chartSection">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
         <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line (Top 10)
@@ -212,11 +219,9 @@
       </div>
     </div>
 
-    <!-- 🧑‍🔧 Tech Latest Job Feed -->
     <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; padding-left: 5px;">งานล่าสุดของทีมช่าง</h3>
     <div class="tech-feed-container" id="techFeed"></div>
 
-    <!-- 🔍 Filters Section -->
     <div class="filter-section" style="margin-top: 25px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
@@ -264,10 +269,8 @@
       </div>
     </div>
 
-    <!-- ส่วนที่ใช้แสดงรายการงาน (Card) -->
     <div id="reportContent"></div>
     
-    <!-- 📄 Pagination -->
     <div class="pagination-container" id="paginationWrapper" style="display:none;">
         <button class="btn-page" id="btnPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
         <span style="font-size:14px; font-weight:600; color:var(--text-muted);" id="pageIndicator">หน้า 1 / 1</span>
@@ -276,7 +279,7 @@
   </div>
 
   <!-- ==============================================
-       หน้าจอที่ 2: ฟอร์มสร้างใบแจ้งซ่อมใหม่ (อัปเดตช่องใหม่แล้ว)
+       หน้าจอที่ 2: ฟอร์มสร้างใบแจ้งซ่อมใหม่ 
        ============================================== -->
   <div id="formView" class="container" style="display: none; margin-top: 25px;">
     <form id="maintenanceForm" onsubmit="submitForm(event)">
@@ -285,7 +288,6 @@
         
         <div class="form-row">
           <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="date" required></div>
-          <div class="form-group"><label>เวลาซ่อม (Repair Time)</label><input type="text" id="repairTime" placeholder="ระบุเวลาซ่อม..." required></div>
           <div class="form-group"><label>กะ (Shift)</label><select id="shift" required><option value="" disabled selected>-- เลือกกะ --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
         </div>
 
@@ -306,6 +308,7 @@
 
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">schedule</span> ระยะเวลาดำเนินการ</div>
+        <!-- 🔴 ลบช่องกรอก Repair Time ทิ้ง เพื่อให้ระบบคำนวณอัตโนมัติ -->
         <div class="form-row">
           <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="callHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="callMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
           <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="startHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="startMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
@@ -313,14 +316,12 @@
         </div>
       </div>
 
-      <!-- 🔴 รายละเอียดทางเทคนิค และ 4 คำถามแผน PM -->
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">build_circle</span> รายละเอียดทางเทคนิค</div>
         <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="breakdown" rows="2" required></textarea></div>
         <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="cause" rows="2" required></textarea></div>
         <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="solved" rows="2" required></textarea></div>
         
-        <!-- 🔴 เปลี่ยน Status F, O, U เป็นคำเต็ม -->
         <div class="form-group">
             <label>สถานะ (Result)</label>
             <select id="result" required>
@@ -343,7 +344,6 @@
                     <option value="No">ไม่ต้องแก้ไข (No)</option>
                 </select>
             </div>
-            <!-- 🔴 เพิ่มคำถามที่ 4 -->
             <div class="form-group">
                 <label>แก้ไข PM เสร็จแล้วรึยัง?</label>
                 <select id="pmCompleted" required>
@@ -427,7 +427,6 @@
     </div>
   </div>
 
-  <!-- 🔴 อัปเดตช่องข้อมูลในหน้าต่างแก้ไขงาน -->
   <div class="page-overlay" id="editJobPage" style="z-index: 250;">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">update</span> อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
@@ -441,7 +440,6 @@
           <div class="card-title">ข้อมูลทั่วไป (แก้ไขได้)</div>
           <div class="form-row">
             <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="edit_date" required></div>
-            <div class="form-group"><label>เวลาซ่อม (Repair Time)</label><input type="text" id="edit_repairTime" required></div>
             <div class="form-group"><label>กะ (Shift)</label><select id="edit_shift" required><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
           </div>
           <div class="form-group"><label>รหัสเครื่องจักร (Machine)</label><input type="text" id="edit_machine" required></div>
@@ -568,12 +566,29 @@
         return null; 
     }
 
+    // 🔴 ฟังก์ชันคำนวณระยะเวลา (หน่วย: นาที)
+    function getDiffMinutes(startHH, startMM, endHH, endMM) {
+        let s = parseInt(startHH)*60 + parseInt(startMM);
+        let e = parseInt(endHH)*60 + parseInt(endMM);
+        if (e < s) e += 24*60; // รองรับการซ่อมข้ามวัน
+        return e - s;
+    }
+
+    // 🔴 แปลงนาทีเป็นข้อความ ชั่วโมง/นาที
+    function formatDuration(totalMins) {
+        if (isNaN(totalMins) || totalMins < 0) return "-";
+        let h = Math.floor(totalMins / 60);
+        let m = totalMins % 60;
+        if (h > 0) return `${h} ชั่วโมง ${m} นาที`;
+        return `${m} นาที`;
+    }
+
     const CACHE_KEY = "cmms_draft_v1";
     
     function saveDraft() {
         let draft = {
             timestamp: new Date().getTime(),
-            date: document.getElementById('date').value, repairTime: document.getElementById('repairTime').value, shift: document.getElementById('shift').value,
+            date: document.getElementById('date').value, shift: document.getElementById('shift').value,
             line: document.getElementById('line').value, lineOther: document.getElementById('lineOther') ? document.getElementById('lineOther').value : '',
             machine: document.getElementById('machine').value,
             callHH: document.getElementById('callHH').value, callMM: document.getElementById('callMM').value,
@@ -594,7 +609,7 @@
         if(saved) {
             let data = JSON.parse(saved);
             if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { 
-                ['date','repairTime','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','pmUpdate','pmCompleted','pmInterval','pmDetail','handover','dept','remark'].forEach(id => {
+                ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','pmUpdate','pmCompleted','pmInterval','pmDetail','handover','dept','remark'].forEach(id => {
                     if(data[id] && document.getElementById(id)) document.getElementById(id).value = data[id];
                 });
                 if(data.line === 'อื่นๆ') toggleOther('line', 'lineOtherContainer');
@@ -655,7 +670,6 @@
         csvContent += "Job No,Date,Shift,Repair Time,Line,Machine,Breakdown Detail,Cause,Action Taken,Update PM?,PM Completed?,PM Detail,PM Interval(M),Result,Call Time,Start Time,End Time,Service By\n";
         
         currentFilteredData.forEach(r => {
-            // 🔴 แปลงค่าเก่า F O U เป็นคำเต็มให้เนียนๆ ก่อน Export
             let mappedResult = r.result === 'F' ? 'Finished' : (r.result === 'O' ? 'Ongoing' : (r.result === 'U' ? 'Unfinished' : r.result));
             let rowData = [
                 r.num, r.date, r.shift, r.repairTime, r.line, r.machine, r.breakdown, 
@@ -687,7 +701,6 @@
         if (fl && r.line !== fl) return false;
         if (shift && r.shift !== shift) return false;
         
-        // 🔴 แปลงข้อมูลเก่า (F, O, U) ให้เป็นคำเต็มก่อนนำไปกรอง
         let mappedStatus = r.result === 'F' ? 'Finished' : (r.result === 'O' ? 'Ongoing' : (r.result === 'U' ? 'Unfinished' : r.result));
         if (statusFilter && mappedStatus !== statusFilter) return false;
         
@@ -705,7 +718,6 @@
       let html = `<p style="font-size:14px; color:var(--text-muted); margin-bottom:15px; font-weight: 500;">พบทั้งหมด <b>${currentFilteredData.length}</b> รายการ (แสดงหน้า ${currentPage}/${totalPages})</p>`;
       
       paginated.forEach(item => {
-        // 🔴 แปลงข้อมูลเก่าให้แสดงผลถูกต้อง
         let statusFull = item.result === "F" || item.result === "Finished" ? "Finished" : (item.result === "O" || item.result === "Ongoing" ? "Ongoing" : "Unfinished");
         let statusColor = statusFull === "Finished" ? "#38A169" : (statusFull === "Ongoing" ? "#D69E2E" : "#E53E3E");
         let isNew = isNewJob(item.date); 
@@ -803,6 +815,10 @@
           return; 
       }
 
+      // 🔴 คำนวณ Repair Time อัตโนมัติ
+      let repairMins = getDiffMinutes(sHH, sMM, eHH, eMM);
+      let calculatedRepairTime = formatDuration(repairMins);
+
       var techArray = []; document.querySelectorAll('.tech-cb:checked').forEach(cb => techArray.push(cb.value));
       if(document.getElementById('cbOther').checked) techArray.push(document.getElementById('techOther').value);
 
@@ -813,7 +829,7 @@
 
         var formData = {
           date: document.getElementById('date').value, dept: document.getElementById('dept').value, line: document.getElementById('line').value, lineOther: document.getElementById('lineOther')?document.getElementById('lineOther').value:'', machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value, solved: document.getElementById('solved').value, result: document.getElementById('result').value, callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'), shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, imgsBefore: baseBefore, imgsAfter: baseAfter,
-          repairTime: document.getElementById('repairTime').value, pmUpdate: document.getElementById('pmUpdate').value, pmCompleted: document.getElementById('pmCompleted').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value
+          repairTime: calculatedRepairTime, pmUpdate: document.getElementById('pmUpdate').value, pmCompleted: document.getElementById('pmCompleted').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value
         };
 
         const res = await callAPI("saveReport", formData);
@@ -850,13 +866,28 @@
         let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; 
         let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
         
+        // 🔴 คำนวณเวลา 3 แกนหลัก
         let downTimeStr = "-";
-        if(job.callTime && job.endTime) {
-            let ct = job.callTime.toString().split(':'); let et = job.endTime.toString().split(':');
-            if(ct.length===2 && et.length===2) {
-                let cM = parseInt(ct[0])*60 + parseInt(ct[1]); let eM = parseInt(et[0])*60 + parseInt(et[1]);
-                if(eM < cM) eM += 24*60; 
-                let diff = eM - cM; downTimeStr = `${Math.floor(diff/60)} ชั่วโมง ${diff%60} นาที`;
+        let repairTimeStr = "-";
+        let responseTimeStr = "-";
+
+        if(job.callTime && job.startTime && job.endTime) {
+            let ct = job.callTime.toString().split(':'); 
+            let st = job.startTime.toString().split(':'); 
+            let et = job.endTime.toString().split(':');
+            
+            if(ct.length===2 && st.length===2 && et.length===2) {
+                // Downtime
+                let dtMins = getDiffMinutes(ct[0], ct[1], et[0], et[1]);
+                downTimeStr = formatDuration(dtMins);
+                
+                // Repair Time
+                let rtMins = getDiffMinutes(st[0], st[1], et[0], et[1]);
+                repairTimeStr = formatDuration(rtMins);
+
+                // Response Time
+                let respMins = getDiffMinutes(ct[0], ct[1], st[0], st[1]);
+                responseTimeStr = formatDuration(respMins);
             }
         }
 
@@ -866,22 +897,31 @@
             <div class="detail-row"><div class="detail-label">สายการผลิต / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> 
         </div> 
         <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value fw-bold">${job.machine}</div></div> 
-        <div class="detail-row"><div class="detail-label">เวลาใช้ซ่อม (Repair Time)</div><div class="detail-value fw-bold text-primary">${job.repairTime || '-'}</div></div> 
         
         <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> 
             <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
         </div> 
         
-        <div class="detail-row" style="background:#FFF5F5; padding:12px; border-radius:10px; border:1px solid #FC8181; margin-top:15px;"> 
-            <div class="detail-label" style="color:#E53E3E;">ระยะเวลาหยุดเครื่อง (Total Downtime)</div>
-            <div class="detail-value fw-bold" style="color:#C53030;">${downTimeStr}</div> 
+        <!-- 🔴 โชว์ Metric 3 ตัว -->
+        <div class="metrics-container">
+            <div class="metric-box downtime">
+                <div class="metric-label">Downtime (เวลาหยุดผลิต)</div>
+                <div class="metric-val">${downTimeStr}</div>
+            </div>
+            <div class="metric-box repair">
+                <div class="metric-label">Repair Time (เวลาใช้ซ่อม)</div>
+                <div class="metric-val">${repairTimeStr}</div>
+            </div>
+            <div class="metric-box response">
+                <div class="metric-label">Response (เวลาเข้าตอบสนอง)</div>
+                <div class="metric-val">${responseTimeStr}</div>
+            </div>
         </div>
 
         <div class="detail-row" style="margin-top:15px;"><div class="detail-label">อาการที่พบ (Breakdown)</div><div class="detail-value">${job.breakdown}</div></div> 
         <div class="detail-row"><div class="detail-label">สาเหตุ (Root Cause)</div><div class="detail-value">${job.cause || '-'}</div></div> 
         <div class="detail-row"><div class="detail-label">วิธีแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div> 
         
-        <!-- ข้อมูล PM ที่กรอกใหม่ -->
         <div class="detail-row" style="margin-top:15px; background:#F0F7FF; padding:12px; border-radius:10px; border:1px solid var(--secondary);">
            <div class="detail-label" style="color:var(--secondary); font-weight:bold;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">assignment_turned_in</span> ข้อมูลเสนอแผน PM</div>
            <div style="font-size:14px; margin-top:8px; line-height:1.6;">
@@ -912,7 +952,6 @@
         document.getElementById('edit_date').value = toLocalYYYYMMDD(dObj);
         document.getElementById('edit_shift').value = currentJobData.shift;
         document.getElementById('edit_machine').value = currentJobData.machine;
-        document.getElementById('edit_repairTime').value = currentJobData.repairTime || "";
         
         let ct = currentJobData.callTime ? currentJobData.callTime.toString().split(':') : ['',''];
         let st = currentJobData.startTime ? currentJobData.startTime.toString().split(':') : ['',''];
@@ -926,7 +965,6 @@
         document.getElementById('edit_cause').value = currentJobData.cause; 
         document.getElementById('edit_solved').value = currentJobData.solved; 
         
-        // 🔴 แปลงรหัสย่อกลับเป็นคำเต็มตอนเปิดโหมด Edit
         let currentRes = currentJobData.result;
         if(currentRes === 'F') currentRes = 'Finished';
         if(currentRes === 'O') currentRes = 'Ongoing';
@@ -967,6 +1005,10 @@
             return; 
         }
 
+        // 🔴 คำนวณ Repair Time อัตโนมัติ
+        let repairMins = getDiffMinutes(sHH, sMM, eHH, eMM);
+        let calculatedRepairTime = formatDuration(repairMins);
+
         var techArray = []; document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value)); 
         if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value); 
         
@@ -983,7 +1025,7 @@
                 callTime: document.getElementById('edit_callHH').value.padStart(2,'0')+':'+document.getElementById('edit_callMM').value.padStart(2,'0'),
                 startTime: document.getElementById('edit_startHH').value.padStart(2,'0')+':'+document.getElementById('edit_startMM').value.padStart(2,'0'),
                 endTime: document.getElementById('edit_endHH').value.padStart(2,'0')+':'+document.getElementById('edit_endMM').value.padStart(2,'0'),
-                repairTime: document.getElementById('edit_repairTime').value,
+                repairTime: calculatedRepairTime,
                 breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
                 pmUpdate: document.getElementById('edit_pmUpdate').value, pmCompleted: document.getElementById('edit_pmCompleted').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
                 tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter 
