@@ -165,7 +165,7 @@
 </head>
 <body>
 
-  <!-- 🔴 ตั้งค่า URL ของ API Google Apps Script อันใหม่ที่ได้จากการกด New Deployment ตรงนี้ -->
+  <!-- 🔴 ใส่ URL หลังบ้าน (GAS) ของคุณตรงนี้ -->
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbygLJABXRzeot0Fu5FxdGN_4GwFJnnPMb2ifm4pvrcsTl6TpdvilGeHqOrNpjJo-MyN9w/exec";
   </script>
@@ -667,9 +667,12 @@
         renderReportTable(1);
     }
 
+    // 🔴 ฟังก์ชัน Export CSV แบบใหม่ ใช้ Blob โหลดข้อมูลได้ไม่จำกัดบรรทัด
     function exportToCSV() {
         if(currentFilteredData.length === 0) { alert("ไม่พบข้อมูลสำหรับ Export"); return; }
-        let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+        
+        // ใส่ \uFEFF ให้ Excel อ่านภาษาไทยได้
+        let csvContent = "\uFEFF";
         csvContent += "Job No,Date,Shift,Repair Time,Line,Machine,Breakdown Detail,Cause,Action Taken,Update PM?,PM Completed?,PM Detail,PM Interval(M),Result,Call Time,Start Time,End Time,Service By\n";
         
         currentFilteredData.forEach(r => {
@@ -678,15 +681,21 @@
                 r.num, r.date, r.shift, r.repairTime, r.line, r.machine, r.breakdown, 
                 r.cause, r.solved, r.pmUpdate, r.pmCompleted, r.pmDetail, r.pmInterval, mappedResult, r.callTime, r.startTime, r.endTime, r.tech
             ];
+            // จัดการข้อมูลที่มีเครื่องหมายคำพูด (") และคอมม่า (,)
             let formattedRow = rowData.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`);
             csvContent += formattedRow.join(",") + "\n";
         });
 
-        let encodedUri = encodeURI(csvContent);
+        // สร้างไฟล์ Blob แทนการใช้ encodeURI
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         let link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `CMMS_Export_${toLocalYYYYMMDD(new Date())}.csv`);
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
+        link.href = URL.createObjectURL(blob);
+        link.download = `CMMS_Export_${toLocalYYYYMMDD(new Date())}.csv`;
+        link.style.display = "none";
+        
+        document.body.appendChild(link); 
+        link.click(); 
+        document.body.removeChild(link);
     }
 
     function renderReportTable(pageNumber) {
@@ -727,7 +736,6 @@
         let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
         let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
 
-        // 🔴 เพิ่มการโชว์เวลาซ่อมบนการ์ดด้านนอกให้ดูง่ายๆ
         let callTimeHtml = item.callTime ? `<span class="badge-chip" style="background:#EBF8FF; color:#3182CE;"><span class="material-symbols-rounded" style="font-size:14px;">notifications_active</span> แจ้ง: ${item.callTime}</span>` : "";
         let repairTimeHtml = (item.repairTime && item.repairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${item.repairTime}</span>` : "";
 
