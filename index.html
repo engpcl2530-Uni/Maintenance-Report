@@ -50,7 +50,7 @@
     .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;}
     .form-group { flex: 1; min-width: 140px; margin-bottom: 15px;}
     label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 13.5px; color: var(--text-muted); }
-    input[type="text"], input[type="date"], select, textarea { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14.5px; font-family: 'Prompt', sans-serif; box-sizing: border-box; background-color: #F8FAFC; transition: all 0.3s; color: var(--text-main); }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14.5px; font-family: 'Prompt', sans-serif; box-sizing: border-box; background-color: #F8FAFC; transition: all 0.3s; color: var(--text-main); }
     input:focus, select:focus, textarea:focus { border-color: var(--secondary); background: #FFF; box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1); outline: none; }
 
     .time-input-group { display: flex; align-items: center; gap: 8px; }
@@ -147,9 +147,7 @@
     .btn-edit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 94, 184, 0.45); }
     .btn-edit:active { transform: translateY(0); }
 
-    /* Notification Toast (สำหรับการเซฟ Cache) */
     #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 12px; display: none; z-index: 1000; box-shadow: var(--shadow-sm);}
-
     #loadingScreen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(244, 247, 249, 0.9); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
@@ -220,7 +218,6 @@
         <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
             <span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน
         </h3>
-        <!-- ปุ่ม Export CSV -->
         <button class="btn-primary" style="background:#28a745; width:auto; padding:6px 12px; font-size:12px; border-radius: 8px;" onclick="exportToCSV()">
             <span class="material-symbols-rounded" style="font-size:16px;">download</span> Export CSV
         </button>
@@ -272,16 +269,20 @@
   </div>
 
   <!-- ==============================================
-       หน้าจอที่ 2: ฟอร์มสร้างใบแจ้งซ่อมใหม่
+       หน้าจอที่ 2: ฟอร์มสร้างใบแจ้งซ่อมใหม่ (อัปเดตช่องใหม่แล้ว)
        ============================================== -->
   <div id="formView" class="container" style="display: none; margin-top: 25px;">
     <form id="maintenanceForm" onsubmit="submitForm(event)">
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">feed</span> ข้อมูลทั่วไป</div>
+        
+        <!-- 🔴 เปลี่ยนแปลงและเพิ่มช่องข้อมูลตามที่ต้องการ -->
         <div class="form-row">
           <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="date" required></div>
+          <div class="form-group"><label>เวลาซ่อม (Repair Time)</label><input type="text" id="repairTime" placeholder="ระบุเวลาซ่อม..." required></div>
           <div class="form-group"><label>กะ (Shift)</label><select id="shift" required><option value="" disabled selected>-- เลือกกะ --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
         </div>
+
         <div class="form-row">
           <div class="form-group"><label>สายการผลิต (Line)</label>
             <select id="line" onchange="toggleOther('line', 'lineOtherContainer')" required>
@@ -306,12 +307,35 @@
         </div>
       </div>
 
+      <!-- 🔴 รายละเอียดทางเทคนิค และ 3 คำถามแผน PM -->
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">build_circle</span> รายละเอียดทางเทคนิค</div>
         <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="breakdown" rows="2" required></textarea></div>
         <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="cause" rows="2" required></textarea></div>
         <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="solved" rows="2" required></textarea></div>
         <div class="form-group"><label>สถานะ (Result)</label><select id="result" required><option value="" disabled selected>-- เลือกสถานะ --</option><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
+        
+        <hr style="border: 1px solid #E2E8F0; margin: 25px 0;">
+        <h3 style="font-size: 15px; color: var(--primary); margin-bottom: 15px; font-weight: 600;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:middle;">assignment</span> ส่วนของการแก้ไขแผน PM (ถ้ามี)</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>ต้องแก้ไขแผน PM หรือไม่?</label>
+                <select id="pmUpdate" required>
+                    <option value="" disabled selected>-- เลือก --</option>
+                    <option value="Yes">ต้องแก้ไขแผน (Yes)</option>
+                    <option value="No">ไม่ต้องแก้ไข (No)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>รอบ PM (เดือน)</label>
+                <input type="number" id="pmInterval" placeholder="ระบุจำนวนเดือน..." min="0">
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+            <label>รายละเอียด PM ที่แก้ไข</label>
+            <textarea id="pmDetail" rows="2" placeholder="ระบุรายละเอียดที่ต้องการปรับปรุงแผน PM..."></textarea>
+        </div>
       </div>
 
       <div class="card">
@@ -378,6 +402,7 @@
     </div>
   </div>
 
+  <!-- 🔴 อัปเดตช่องข้อมูลในหน้าต่างแก้ไขงาน -->
   <div class="page-overlay" id="editJobPage" style="z-index: 250;">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">update</span> อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
@@ -387,17 +412,16 @@
       <form id="editForm" onsubmit="submitEditForm(event)">
         <input type="hidden" id="editJobNum">
         
-        <!-- ข้อมูลทั่วไปที่สามารถแก้ไขได้ -->
         <div class="card">
           <div class="card-title">ข้อมูลทั่วไป (แก้ไขได้)</div>
           <div class="form-row">
             <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="edit_date" required></div>
+            <div class="form-group"><label>เวลาซ่อม (Repair Time)</label><input type="text" id="edit_repairTime" required></div>
             <div class="form-group"><label>กะ (Shift)</label><select id="edit_shift" required><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
           </div>
           <div class="form-group"><label>รหัสเครื่องจักร (Machine)</label><input type="text" id="edit_machine" required></div>
         </div>
 
-        <!-- เวลาดำเนินการที่สามารถแก้ไขได้ -->
         <div class="card">
           <div class="card-title">ระยะเวลาดำเนินการ (แก้ไขได้)</div>
           <div class="form-row">
@@ -408,11 +432,18 @@
         </div>
 
         <div class="card">
-          <div class="card-title">รายละเอียดปัญหา</div>
+          <div class="card-title">รายละเอียดปัญหา และแผน PM</div>
           <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="edit_breakdown" rows="2" required></textarea></div>
           <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="edit_cause" rows="2" required></textarea></div>
           <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="edit_solved" rows="2" required></textarea></div>
           <div class="form-group"><label>อัปเดตสถานะงาน (Result)</label><select id="edit_result" required><option value="F">Finished (เสร็จสมบูรณ์)</option><option value="O">Ongoing (กำลังดำเนินการ)</option><option value="U">Unfinished (ยังไม่เสร็จ)</option></select></div>
+          
+          <hr style="border: 1px solid #E2E8F0; margin: 20px 0;">
+          <div class="form-row">
+              <div class="form-group"><label>ต้องแก้ไขแผน PM หรือไม่?</label><select id="edit_pmUpdate" required><option value="" disabled>-- เลือก --</option><option value="Yes">ต้องแก้ไข</option><option value="No">ไม่ต้องแก้ไข</option></select></div>
+              <div class="form-group"><label>รอบ PM (เดือน)</label><input type="number" id="edit_pmInterval" min="0"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;"><label>รายละเอียด PM ที่แก้ไข</label><textarea id="edit_pmDetail" rows="2"></textarea></div>
         </div>
         
         <div class="card">
@@ -453,7 +484,7 @@
     </div>
   </div>
 
-  <!-- 🟢 SCRIPT LOGIC (จาวาสคริปต์ควบคุมการทำงานทั้งหมด) 🟢 -->
+  <!-- 🟢 SCRIPT LOGIC 🟢 -->
   <script>
     let allReportData = [];
     let currentJobData = null; 
@@ -463,27 +494,19 @@
     const itemsPerPage = 200; 
     let currentFilteredData = [];
 
-    // 🔴 1. ระบบจัดการและแปลงวันที่ 
     function parseDateSafely(dateStr) {
         if (!dateStr) return new Date(0); 
         let str = dateStr.toString().trim();
-        
-        if (str.includes('-')) {
-            let d = new Date(str);
-            if (!isNaN(d.getTime())) return d;
-        }
+        if (str.includes('-')) { let d = new Date(str); if (!isNaN(d.getTime())) return d; }
         if (str.includes('/')) {
             let parts = str.split('/');
             if (parts.length === 3) {
-                let p0 = parseInt(parts[0], 10);
-                let p1 = parseInt(parts[1], 10);
-                let p2 = parseInt(parts[2], 10);
+                let p0 = parseInt(parts[0], 10); let p1 = parseInt(parts[1], 10); let p2 = parseInt(parts[2], 10);
                 if (p2 < 100) p2 += 2000;
                 return new Date(p2, p1 - 1, p0); 
             }
         }
-        let fallback = new Date(str);
-        return isNaN(fallback.getTime()) ? new Date(0) : fallback;
+        let fallback = new Date(str); return isNaN(fallback.getTime()) ? new Date(0) : fallback;
     }
 
     function toLocalYYYYMMDD(d) {
@@ -500,27 +523,23 @@
         return (diffHours >= -24 && diffHours <= 48); 
     }
 
-    // ฟังก์ชันตรวจสอบความถูกต้องของเวลาทั้ง Start และ End (รองรับข้ามวัน)
     function validateTimes(cHH, cMM, sHH, sMM, eHH, eMM) {
         let c = parseInt(cHH)*60 + parseInt(cMM);
         let s = parseInt(sHH)*60 + parseInt(sMM);
         let e = parseInt(eHH)*60 + parseInt(eMM);
-        
         if (s < c && c >= 18*60 && s <= 6*60) s += 24*60;
         if (e < s && s >= 18*60 && e <= 12*60) e += 24*60; 
-        
         if (s < c) return "เวลา 'เริ่มซ่อม' เร็วกว่าเวลา 'ที่รับแจ้ง'";
         if (e < s) return "เวลา 'ซ่อมเสร็จ' เร็วกว่าเวลา 'เริ่มซ่อม'";
         return null; 
     }
 
-    // 🔴 2. ระบบ Offline Storage
     const CACHE_KEY = "cmms_draft_v1";
     
     function saveDraft() {
         let draft = {
             timestamp: new Date().getTime(),
-            date: document.getElementById('date').value, shift: document.getElementById('shift').value,
+            date: document.getElementById('date').value, repairTime: document.getElementById('repairTime').value, shift: document.getElementById('shift').value,
             line: document.getElementById('line').value, lineOther: document.getElementById('lineOther') ? document.getElementById('lineOther').value : '',
             machine: document.getElementById('machine').value,
             callHH: document.getElementById('callHH').value, callMM: document.getElementById('callMM').value,
@@ -528,6 +547,7 @@
             endHH: document.getElementById('endHH').value, endMM: document.getElementById('endMM').value,
             breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value,
             solved: document.getElementById('solved').value, result: document.getElementById('result').value,
+            pmUpdate: document.getElementById('pmUpdate').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value,
             handover: document.getElementById('handover').value, dept: document.getElementById('dept').value, remark: document.getElementById('remark').value
         };
         localStorage.setItem(CACHE_KEY, JSON.stringify(draft));
@@ -540,7 +560,7 @@
         if(saved) {
             let data = JSON.parse(saved);
             if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { 
-                ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','handover','dept','remark'].forEach(id => {
+                ['date','repairTime','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','pmUpdate','pmInterval','pmDetail','handover','dept','remark'].forEach(id => {
                     if(data[id] && document.getElementById(id)) document.getElementById(id).value = data[id];
                 });
                 if(data.line === 'อื่นๆ') toggleOther('line', 'lineOtherContainer');
@@ -574,7 +594,6 @@
       return await response.json();
     }
 
-    // 🔴 3. Quick Filters & Export CSV
     function setQuickFilter(type) {
         document.querySelectorAll('.btn-quick').forEach(b => b.classList.remove('active'));
         event.target.classList.add('active');
@@ -583,37 +602,29 @@
         let fs = document.getElementById('fStart');
         let fe = document.getElementById('fEnd');
         
-        if (type === 'all') { 
-            fs.value = ''; fe.value = ''; 
-        }
+        if (type === 'all') { fs.value = ''; fe.value = ''; }
         else if (type === 'month') {
             let firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
-            fs.value = toLocalYYYYMMDD(firstDay);
-            fe.value = toLocalYYYYMMDD(today);
+            fs.value = toLocalYYYYMMDD(firstDay); fe.value = toLocalYYYYMMDD(today);
         }
         else if (type === 'week') {
             let first = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1);
             let firstDay = new Date(today.setDate(first));
-            fs.value = toLocalYYYYMMDD(firstDay);
-            fe.value = toLocalYYYYMMDD(new Date());
+            fs.value = toLocalYYYYMMDD(firstDay); fe.value = toLocalYYYYMMDD(new Date());
         }
         renderReportTable(1);
     }
 
     function exportToCSV() {
-        if(currentFilteredData.length === 0) {
-            alert("ไม่พบข้อมูลสำหรับ Export");
-            return;
-        }
+        if(currentFilteredData.length === 0) { alert("ไม่พบข้อมูลสำหรับ Export"); return; }
         let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-        csvContent += "Job No,Date,Shift,Line,Machine,Breakdown Detail,Cause,Action Taken,Result,Call Time,Start Time,End Time,Service By\n";
+        csvContent += "Job No,Date,Shift,Repair Time,Line,Machine,Breakdown Detail,Cause,Action Taken,Update PM?,PM Detail,PM Interval(M),Result,Call Time,Start Time,End Time,Service By\n";
         
         currentFilteredData.forEach(r => {
             let rowData = [
-                r.num, r.date, r.shift, r.line, r.machine, r.breakdown, 
-                r.cause, r.solved, r.result, r.callTime, r.startTime, r.endTime, r.tech
+                r.num, r.date, r.shift, r.repairTime, r.line, r.machine, r.breakdown, 
+                r.cause, r.solved, r.pmUpdate, r.pmDetail, r.pmInterval, r.result, r.callTime, r.startTime, r.endTime, r.tech
             ];
-            // Format for CSV (handle commas and newlines in text)
             let formattedRow = rowData.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`);
             csvContent += formattedRow.join(",") + "\n";
         });
@@ -622,35 +633,27 @@
         let link = document.createElement("a");
         link.setAttribute("href", encodedUri);
         link.setAttribute("download", `CMMS_Export_${toLocalYYYYMMDD(new Date())}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
     }
 
-    // 🔴 4. Pagination & Data Render
     function renderReportTable(pageNumber) {
-      let fs = document.getElementById('fStart').value; 
-      let fe = document.getElementById('fEnd').value;
-      let fl = document.getElementById('fLine').value; 
-      let shift = document.getElementById('fShift').value;
-      let statusFilter = document.getElementById('fStatus').value; 
-      let textFilter = document.getElementById('fText').value.toLowerCase();
+      let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
+      let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
+      let statusFilter = document.getElementById('fStatus').value; let textFilter = document.getElementById('fText').value.toLowerCase();
 
       let fsVal = fs ? parseDateSafely(fs).setHours(0,0,0,0) : null;
       let feVal = fe ? parseDateSafely(fe).setHours(23,59,59,999) : null;
 
       currentFilteredData = allReportData.filter(r => {
-        let jDateObj = parseDateSafely(r.date);
-        let jDate = jDateObj.getTime();
-        
+        let jDateObj = parseDateSafely(r.date); let jDate = jDateObj.getTime();
         if (fsVal && jDate < fsVal) return false;
         if (feVal && jDate > feVal) return false;
         if (fl && r.line !== fl) return false;
         if (shift && r.shift !== shift) return false;
         if (statusFilter && r.result !== statusFilter) return false;
-        // ค้นหาครอบคลุมถึงเลข Num แล้ว
-        if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || r.tech.toLowerCase().includes(textFilter) || r.machine.toLowerCase().includes(textFilter) || r.breakdown.toLowerCase().includes(textFilter))) return false;
         
+        // 🔴 แก้บัค Search Error (เพิ่มดักจับ || "") ป้องกันแอปพังเวลางานยังไม่มีข้อมูลช่าง
+        if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || (r.tech || "").toLowerCase().includes(textFilter) || (r.machine || "").toLowerCase().includes(textFilter) || (r.breakdown || "").toLowerCase().includes(textFilter))) return false;
         return true;
       });
 
@@ -692,15 +695,10 @@
           document.getElementById('pageIndicator').innerText = `หน้า ${currentPage} / ${totalPages}`;
           document.getElementById('btnPrev').disabled = (currentPage === 1);
           document.getElementById('btnNext').disabled = (currentPage === totalPages);
-      } else { 
-          pageWrapper.style.display = "none"; 
-      }
+      } else { pageWrapper.style.display = "none"; }
     }
 
-    function changePage(step) { 
-      renderReportTable(currentPage + step); 
-      window.scrollTo(0, document.getElementById('dashboardView').offsetTop); 
-    }
+    function changePage(step) { renderReportTable(currentPage + step); window.scrollTo(0, document.getElementById('dashboardView').offsetTop); }
 
     function updateDashboardStats(data, selectedLine) {
         let newCount = 0; let doneCount = 0;
@@ -709,9 +707,7 @@
         data.forEach(job => {
             if(job.result === 'F') doneCount++;
             if(isNewJob(job.date)) newCount++; 
-            
             if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
-            
             if(job.tech) {
                 let techs = job.tech.split(',').map(t => t.trim());
                 techs.forEach(t => {
@@ -731,27 +727,16 @@
             chartSection.style.display = 'none';
         } else {
             chartSection.style.display = 'block';
-            
             let lineArray = Object.keys(lineCounts).map(k => ({line: k, count: lineCounts[k]}));
-            lineArray.sort((a,b) => b.count - a.count); 
-            lineArray = lineArray.slice(0, 10); 
-            
-            let chartLabels = lineArray.map(i => i.line);
-            let chartData = lineArray.map(i => i.count);
+            lineArray.sort((a,b) => b.count - a.count); lineArray = lineArray.slice(0, 10); 
+            let chartLabels = lineArray.map(i => i.line); let chartData = lineArray.map(i => i.count);
 
             let ctx = document.getElementById('lineIssueChart').getContext('2d');
             if(lineChartInstance) lineChartInstance.destroy();
             lineChartInstance = new Chart(ctx, {
                 type: 'bar',
-                data: { 
-                    labels: chartLabels, 
-                    datasets: [{ label: 'จำนวนปัญหา', data: chartData, backgroundColor: '#00A5D9', borderRadius: 6 }] 
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, 
-                    plugins: { legend: { display: false } }, 
-                    scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } 
-                }
+                data: { labels: chartLabels, datasets: [{ label: 'จำนวนปัญหา', data: chartData, backgroundColor: '#00A5D9', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } }
             });
         }
 
@@ -763,7 +748,6 @@
         document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
 
-    // 🔴 5. Submit New Report
     async function submitForm(event) {
       event.preventDefault(); 
       var btn = document.getElementById('submitBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
@@ -774,7 +758,7 @@
       
       let timeError = validateTimes(cHH, cMM, sHH, sMM, eHH, eMM);
       if(timeError) {
-          alert("⚠️ ข้อผิดพลาดเวลา: " + timeError + "\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง (ยกเว้นเป็นการปฏิบัติงานข้ามคืนในช่วงกะดึก)");
+          alert("⚠️ ข้อผิดพลาดเวลา: " + timeError + "\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง");
           btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false;
           return; 
       }
@@ -788,7 +772,8 @@
         for(let f of filesAfter) baseAfter.push(await compressImageAsync(f));
 
         var formData = {
-          date: document.getElementById('date').value, dept: document.getElementById('dept').value, line: document.getElementById('line').value, lineOther: document.getElementById('lineOther')?document.getElementById('lineOther').value:'', machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value, solved: document.getElementById('solved').value, result: document.getElementById('result').value, callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'), shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, imgsBefore: baseBefore, imgsAfter: baseAfter
+          date: document.getElementById('date').value, dept: document.getElementById('dept').value, line: document.getElementById('line').value, lineOther: document.getElementById('lineOther')?document.getElementById('lineOther').value:'', machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value, solved: document.getElementById('solved').value, result: document.getElementById('result').value, callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'), shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, imgsBefore: baseBefore, imgsAfter: baseAfter,
+          repairTime: document.getElementById('repairTime').value, pmUpdate: document.getElementById('pmUpdate').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value
         };
 
         const res = await callAPI("saveReport", formData);
@@ -799,18 +784,13 @@
           clearFiles('before'); clearFiles('after');
           
           localStorage.removeItem(CACHE_KEY); 
-          
           toggleMainView(); 
           document.getElementById('loadingScreen').style.display = 'flex';
           const newRes = await callAPI("getDashboard", {});
-          if(newRes.status==="success"){
-              allReportData=newRes.data; 
-              renderReportTable(1);
-          }
+          if(newRes.status==="success"){ allReportData=newRes.data; renderReportTable(1); }
           document.getElementById('loadingScreen').style.display = 'none';
         } else { alert("เกิดข้อผิดพลาด: "+res.message); }
       } catch(err) { alert("Error: "+err.message); }
-      
       btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled=false;
     }
 
@@ -827,17 +807,13 @@
         let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; 
         let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
         
-        // 🔴 คำนวณ Downtime
         let downTimeStr = "-";
         if(job.callTime && job.endTime) {
-            let ct = job.callTime.toString().split(':');
-            let et = job.endTime.toString().split(':');
+            let ct = job.callTime.toString().split(':'); let et = job.endTime.toString().split(':');
             if(ct.length===2 && et.length===2) {
-                let cM = parseInt(ct[0])*60 + parseInt(ct[1]);
-                let eM = parseInt(et[0])*60 + parseInt(et[1]);
-                if(eM < cM) eM += 24*60; // ข้ามวัน
-                let diff = eM - cM;
-                downTimeStr = `${Math.floor(diff/60)} ชั่วโมง ${diff%60} นาที`;
+                let cM = parseInt(ct[0])*60 + parseInt(ct[1]); let eM = parseInt(et[0])*60 + parseInt(et[1]);
+                if(eM < cM) eM += 24*60; 
+                let diff = eM - cM; downTimeStr = `${Math.floor(diff/60)} ชั่วโมง ${diff%60} นาที`;
             }
         }
 
@@ -847,6 +823,8 @@
             <div class="detail-row"><div class="detail-label">สายการผลิต / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> 
         </div> 
         <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value fw-bold">${job.machine}</div></div> 
+        <div class="detail-row"><div class="detail-label">เวลาใช้ซ่อม (Repair Time)</div><div class="detail-value fw-bold text-primary">${job.repairTime || '-'}</div></div> 
+        
         <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> 
             <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
         </div> 
@@ -859,6 +837,17 @@
         <div class="detail-row" style="margin-top:15px;"><div class="detail-label">อาการที่พบ (Breakdown)</div><div class="detail-value">${job.breakdown}</div></div> 
         <div class="detail-row"><div class="detail-label">สาเหตุ (Root Cause)</div><div class="detail-value">${job.cause || '-'}</div></div> 
         <div class="detail-row"><div class="detail-label">วิธีแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div> 
+        
+        <!-- ข้อมูล PM ที่กรอกใหม่ -->
+        <div class="detail-row" style="margin-top:15px; background:#F0F7FF; padding:12px; border-radius:10px; border:1px solid var(--secondary);">
+           <div class="detail-label" style="color:var(--secondary); font-weight:bold;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">assignment_turned_in</span> ข้อมูลเสนอแผน PM</div>
+           <div style="font-size:14px; margin-top:8px; line-height:1.6;">
+               <b>ต้องแก้ไขแผน PM หรือไม่:</b> ${job.pmUpdate || '-'}<br>
+               <b>รอบ PM (เดือน):</b> ${job.pmInterval ? job.pmInterval + " เดือน" : '-'}<br>
+               <b>รายละเอียดที่แก้ไข:</b> ${job.pmDetail || '-'}
+           </div>
+        </div>
+
         <div class="detail-row"><div class="detail-label">ทีมช่าง / ผู้ปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> 
         <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed var(--border);"> 
             <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม</div> 
@@ -875,11 +864,11 @@
         document.getElementById('editJobNumLabel').innerText = "#" + currentJobData.num; 
         document.getElementById('editJobNum').value = currentJobData.num; 
         
-        // Populate new editable fields
         let dObj = parseDateSafely(currentJobData.date);
         document.getElementById('edit_date').value = toLocalYYYYMMDD(dObj);
         document.getElementById('edit_shift').value = currentJobData.shift;
         document.getElementById('edit_machine').value = currentJobData.machine;
+        document.getElementById('edit_repairTime').value = currentJobData.repairTime || "";
         
         let ct = currentJobData.callTime ? currentJobData.callTime.toString().split(':') : ['',''];
         let st = currentJobData.startTime ? currentJobData.startTime.toString().split(':') : ['',''];
@@ -894,26 +883,21 @@
         document.getElementById('edit_solved').value = currentJobData.solved; 
         document.getElementById('edit_result').value = currentJobData.result; 
         
+        document.getElementById('edit_pmUpdate').value = currentJobData.pmUpdate || "";
+        document.getElementById('edit_pmInterval').value = currentJobData.pmInterval || "";
+        document.getElementById('edit_pmDetail').value = currentJobData.pmDetail || "";
+
         clearFiles('edit_before'); clearFiles('edit_after'); 
         
-        let techString = currentJobData.tech || ""; 
-        let checkboxes = document.querySelectorAll('.edit-tech-cb'); 
-        let otherNames = []; 
-        checkboxes.forEach(cb => cb.checked = false); 
-        document.getElementById('edit_cbOther').checked = false; 
-        toggleOtherTech('edit'); 
+        let techString = currentJobData.tech || ""; let checkboxes = document.querySelectorAll('.edit-tech-cb'); let otherNames = []; 
+        checkboxes.forEach(cb => cb.checked = false); document.getElementById('edit_cbOther').checked = false; toggleOtherTech('edit'); 
         
         let techArray = techString.split(',').map(t => t.trim()); 
         techArray.forEach(tech => { 
-            let found = false; 
-            checkboxes.forEach(cb => { if(cb.value === tech) { cb.checked = true; found = true; }}); 
+            let found = false; checkboxes.forEach(cb => { if(cb.value === tech) { cb.checked = true; found = true; }}); 
             if(!found && tech !== "") otherNames.push(tech); 
         }); 
-        if(otherNames.length > 0) { 
-            document.getElementById('edit_cbOther').checked = true; 
-            toggleOtherTech('edit'); 
-            document.getElementById('edit_techOther').value = otherNames.join(', '); 
-        } 
+        if(otherNames.length > 0) { document.getElementById('edit_cbOther').checked = true; toggleOtherTech('edit'); document.getElementById('edit_techOther').value = otherNames.join(', '); } 
         document.getElementById('editJobPage').style.display = 'block'; 
     }
 
@@ -948,22 +932,16 @@
                 callTime: document.getElementById('edit_callHH').value.padStart(2,'0')+':'+document.getElementById('edit_callMM').value.padStart(2,'0'),
                 startTime: document.getElementById('edit_startHH').value.padStart(2,'0')+':'+document.getElementById('edit_startMM').value.padStart(2,'0'),
                 endTime: document.getElementById('edit_endHH').value.padStart(2,'0')+':'+document.getElementById('edit_endMM').value.padStart(2,'0'),
-                breakdown: document.getElementById('edit_breakdown').value, 
-                cause: document.getElementById('edit_cause').value, 
-                solved: document.getElementById('edit_solved').value, 
-                result: document.getElementById('edit_result').value, 
-                tech: techArray.join(', '), 
-                imgsBefore: baseEditBefore, 
-                imgsAfter: baseEditAfter 
+                repairTime: document.getElementById('edit_repairTime').value,
+                breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
+                pmUpdate: document.getElementById('edit_pmUpdate').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
+                tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter 
             }; 
             
             const res = await callAPI("updateReport", updateData); 
             if(res.status === "success") { 
-                alert(res.message); 
-                clearFiles('edit_before'); clearFiles('edit_after'); 
-                document.getElementById('editJobPage').style.display = 'none'; 
-                document.getElementById('jobDetailsPage').style.display = 'none'; 
-                document.getElementById('loadingScreen').style.display = 'flex'; 
+                alert(res.message); clearFiles('edit_before'); clearFiles('edit_after'); 
+                document.getElementById('editJobPage').style.display = 'none'; document.getElementById('jobDetailsPage').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; 
                 const newRes = await callAPI("getDashboard", {}); 
                 if(newRes.status === "success") { allReportData = newRes.data; renderReportTable(currentPage); } 
                 document.getElementById('loadingScreen').style.display = 'none'; 
@@ -975,9 +953,6 @@
     function formatTime(input, maxVal) { let val = input.value.replace(/[^0-9]/g, ''); if(val!==""){let num=parseInt(val,10);if(num>maxVal)val=maxVal.toString();} input.value=val; if(val.length===2){let nxt=input.nextElementSibling;if(nxt&&nxt.tagName==='SPAN')nxt=nxt.nextElementSibling;if(nxt&&nxt.tagName==='INPUT')nxt.focus();} }
     function getTimeString(p) { return document.getElementById(p+'HH').value.padStart(2,'0')+':'+document.getElementById(p+'MM').value.padStart(2,'0'); }
 
-    // ==========================================
-    // Image Handling Functions (จัดการรูปและบีบอัดภาพ)
-    // ==========================================
     let filesBefore = [], filesAfter = []; let editFilesBefore = [], editFilesAfter = [];
     function handleFiles(event, type) { const files = event.target.files; if(files.length===0) return; let targetArray; let thumbDiv; let clearBtn; if(type === 'before') { targetArray = filesBefore; thumbDiv = document.getElementById('thumbBefore'); clearBtn = document.getElementById('clearBefore'); } else if(type === 'after') { targetArray = filesAfter; thumbDiv = document.getElementById('thumbAfter'); clearBtn = document.getElementById('clearAfter'); } else if(type === 'edit_before') { targetArray = editFilesBefore; thumbDiv = document.getElementById('thumbEditBefore'); clearBtn = document.getElementById('clearEditBefore'); } else if(type === 'edit_after') { targetArray = editFilesAfter; thumbDiv = document.getElementById('thumbEditAfter'); clearBtn = document.getElementById('clearEditAfter'); } if (targetArray.length + files.length > 5) { alert("แนบรูปได้สูงสุด 5 ภาพต่อส่วนครับ"); return; } for(let i=0; i<files.length; i++) { targetArray.push(files[i]); let reader = new FileReader(); reader.onload = e => { let wrap=document.createElement('div'); wrap.className='thumb-wrap'; wrap.innerHTML=`<img src="${e.target.result}">`; thumbDiv.appendChild(wrap); }; reader.readAsDataURL(files[i]); } clearBtn.style.display="block"; event.target.value=""; }
     function clearFiles(type) { if(type==='before'){filesBefore=[];document.getElementById('thumbBefore').innerHTML="";document.getElementById('clearBefore').style.display="none";} else if(type==='after'){filesAfter=[];document.getElementById('thumbAfter').innerHTML="";document.getElementById('clearAfter').style.display="none";} else if(type==='edit_before'){editFilesBefore=[];document.getElementById('thumbEditBefore').innerHTML="";document.getElementById('clearEditBefore').style.display="none";} else if(type==='edit_after'){editFilesAfter=[];document.getElementById('thumbEditAfter').innerHTML="";document.getElementById('clearEditAfter').style.display="none";} }
