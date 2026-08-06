@@ -165,7 +165,7 @@
 </head>
 <body>
 
-  <!-- 🔴 ตั้งค่า URL ของ API Google Apps Script ตรงนี้ -->
+  <!-- 🔴 ตั้งค่า URL ของ API Google Apps Script อันใหม่ที่ได้จากการกด New Deployment ตรงนี้ -->
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbygLJABXRzeot0Fu5FxdGN_4GwFJnnPMb2ifm4pvrcsTl6TpdvilGeHqOrNpjJo-MyN9w/exec";
   </script>
@@ -210,6 +210,7 @@
       </div>
     </div>
 
+    <!-- 📈 Chart Section -->
     <div class="chart-card" id="chartSection">
       <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
         <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line (Top 10)
@@ -219,9 +220,11 @@
       </div>
     </div>
 
+    <!-- 🧑‍🔧 Tech Latest Job Feed -->
     <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; padding-left: 5px;">งานล่าสุดของทีมช่าง</h3>
     <div class="tech-feed-container" id="techFeed"></div>
 
+    <!-- 🔍 Filters Section -->
     <div class="filter-section" style="margin-top: 25px;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
@@ -269,8 +272,10 @@
       </div>
     </div>
 
+    <!-- ส่วนที่ใช้แสดงรายการงาน (Card) -->
     <div id="reportContent"></div>
     
+    <!-- 📄 Pagination -->
     <div class="pagination-container" id="paginationWrapper" style="display:none;">
         <button class="btn-page" id="btnPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
         <span style="font-size:14px; font-weight:600; color:var(--text-muted);" id="pageIndicator">หน้า 1 / 1</span>
@@ -308,7 +313,7 @@
 
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">schedule</span> ระยะเวลาดำเนินการ</div>
-        <!-- 🔴 ลบช่องกรอก Repair Time ทิ้ง เพื่อให้ระบบคำนวณอัตโนมัติ -->
+        <!-- ลบช่องกรอก Repair Time ทิ้ง เพื่อให้ระบบคำนวณอัตโนมัติ -->
         <div class="form-row">
           <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="callHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="callMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
           <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="startHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="startMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
@@ -566,15 +571,13 @@
         return null; 
     }
 
-    // 🔴 ฟังก์ชันคำนวณระยะเวลา (หน่วย: นาที)
     function getDiffMinutes(startHH, startMM, endHH, endMM) {
         let s = parseInt(startHH)*60 + parseInt(startMM);
         let e = parseInt(endHH)*60 + parseInt(endMM);
-        if (e < s) e += 24*60; // รองรับการซ่อมข้ามวัน
+        if (e < s) e += 24*60; 
         return e - s;
     }
 
-    // 🔴 แปลงนาทีเป็นข้อความ ชั่วโมง/นาที
     function formatDuration(totalMins) {
         if (isNaN(totalMins) || totalMins < 0) return "-";
         let h = Math.floor(totalMins / 60);
@@ -724,6 +727,10 @@
         let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
         let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
 
+        // 🔴 เพิ่มการโชว์เวลาซ่อมบนการ์ดด้านนอกให้ดูง่ายๆ
+        let callTimeHtml = item.callTime ? `<span class="badge-chip" style="background:#EBF8FF; color:#3182CE;"><span class="material-symbols-rounded" style="font-size:14px;">notifications_active</span> แจ้ง: ${item.callTime}</span>` : "";
+        let repairTimeHtml = (item.repairTime && item.repairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${item.repairTime}</span>` : "";
+
         html += `
           <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
             <div class="report-card-head">
@@ -734,6 +741,8 @@
             <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
               <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">person</span> ${techDisplay}</span>
               <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">calendar_month</span> ${item.date}</span>
+              ${callTimeHtml}
+              ${repairTimeHtml}
             </div>
           </div>`;
       }); 
@@ -815,7 +824,6 @@
           return; 
       }
 
-      // 🔴 คำนวณ Repair Time อัตโนมัติ
       let repairMins = getDiffMinutes(sHH, sMM, eHH, eMM);
       let calculatedRepairTime = formatDuration(repairMins);
 
@@ -866,7 +874,6 @@
         let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; 
         let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
         
-        // 🔴 คำนวณเวลา 3 แกนหลัก
         let downTimeStr = "-";
         let repairTimeStr = "-";
         let responseTimeStr = "-";
@@ -877,15 +884,12 @@
             let et = job.endTime.toString().split(':');
             
             if(ct.length===2 && st.length===2 && et.length===2) {
-                // Downtime
                 let dtMins = getDiffMinutes(ct[0], ct[1], et[0], et[1]);
                 downTimeStr = formatDuration(dtMins);
                 
-                // Repair Time
                 let rtMins = getDiffMinutes(st[0], st[1], et[0], et[1]);
                 repairTimeStr = formatDuration(rtMins);
 
-                // Response Time
                 let respMins = getDiffMinutes(ct[0], ct[1], st[0], st[1]);
                 responseTimeStr = formatDuration(respMins);
             }
@@ -902,7 +906,21 @@
             <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
         </div> 
         
-        <!-- 🔴 โชว์ Metric 3 ตัว -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px; background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+            <div>
+                <div style="font-size:11px; color:var(--text-muted); font-weight:700;">เวลาแจ้ง</div>
+                <div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.callTime || '-'}</div>
+            </div>
+            <div>
+                <div style="font-size:11px; color:var(--text-muted); font-weight:700;">เริ่มซ่อม</div>
+                <div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.startTime || '-'}</div>
+            </div>
+            <div>
+                <div style="font-size:11px; color:var(--text-muted); font-weight:700;">ซ่อมเสร็จ</div>
+                <div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.endTime || '-'}</div>
+            </div>
+        </div>
+
         <div class="metrics-container">
             <div class="metric-box downtime">
                 <div class="metric-label">Downtime (เวลาหยุดผลิต)</div>
@@ -1005,7 +1023,6 @@
             return; 
         }
 
-        // 🔴 คำนวณ Repair Time อัตโนมัติ
         let repairMins = getDiffMinutes(sHH, sMM, eHH, eMM);
         let calculatedRepairTime = formatDuration(repairMins);
 
