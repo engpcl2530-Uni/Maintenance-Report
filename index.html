@@ -667,37 +667,72 @@
         renderReportTable(1);
     }
 
-    // 🔴 ฟังก์ชัน Export CSV แบบใหม่ ใช้ Blob โหลดข้อมูลได้ไม่จำกัดบรรทัด
+   // 🔴 ฟังก์ชัน Export CSV แบบไร้ขีดจำกัด และเรียงคอลัมน์ตรงกับ Google Sheets เป๊ะๆ
     function exportToCSV() {
-        if(currentFilteredData.length === 0) { alert("ไม่พบข้อมูลสำหรับ Export"); return; }
+        // ตรวจสอบว่ามีข้อมูลหรือไม่
+        if(!currentFilteredData || currentFilteredData.length === 0) { 
+            alert("ไม่พบข้อมูลสำหรับ Export"); 
+            return; 
+        }
         
-        // ใส่ \uFEFF ให้ Excel อ่านภาษาไทยได้
+        // ใส่ \uFEFF (BOM) เพื่อให้ Excel เปิดอ่านภาษาไทยได้ไม่เพี้ยน
         let csvContent = "\uFEFF";
-        csvContent += "Job No,Date,Shift,Repair Time,Line,Machine,Breakdown Detail,Cause,Action Taken,Update PM?,PM Completed?,PM Detail,PM Interval(M),Result,Call Time,Start Time,End Time,Service By\n";
         
+        // 🔴 ล็อกหัวตารางให้ตรงกับ Google Sheets ทั้ง 22 คอลัมน์
+        let headers = [
+            "Num", "วันที่", "แผนก", "Line", "Machine", 
+            "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
+            "Start Time", "End Time", "Repair Time", "Shift", "Service by", 
+            "หมายเหตุผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
+            "PM Detail", "PM Interval", "PM Completed"
+        ];
+        csvContent += headers.join(",") + "\n";
+        
+        // ดึงข้อมูลทั้งหมดที่ผ่านการกรองแล้ว
         currentFilteredData.forEach(r => {
-            let mappedResult = r.result === 'F' ? 'Finished' : (r.result === 'O' ? 'Ongoing' : (r.result === 'U' ? 'Unfinished' : r.result));
+            // แปลงสถานะให้เป็นคำเต็ม
+            let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
+            
+            // นำหมายเหตุและผู้รับมอบงาน มัดรวมกันให้เหมือนในฐานข้อมูลเป๊ะๆ
+            let combinedRemark = r.remark || "";
+            if (r.handover) {
+                combinedRemark = combinedRemark + (combinedRemark ? " | " : "") + "ผู้รับมอบ: " + r.handover;
+            }
+            
+            // 🔴 จัดเรียงข้อมูลให้ตรงกับหัวตาราง 22 ช่องเป๊ะ
             let rowData = [
-                r.num, r.date, r.shift, r.repairTime, r.line, r.machine, r.breakdown, 
-                r.cause, r.solved, r.pmUpdate, r.pmCompleted, r.pmDetail, r.pmInterval, mappedResult, r.callTime, r.startTime, r.endTime, r.tech
+                r.num, r.date, r.dept, r.line, r.machine,
+                r.breakdown, r.cause, r.solved, mappedResult, r.callTime,
+                r.startTime, r.endTime, r.repairTime, r.shift, r.tech,
+                combinedRemark, r.imgBefore, r.imgAfter, r.pmUpdate,
+                r.pmDetail, r.pmInterval, r.pmCompleted
             ];
-            // จัดการข้อมูลที่มีเครื่องหมายคำพูด (") และคอมม่า (,)
-            let formattedRow = rowData.map(v => `"${(v || '').toString().replace(/"/g, '""')}"`);
+            
+            // ป้องกัน Error จาก , หรือ " ในข้อความ
+            let formattedRow = rowData.map(v => {
+                let str = (v || '').toString();
+                return `"${str.replace(/"/g, '""')}"`; // ครอบด้วย "" เสมอ
+            });
+            
             csvContent += formattedRow.join(",") + "\n";
         });
 
-        // สร้างไฟล์ Blob แทนการใช้ encodeURI
+        // สร้างไฟล์จำลองในหน่วยความจำเบราว์เซอร์
         let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob);
+        
         let link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = `CMMS_Export_${toLocalYYYYMMDD(new Date())}.csv`;
+        link.href = url;
+        link.download = `CMMS_Report_${toLocalYYYYMMDD(new Date())}.csv`;
         link.style.display = "none";
         
-        document.body.appendChild(link); 
-        link.click(); 
+        document.body.appendChild(link);
+        link.click();
         document.body.removeChild(link);
+        
+        // คืนหน่วยความจำเพื่อไม่ให้เบราว์เซอร์หน่วง
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
       let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
