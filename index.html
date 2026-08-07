@@ -539,6 +539,40 @@
     const itemsPerPage = 200; 
     let currentFilteredData = [];
 
+    // 🔴 1. ฟังก์ชันตัวช่วย: เปลี่ยน "1:25:00" ให้เป็น "1 ชั่วโมง 25 นาที" แบบฉลาดๆ
+    function parseTimeStringToPretty(timeStr) {
+        if (!timeStr || timeStr === "-") return "-";
+        let str = timeStr.toString().trim();
+        
+        // ถ้าเป็นข้อความที่มีคำว่า ชั่วโมง หรือ นาที อยู่แล้ว (ส่งมาจากหน้าเว็บ)
+        if (str.includes("ชั่วโมง") || str.includes("นาที")) {
+            return str.replace(" 0 นาที", ""); // คลีน "0 นาที" ทิ้งเผื่อติดมา
+        }
+        
+        // ถ้าดึงข้อมูลดิบจาก Sheet มาเป็นฟอร์แมตเวลา เช่น 1:25:00 หรือ 0:45:00
+        if (str.includes(":")) {
+            let parts = str.split(":");
+            let h = parseInt(parts[0], 10) || 0;
+            let m = parseInt(parts[1], 10) || 0;
+            
+            if (h > 0 && m > 0) return `${h} ชั่วโมง ${m} นาที`;
+            if (h > 0 && m === 0) return `${h} ชั่วโมง`; // ซ่อมพอดีชั่วโมงเป๊ะ
+            return `${m} นาที`; // ซ่อมไม่ถึงชั่วโมง
+        }
+        return str;
+    }
+
+    // 🔴 2. อัปเดตฟังก์ชันนี้ เพื่อไม่ให้โชว์คำว่า " 0 นาที" ด้วยครับ
+    function formatDuration(totalMins) {
+        if (isNaN(totalMins) || totalMins < 0) return "-";
+        let h = Math.floor(totalMins / 60);
+        let m = totalMins % 60;
+        
+        if (h > 0 && m > 0) return `${h} ชั่วโมง ${m} นาที`;
+        if (h > 0 && m === 0) return `${h} ชั่วโมง`;
+        return `${m} นาที`;
+    }
+
     function parseDateSafely(dateStr) {
         if (!dateStr) return new Date(0); 
         let str = dateStr.toString().trim();
@@ -590,14 +624,6 @@
         let e = parseInt(endHH)*60 + parseInt(endMM);
         if (e < s) e += 24*60; 
         return e - s;
-    }
-
-    function formatDuration(totalMins) {
-        if (isNaN(totalMins) || totalMins < 0) return "-";
-        let h = Math.floor(totalMins / 60);
-        let m = totalMins % 60;
-        if (h > 0) return `${h} ชั่วโมง ${m} นาที`;
-        return `${m} นาที`;
     }
 
     const CACHE_KEY = "cmms_draft_v1";
@@ -770,9 +796,11 @@
         let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
 
         let callTimeHtml = item.callTime ? `<span class="badge-chip" style="background:#EBF8FF; color:#3182CE;"><span class="material-symbols-rounded" style="font-size:14px;">notifications_active</span> แจ้ง: ${item.callTime}</span>` : "";
-        let repairTimeHtml = (item.repairTime && item.repairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${item.repairTime}</span>` : "";
+        
+        // 🔴 3. เรียกใช้ฟังก์ชันแปลภาษาให้เวลาดูสวยงามบนการ์ดแต่ละใบ
+        let prettyRepairTime = parseTimeStringToPretty(item.repairTime);
+        let repairTimeHtml = (prettyRepairTime && prettyRepairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${prettyRepairTime}</span>` : "";
 
-        // 🔴 แสดงผลเป็น displayNum สวยงาม แต่ยังส่ง .num จริงไปดึงข้อมูลแก้ไข
         html += `
           <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
             <div class="report-card-head">
@@ -923,7 +951,6 @@
         let job = allReportData.find(r => r.num.toString() === numStr.toString()); 
         if(!job) return; 
         currentJobData = job; 
-        // 🔴 ใช้ displayNum โชว์เพื่อความสวยงาม
         document.getElementById('detailJobNum').innerText = "งานลำดับที่ #" + job.displayNum; 
         
         let statusFull = job.result === 'F' || job.result === 'Finished' ? 'Finished (เสร็จสมบูรณ์)' : 
@@ -933,15 +960,20 @@
         let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
         
         let downTimeStr = "-";
-        let repairTimeStr = "-";
+        
+        // 🔴 4. แปลงคำในช่อง Repair Time ของการ์ดใหญ่
+        let repairTimeStr = parseTimeStringToPretty(job.repairTime) || "-";
         let responseTimeStr = "-";
 
         let st = job.startTime ? job.startTime.toString().split(':') : []; 
         let et = job.endTime ? job.endTime.toString().split(':') : [];
 
         if(st.length===2 && et.length===2) {
-            let rtMins = getDiffMinutes(st[0], st[1], et[0], et[1]);
-            repairTimeStr = formatDuration(rtMins);
+            // ถ้าข้อมูลดิบไม่ได้คำนวณมา ให้คำนวณเองเลย
+            if (repairTimeStr === "-") {
+                let rtMins = getDiffMinutes(st[0], st[1], et[0], et[1]);
+                repairTimeStr = formatDuration(rtMins);
+            }
             
             if(job.callTime && job.callTime !== "") {
                 let ct = job.callTime.toString().split(':'); 
@@ -1030,9 +1062,7 @@
 
     function openEditMode() { 
         if(!currentJobData) return; 
-        // 🔴 ใช้ displayNum โชว์เพื่อความสวยงาม
         document.getElementById('editJobNumLabel').innerText = "ลำดับที่ #" + currentJobData.displayNum; 
-        // 🔴 แต่รหัสที่จะส่งไปหลังบ้าน ต้องเป็น System ID เท่านั้น (currentJobData.num)
         document.getElementById('editJobNum').value = currentJobData.num; 
         
         let dObj = parseDateSafely(currentJobData.date);
@@ -1111,7 +1141,7 @@
             for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); 
             
             var updateData = { 
-                num: document.getElementById('editJobNum').value, // 🔴 นำ System ID ทรงพลัง ส่งกลับไปแก้ไข
+                num: document.getElementById('editJobNum').value,
                 date: document.getElementById('edit_date').value,
                 shift: document.getElementById('edit_shift').value,
                 machine: document.getElementById('edit_machine').value,
