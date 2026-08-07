@@ -689,7 +689,7 @@
         
         let csvContent = "\uFEFF";
         let headers = [
-            "Num", "วันที่", "แผนก", "Line", "Machine", 
+            "No.", "วันที่", "แผนก", "Line", "Machine", 
             "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
             "Start Time", "End Time", "Repair Time", "Shift", "Service by", 
             "หมายเหตุ", "ผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
@@ -701,7 +701,7 @@
             let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
             
             let rowData = [
-                r.num, r.date, r.dept, r.line, r.machine,
+                r.displayNum, r.date, r.dept, r.line, r.machine,
                 r.breakdown, r.cause, r.solved, mappedResult, r.callTime,
                 r.startTime, r.endTime, r.repairTime, r.shift, r.tech,
                 r.remark, r.handover, r.imgBefore, r.imgAfter, r.pmUpdate,
@@ -772,10 +772,11 @@
         let callTimeHtml = item.callTime ? `<span class="badge-chip" style="background:#EBF8FF; color:#3182CE;"><span class="material-symbols-rounded" style="font-size:14px;">notifications_active</span> แจ้ง: ${item.callTime}</span>` : "";
         let repairTimeHtml = (item.repairTime && item.repairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${item.repairTime}</span>` : "";
 
+        // 🔴 แสดงผลเป็น displayNum สวยงาม แต่ยังส่ง .num จริงไปดึงข้อมูลแก้ไข
         html += `
           <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
             <div class="report-card-head">
-              <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.num}</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
+              <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum}</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
               <div style="font-size:14px; font-weight:700; color:${statusColor};">${statusFull}</div>
             </div>
             <p class="report-detail"><b>อาการ:</b> ${item.breakdown}</p>
@@ -818,6 +819,7 @@
                     if(!techLatest[t] || jobTime > techLatest[t].lastUpdateMs) {
                         techLatest[t] = { 
                             num: job.num, 
+                            displayNum: job.displayNum, 
                             machine: job.machine, 
                             line: job.line, 
                             result: mappedStatus,
@@ -856,7 +858,7 @@
         let feedHtml = "";
         techArr.forEach(info => {
             let col = info.result==='Finished'?'#38A169':(info.result==='Ongoing'?'#D69E2E':'#E53E3E');
-            feedHtml += `<div class="tech-chip" onclick="openJobDetails('${info.num}')" style="cursor:pointer; border-left: 4px solid ${col};"><div class="tech-chip-name"><span class="material-symbols-rounded" style="font-size:16px;">build</span> ${info.tech}</div><div class="tech-chip-job">#${info.num} ${info.machine}</div></div>`;
+            feedHtml += `<div class="tech-chip" onclick="openJobDetails('${info.num}')" style="cursor:pointer; border-left: 4px solid ${col};"><div class="tech-chip-name"><span class="material-symbols-rounded" style="font-size:16px;">build</span> ${info.tech}</div><div class="tech-chip-job">#${info.displayNum} ${info.machine}</div></div>`;
         });
         document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
@@ -921,7 +923,8 @@
         let job = allReportData.find(r => r.num.toString() === numStr.toString()); 
         if(!job) return; 
         currentJobData = job; 
-        document.getElementById('detailJobNum').innerText = "#" + job.num; 
+        // 🔴 ใช้ displayNum โชว์เพื่อความสวยงาม
+        document.getElementById('detailJobNum').innerText = "งานลำดับที่ #" + job.displayNum; 
         
         let statusFull = job.result === 'F' || job.result === 'Finished' ? 'Finished (เสร็จสมบูรณ์)' : 
                          (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)');
@@ -1027,7 +1030,9 @@
 
     function openEditMode() { 
         if(!currentJobData) return; 
-        document.getElementById('editJobNumLabel').innerText = "#" + currentJobData.num; 
+        // 🔴 ใช้ displayNum โชว์เพื่อความสวยงาม
+        document.getElementById('editJobNumLabel').innerText = "ลำดับที่ #" + currentJobData.displayNum; 
+        // 🔴 แต่รหัสที่จะส่งไปหลังบ้าน ต้องเป็น System ID เท่านั้น (currentJobData.num)
         document.getElementById('editJobNum').value = currentJobData.num; 
         
         let dObj = parseDateSafely(currentJobData.date);
@@ -1106,7 +1111,7 @@
             for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); 
             
             var updateData = { 
-                num: document.getElementById('editJobNum').value,
+                num: document.getElementById('editJobNum').value, // 🔴 นำ System ID ทรงพลัง ส่งกลับไปแก้ไข
                 date: document.getElementById('edit_date').value,
                 shift: document.getElementById('edit_shift').value,
                 machine: document.getElementById('edit_machine').value,
