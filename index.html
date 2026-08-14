@@ -348,7 +348,7 @@
         <div class="form-row">
             <div class="form-group">
                 <label>ต้องแก้ไขแผน PM หรือไม่?</label>
-                <select id="pmUpdate" required>
+                <select id="pmUpdate">
                     <option value="" disabled selected>-- เลือก --</option>
                     <option value="Yes">ต้องแก้ไขแผน (Yes)</option>
                     <option value="No">ไม่ต้องแก้ไข (No)</option>
@@ -356,7 +356,7 @@
             </div>
             <div class="form-group">
                 <label>แก้ไข PM เสร็จแล้วรึยัง?</label>
-                <select id="pmCompleted" required>
+                <select id="pmCompleted">
                     <option value="" disabled selected>-- เลือก --</option>
                     <option value="Yes">เสร็จแล้ว (Yes)</option>
                     <option value="No">ยังไม่เสร็จ (No)</option>
@@ -479,8 +479,8 @@
           
           <hr style="border: 1px solid #E2E8F0; margin: 20px 0;">
           <div class="form-row">
-              <div class="form-group"><label>ต้องแก้ไขแผน PM หรือไม่?</label><select id="edit_pmUpdate" required><option value="" disabled>-- เลือก --</option><option value="Yes">ต้องแก้ไข</option><option value="No">ไม่ต้องแก้ไข</option></select></div>
-              <div class="form-group"><label>แก้ไข PM เสร็จรึยัง?</label><select id="edit_pmCompleted" required><option value="" disabled>-- เลือก --</option><option value="Yes">เสร็จแล้ว</option><option value="No">ยังไม่เสร็จ</option></select></div>
+              <div class="form-group"><label>ต้องแก้ไขแผน PM หรือไม่?</label><select id="edit_pmUpdate"><option value="" disabled>-- เลือก --</option><option value="Yes">ต้องแก้ไข</option><option value="No">ไม่ต้องแก้ไข</option></select></div>
+              <div class="form-group"><label>แก้ไข PM เสร็จรึยัง?</label><select id="edit_pmCompleted"><option value="" disabled>-- เลือก --</option><option value="Yes">เสร็จแล้ว</option><option value="No">ยังไม่เสร็จ</option></select></div>
               <div class="form-group"><label>รอบ PM (เดือน)</label><input type="number" id="edit_pmInterval" min="0"></div>
           </div>
           <div class="form-group" style="margin-bottom:0;"><label>รายละเอียด PM ที่แก้ไข</label><textarea id="edit_pmDetail" rows="2"></textarea></div>
