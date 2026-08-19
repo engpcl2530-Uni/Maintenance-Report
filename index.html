@@ -2,690 +2,1060 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>BPC Maintenance Report & Tracker</title>
   <meta name="robots" content="noindex, nofollow">
-  <title>SMP Management System</title>
   
-  <link rel="icon" type="image/png" href="images/logo.png">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@24,400,1,0" rel="stylesheet" />
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
-
   <style>
-    body { background-color: #F8F9FA; padding-bottom: 90px; font-family: 'Prompt', sans-serif; color: #333; }
-    .app-header { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid #E5E7EB; padding: 15px 20px; position: sticky; top: 0; z-index: 1000; }
-    .fab { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: #2563EB; color: white; text-align: center; line-height: 56px; font-size: 32px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4); cursor: pointer; z-index: 1000; transition: all 0.3s; }
-    .fab:hover { transform: scale(1.05); background-color: #1D4ED8; }
-    .section-view { display: none; animation: fadeIn 0.4s ease-in-out; }
-    .section-view.active { display: block; }
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .card-custom { background: white; border: 1px solid #F3F4F6; border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.03); margin-bottom: 24px; }
-    .section-title { font-weight: 600; color: #111827; margin-bottom: 24px; font-size: 1.15rem; display: flex; align-items: center; gap: 8px; }
-    .section-title i { color: #2563EB; }
-    .card-smp { cursor: pointer; transition: all 0.2s; border: 1px solid #E5E7EB; border-radius: 12px; }
-    .card-smp:hover { border-color: #2563EB; box-shadow: 0 8px 16px rgba(37,99,235,0.08); transform: translateY(-3px); }
-    .form-label { font-size: 0.9rem; font-weight: 500; color: #4B5563; }
-    .form-control, .form-select { border-radius: 10px; border: 1px solid #D1D5DB; padding: 10px 15px; font-size: 0.95rem; background-color: #F9FAFB; }
-    .form-control:focus, .form-select:focus { border-color: #2563EB; background-color: white; box-shadow: 0 0 0 4px rgba(37,99,235,0.1); }
-    .required-star { color: #EF4444; }
+    :root { 
+      --primary: #001F5B; 
+      --secondary: #005EB8; 
+      --accent: #00A5D9; 
+      --bg: #F4F7F9; 
+      --card-bg: #FFFFFF; 
+      --text-main: #1A202C;
+      --text-muted: #718096;
+      --border: #E2E8F0;
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+      --shadow-md: 0 10px 25px rgba(0, 31, 91, 0.08);
+      --shadow-hover: 0 15px 35px rgba(0, 94, 184, 0.15);
+    }
     
-    .icon-checkbox { display: inline-flex; flex-direction: column; align-items: center; justify-content: center; width: 105px; height: 110px; cursor: pointer; position: relative; background: #F3F4F6; border: 2px solid transparent; border-radius: 14px; transition: all 0.2s; padding: 10px; }
-    .icon-checkbox:hover { background: #E5E7EB; }
-    .custom-icon-img { width: 55px; height: 55px; object-fit: contain; margin-bottom: 8px; transition: all 0.2s; }
-    .icon-checkbox span.label { font-size: 12px; color: #374151; font-weight: 500; text-align: center; line-height: 1.1; }
-    .icon-checkbox.not-used { background: white; border: 2px dashed #D1D5DB; opacity: 0.7; }
-    .icon-checkbox.not-used .custom-icon-img { filter: grayscale(100%); opacity: 0.25; }
-    .icon-checkbox.not-used span.label { color: #9CA3AF; }
-    .icon-checkbox.not-used::after { content: 'close'; font-family: 'Material Icons'; color: #EF4444; font-size: 55px; position: absolute; font-weight: bold; text-shadow: 0 0 6px white; top: 20px; }
+    body { font-family: 'Prompt', sans-serif; background-color: var(--bg); margin: 0; padding: 0; color: var(--text-main); padding-bottom: 100px; }
+    
+    /* Header */
+    .header { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; padding: 25px 20px 35px; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; box-shadow: var(--shadow-md); margin-bottom: -15px; position: sticky; top: 0; z-index: 50; display: flex; align-items: center; justify-content: space-between;}
+    .header-left { display: flex; align-items: center; gap: 15px; }
+    .header-icon { font-size: 32px; background: rgba(255,255,255,0.15); padding: 10px; border-radius: 12px; }
+    .header-text h1 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: 0.5px; }
+    .header-text p { font-size: 13px; color: rgba(255,255,255,0.85); margin: 3px 0 0; }
 
-    .step-card { background: #FAFAFA; border: 1px solid #E5E7EB; border-radius: 12px; padding: 20px; margin-bottom: 15px; }
-    .btn-main { background: #2563EB; color: white; border-radius: 12px; font-weight: 500; padding: 14px; transition: 0.2s; }
-    .btn-main:hover { background: #1D4ED8; color: white; transform: translateY(-2px); }
+    .btn-hub { background: rgba(255, 255, 255, 0.15); color: white; text-decoration: none; padding: 8px 14px; border-radius: 10px; display: flex; align-items: center; gap: 6px; font-size: 13.5px; font-weight: 600; transition: all 0.3s; border: 1px solid rgba(255, 255, 255, 0.2); }
+    .btn-hub:hover { background: rgba(255, 255, 255, 0.3); transform: translateY(-2px); }
+    .btn-hub:active { transform: translateY(0); }
+
+    .container { padding: 0 15px; max-width: 800px; margin: auto; position: relative; z-index: 20; }
+    
+    /* Cards ทั่วไป */
+    .card { background: var(--card-bg); padding: 25px; border-radius: 16px; box-shadow: var(--shadow-md); margin-bottom: 25px; border: 1px solid rgba(0, 94, 184, 0.05); }
+    .card-title { color: var(--primary); font-size: 16px; font-weight: 700; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 12px;}
+    .card-title .material-symbols-rounded { color: var(--secondary); font-size: 20px; }
+    
+    /* Forms */
+    .form-row { display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;}
+    .form-group { flex: 1; min-width: 140px; margin-bottom: 15px;}
+    label { display: block; margin-bottom: 8px; font-weight: 500; font-size: 13.5px; color: var(--text-muted); }
+    input[type="text"], input[type="number"], input[type="date"], select, textarea { width: 100%; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: 10px; font-size: 14.5px; font-family: 'Prompt', sans-serif; box-sizing: border-box; background-color: #F8FAFC; transition: all 0.3s; color: var(--text-main); }
+    input:focus, select:focus, textarea:focus { border-color: var(--secondary); background: #FFF; box-shadow: 0 0 0 3px rgba(0, 94, 184, 0.1); outline: none; }
+
+    .time-input-group { display: flex; align-items: center; gap: 8px; }
+    .time-input-group input { text-align: center; padding: 12px; font-weight: 600; letter-spacing: 1px;}
+    .time-colon { font-weight: bold; color: var(--text-muted); }
+
+    /* Upload UI Premium */
+    .upload-container { display: flex; flex-direction: column; gap: 15px; }
+    @media (min-width: 600px) { .upload-container { flex-direction: row; } }
+    .upload-box { flex: 1; border: 1.5px dashed #CBD5E0; padding: 20px 15px; border-radius: 12px; background: #F8FAFC; transition: 0.3s; }
+    .upload-box:hover { border-color: var(--secondary); background: #F0F7FF; }
+    .btn-upload-group { display: flex; gap: 8px; margin-top: 15px; }
+    .btn-upload { flex: 1; background: #FFF; border: 1px solid var(--border); padding: 10px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; display: flex; flex-direction: column; align-items: center; gap: 5px; box-shadow: var(--shadow-sm); transition: 0.2s;}
+    .btn-upload.primary { background: var(--secondary); color: #FFF; border-color: var(--secondary); }
+    .btn-upload input[type="file"] { display: none; }
+    .btn-upload:active { transform: scale(0.97); }
+    
+    .gallery-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; justify-content: center;}
+    .thumb-wrap { position: relative; width: 55px; height: 55px; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-sm); border: 1px solid var(--border);}
+    .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    .btn-clear { background: transparent; color: #E53E3E; border: none; font-size: 13px; cursor: pointer; margin-top: 12px; font-weight: 500; text-decoration: underline; display: none; width: 100%; font-family: 'Prompt';}
+
+    /* Checkbox */
+    .checkbox-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: #F8FAFC; padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+    .checkbox-grid label { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 14px; cursor: pointer; color: var(--text-main);}
+    .checkbox-grid input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--secondary); cursor: pointer;}
+
+    /* FAB Menu */
+    .fab-main { position: fixed; bottom: 30px; right: 25px; width: 60px; height: 60px; border-radius: 50%; background: var(--secondary); color: white; border: none; box-shadow: var(--shadow-md); display: flex; justify-content: center; align-items: center; cursor: pointer; transition: 0.3s; z-index: 100;}
+    .fab-main:hover { transform: scale(1.05); }
+    .fab-main.close-mode { background: var(--text-muted); transform: rotate(45deg); }
+
+    /* 📊 Analytics Dashboard CSS */
+    .dashboard-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; margin-bottom: 20px;}
+    .stat-card { background: white; padding: 15px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; justify-content: center;}
+    .stat-card h3 { font-size: 12px; color: var(--text-muted); margin: 0 0 5px; font-weight: 600;}
+    .stat-card .value { font-size: 28px; font-weight: 700; color: var(--primary); margin: 0;}
+    
+    .chart-card { background: white; padding: 20px; border-radius: 16px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); margin-bottom: 20px; transition: 0.3s;}
+    .chart-wrapper { position: relative; height: 220px; width: 100%; }
+    
+    /* 🧑‍🔧 Tech Feed Scroll */
+    .tech-feed-container { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;}
+    .tech-feed-container::-webkit-scrollbar { display: none; }
+    .tech-chip { background: white; border: 1px solid var(--border); padding: 12px 15px; border-radius: 12px; min-width: 140px; box-shadow: var(--shadow-sm); flex-shrink: 0;}
+    .tech-chip-name { font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 4px; display: flex; align-items: center; gap: 5px;}
+    .tech-chip-job { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+
+    /* Dashboard & Filters */
+    .filter-section { background: white; padding: 20px; border-radius: 16px; margin-bottom: 20px; box-shadow: var(--shadow-sm); border: 1px solid rgba(0, 94, 184, 0.05); }
+    
+    .quick-filters { display: flex; gap: 8px; margin-bottom: 15px; overflow-x: auto; padding-bottom: 5px;}
+    .btn-quick { background: #EDF2F7; border: none; padding: 8px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--text-muted); cursor: pointer; white-space: nowrap; font-family: 'Prompt';}
+    .btn-quick.active { background: var(--secondary); color: white; }
+
+    .report-card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 15px; box-shadow: var(--shadow-sm); border: 1px solid var(--border); border-left: 5px solid var(--accent); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); cursor: pointer; position: relative; overflow: hidden;}
+    .report-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); border-color: var(--secondary); border-left: 5px solid var(--secondary); }
+    
+    .status-Finished { border-left-color: #38A169 !important; } 
+    .status-Ongoing { border-left-color: #D69E2E !important; } 
+    .status-Unfinished { border-left-color: #E53E3E !important; } 
+    .status-F { border-left-color: #38A169 !important; } 
+    .status-O { border-left-color: #D69E2E !important; } 
+    .status-U { border-left-color: #E53E3E !important; } 
+    
+    .badge-new { background: #E53E3E; color: white; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; animation: pulseRed 2s infinite; margin-left: 5px; }
+    @keyframes pulseRed { 0% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0.5); } 70% { box-shadow: 0 0 0 6px rgba(229, 62, 62, 0); } 100% { box-shadow: 0 0 0 0 rgba(229, 62, 62, 0); } }
+    .report-card.is-new { border: 1px solid #FC8181; background: #FFF5F5; }
+    .report-card.is-new:hover { border-color: #E53E3E; box-shadow: 0 10px 25px rgba(229, 62, 62, 0.15); border-left: 5px solid #E53E3E; }
+
+    .report-card-head { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 10px;}
+    .report-card-title { font-weight: 600; color: var(--primary); font-size: 15px; display: flex; align-items: center; flex-wrap: wrap;}
+    .report-detail { font-size: 14px; color: #4A5568; line-height: 1.6; margin: 4px 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;}
+    .badge-chip { background: #EDF2F7; color: #4A5568; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 500; display: inline-flex; align-items: center; gap: 4px;}
+
+    /* 📄 Pagination CSS */
+    .pagination-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; margin-top: 10px; border-top: 1px solid var(--border);}
+    .btn-page { background: white; border: 1px solid var(--border); padding: 8px 15px; border-radius: 8px; font-weight: 600; color: var(--primary); cursor: pointer; font-family: 'Prompt'; transition: 0.2s;}
+    .btn-page:hover:not(:disabled) { background: #F8FAFC; border-color: var(--secondary); }
+    .btn-page:disabled { background: #F1F5F9; color: #CBD5E0; cursor: not-allowed; }
+
+    /* Full Page Modals */
+    .page-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg); z-index: 200; display: none; overflow-y: auto; padding-bottom: 80px;}
+    .page-header { background: white; padding: 20px; position: sticky; top: 0; display: flex; justify-content: space-between; align-items: center; box-shadow: var(--shadow-sm); z-index: 10; margin-bottom: 25px; border-bottom: 2px solid var(--secondary);}
+    .btn-close-page { background: #F1F5F9; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; color: var(--primary); transition: 0.2s;}
+    .btn-close-page:hover { background: #E2E8F0; }
+    
+    .detail-row { margin-bottom: 15px; padding-bottom: 12px; border-bottom: 1px solid #F1F5F9; }
+    .detail-label { font-size: 12.5px; color: var(--text-muted); margin-bottom: 3px; font-weight: 500; }
+    .detail-value { font-size: 15px; color: var(--primary); font-weight: 500; line-height: 1.5; white-space: pre-wrap;}
+    
+    /* Metrics Box */
+    .metrics-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+    .metric-box { flex: 1; min-width: 100px; background: #FFF; border: 1px solid var(--border); border-radius: 12px; padding: 15px; text-align: center; box-shadow: var(--shadow-sm); }
+    .metric-box.downtime { border-bottom: 4px solid #E53E3E; }
+    .metric-box.repair { border-bottom: 4px solid #38A169; }
+    .metric-box.response { border-bottom: 4px solid #D69E2E; }
+    .metric-label { font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+    .metric-val { font-size: 18px; font-weight: 700; color: var(--text-main); }
+    
+    /* Buttons */
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 15px; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; transition: 0.2s; box-shadow: 0 4px 15px rgba(0, 31, 91, 0.25);}
+    .btn-primary:active { transform: scale(0.98); }
+    
+    .btn-edit { background: linear-gradient(135deg, var(--secondary), #004a94); color: white; border: none; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; font-family: 'Prompt'; margin-top: 25px; transition: all 0.3s ease; box-shadow: 0 6px 20px rgba(0, 94, 184, 0.35);}
+    .btn-edit:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0, 94, 184, 0.45); }
+    .btn-edit:active { transform: translateY(0); }
+
+    #toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 30px; font-size: 12px; display: none; z-index: 1000; box-shadow: var(--shadow-sm);}
+    #loadingScreen { position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(244, 247, 249, 0.9); backdrop-filter: blur(5px); z-index: 999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
   </style>
 </head>
 <body>
 
-  <div class="app-header d-flex justify-content-between align-items-center">
-    <h5 class="m-0 fw-bold text-dark" id="headerTitle">ระบบจัดการ SMP</h5>
-    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="btnBackHome" style="display:none;" onclick="showHome()">กลับหน้าแรก</button>
+  <!-- 🔴 ใส่ URL ของคุณตรงนี้ -->
+  <script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbygLJABXRzeot0Fu5FxdGN_4GwFJnnPMb2ifm4pvrcsTl6TpdvilGeHqOrNpjJo-MyN9w/exec";
+  </script>
+
+  <!-- Main Header -->
+  <div class="header" id="mainHeader">
+    <div class="header-left">
+      <div class="header-icon"><span class="material-symbols-rounded">engineering</span></div>
+      <div class="header-text">
+        <h1 id="appTitle">CMMS System</h1>
+        <p id="appSub">ศูนย์กลางติดตามและแจกงานซ่อม</p>
+      </div>
+    </div>
+    <div class="header-right">
+      <a href="https://engpcl2530-uni.github.io/BPC-Background-system-Unilever/" class="btn-hub">
+        <span class="material-symbols-rounded" style="font-size: 20px;">apps</span> Hub
+      </a>
+    </div>
   </div>
 
-  <div class="container mt-4">
+  <div id="loadingScreen">
+    <span class="material-symbols-rounded" style="font-size: 45px; color: var(--secondary); animation: spin 1.5s linear infinite;">sync</span>
+    <p style="margin-top: 15px; font-weight: 600; color: var(--primary);">กำลังดึงข้อมูลจากระบบ...</p>
+    <style>@keyframes spin { 100% { transform: rotate(360deg); } }</style>
+  </div>
 
-    <!-- ================= VIEW 1: Home ================= -->
-    <div id="homeView" class="section-view active">
-      <div class="row mb-4"><div class="col-md-8"><input type="text" id="searchInput" class="form-control" placeholder="🔍 ค้นหา รหัส, ชื่อเรื่อง, ไลน์..." onkeyup="filterList()"></div></div>
-      <div id="smpListContainer" class="row"><div class="text-center mt-5 text-muted"><div class="spinner-border text-primary mb-2"></div><p>กำลังโหลดข้อมูล...</p></div></div>
-      <div class="fab" onclick="showForm()">+</div>
+  <div id="toast">บันทึกข้อมูลฉบับร่างอัตโนมัติแล้ว</div>
+
+  <div id="dashboardView" class="container" style="display: none;">
+    <div class="dashboard-stats">
+      <div class="stat-card">
+        <h3>งานใหม่ (48 ชม.)</h3>
+        <p class="value" id="statNewTask">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>สถานะซ่อมเสร็จ</h3>
+        <p class="value" id="statDone" style="color: #38A169;">0%</p>
+      </div>
     </div>
 
-    <!-- ================= VIEW 2: Form ================= -->
-    <div id="formView" class="section-view">
-      <form id="smpForm">
-        <div class="card-custom">
-          <div class="section-title"><i class="material-icons">article</i> ข้อมูลทั่วไป</div>
-          <div class="row">
-            <div class="col-md-8 mb-3"><label class="form-label">ชื่อเรื่อง SMP <span class="required-star">*</span></label><input type="text" class="form-control" id="f_title" required></div>
-            <div class="col-md-4 mb-3"><label class="form-label">SMP ID <span class="required-star">*</span></label><input type="text" class="form-control text-primary fw-bold bg-light" id="f_smpId" readonly required></div>
-            <div class="col-md-6 mb-3"><label class="form-label">นำเสนอโดย <span class="required-star">*</span></label><input type="text" class="form-control" id="f_presenter" required></div>
-            <div class="col-md-6 mb-3"><label class="form-label">อนุมัติโดย</label><input type="text" class="form-control" id="f_approver"></div>
-            <div class="col-md-6 mb-3"><label class="form-label">ไลน์ / แผนก</label><input type="text" class="form-control" id="f_line"></div>
-            <div class="col-md-6 mb-3"><label class="form-label">เครื่องจักร</label><input type="text" class="form-control" id="f_machine"></div>
-            
-            <div class="col-md-12 mb-4 mt-2">
-              <label class="form-label">ประเภทของ SMP <span class="required-star">*</span></label>
-              <div class="d-flex flex-wrap gap-4 mt-1">
-                <div class="form-check"><input class="form-check-input chk-smptype" type="checkbox" value="เครื่องกล" id="t1"><label class="form-check-label" for="t1">เครื่องกล</label></div>
-                <div class="form-check"><input class="form-check-input chk-smptype" type="checkbox" value="ไฟฟ้าและการควบคุม" id="t2"><label class="form-check-label" for="t2">ไฟฟ้าและการควบคุม</label></div>
-                <div class="form-check"><input class="form-check-input chk-smptype" type="checkbox" value="อื่นๆ" id="t3" onchange="toggleOtherType(this.checked)"><label class="form-check-label" for="t3">อื่นๆ</label></div>
-              </div>
-              <input type="text" class="form-control mt-2" id="f_smpTypeOther" placeholder="โปรดระบุประเภท SMP..." style="display:none;">
-            </div>
-
-            <div class="col-md-4 mb-3"><label class="form-label">จำนวนช่างเทคนิค</label><input type="number" class="form-control" id="f_techCount"></div>
-            <div class="col-md-4 mb-3"><label class="form-label">เวลาที่ช่างทำงานรวม (นาที)</label><input type="number" class="form-control" id="f_techTime"></div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">ประเภทบำรุงรักษา <span class="required-star">*</span></label>
-              <select class="form-select" id="f_maintType" required>
-                <option value="">-- เลือก --</option><option value="TBM">TBM</option><option value="CBM">CBM</option><option value="BDM">BDM</option>
-              </select>
-            </div>
-            
-            <div class="col-md-4 mb-3"><label class="form-label">เวลาที่ใช้งาน (นาที)</label><input type="number" class="form-control" id="f_workTime"></div>
-            <div class="col-md-4 mb-3"><label class="form-label">เวลาหยุดเครื่องจักร (นาที)</label><input type="number" class="form-control" id="f_downtime"></div>
-            <div class="col-md-4 mb-3">
-              <label class="form-label">ความถี่</label>
-              <select class="form-select" id="f_frequency">
-                <option value="">-- เลือก --</option><option value="กะ">กะ</option><option value="วัน">วัน</option><option value="เดือน">เดือน</option><option value="ไตรมาส">ไตรมาส</option><option value="ปี">ปี</option>
-              </select>
-            </div>
-            <div class="col-md-12 mt-2">
-              <label class="form-label"><i class="material-icons align-middle fs-5">photo_camera</i> รูปภาพการทำงานหลัก</label>
-              <input type="file" class="form-control bg-white" accept="image/*" capture="environment" onchange="compressMainImage(this)">
-              <input type="hidden" id="f_mainImageBase64">
-              <div id="mainImagePreview" class="mt-3"></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-custom">
-          <div class="section-title"><i class="material-icons text-warning">security</i> ความปลอดภัย (Safety)</div>
-          
-          <label class="form-label mb-2">อุปกรณ์ป้องกันส่วนบุคคล (PPE) <span class="text-muted fw-normal fs-6">- คลิกเพื่อกากบาทหาก "ไม่ใช้งาน"</span></label>
-          <div id="ppeBox" class="d-flex flex-wrap gap-2 mb-4">
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="ถุงมือ"><img src="images/ppe_gloves.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">ถุงมือ</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="หมวกนิรภัย"><img src="images/ppe_helmet.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">หมวกนิรภัย</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="หน้ากาก"><img src="images/ppe_mask.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">หน้ากาก</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="กันตกจากที่สูง"><img src="images/ppe_harness.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">กันตกที่สูง</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="แว่นตา"><img src="images/ppe_glasses.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">แว่นตา</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="ที่อุดหู"><img src="images/ppe_headphone.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">ที่อุดหู</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="รองเท้าเซฟตี้"><img src="images/ppe_foot.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">รองเท้าเซฟตี้</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="เสื้อสะท้อนแสง"><img src="images/ppe_vis_cloth.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">เสื้อสะท้อนแสง</span></div>
-          </div>
-
-          <div class="mb-4 bg-light p-3 rounded-3 border d-flex align-items-center gap-4">
-            <img src="images/icon_loto.png" style="width: 60px; height: 60px; object-fit: contain;" onerror="this.style.display='none'">
-            <div>
-              <label class="form-label mb-2">ต้องการอุปกรณ์ LOTO หรือไม่? <span class="required-star">*</span></label><br>
-              <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="r_loto" value="ต้องการ" required><label class="form-check-label">ต้องการ</label></div>
-              <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="r_loto" value="ไม่ต้องการ"><label class="form-check-label">ไม่ต้องการ</label></div>
-            </div>
-          </div>
-
-          <label class="form-label mb-2">ความเสี่ยงอันตราย <span class="text-muted fw-normal fs-6">- คลิกเพื่อกากบาทหาก "ไม่มีความเสี่ยงนี้"</span></label>
-          <div id="riskBox" class="d-flex flex-wrap gap-2 mb-4">
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="จุดหนีบ"><img src="images/risk_gear.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">จุดหนีบ</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="อุปกรณ์เครื่องมือ"><img src="images/risk_wrech.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">อุปกรณ์/เครื่องมือ</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="ยกด้วยมือ"><img src="images/risk_heavyobject.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">ยกด้วยมือ</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="ทำงานที่สูง"><img src="images/risk_highground.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">ที่สูง</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="สารเคมี"><img src="images/risk_chmisrty.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">สารเคมี</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="เสียงดัง"><img src="images/risk_loudnoise.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">เสียงดัง</span></div>
-            <div class="icon-checkbox" onclick="this.classList.toggle('not-used')" data-val="รถโฟล์คลิฟต์"><img src="images/risk_car.png" class="custom-icon-img" onerror="this.style.display='none'"><span class="label">โฟล์คลิฟต์</span></div>
-          </div>
-
-          <div class="mb-2 bg-light p-3 rounded-3 border d-flex align-items-center gap-4">
-            <img src="images/icon_risk_assessed.png" style="width: 60px; height: 60px; object-fit: contain;" onerror="this.style.display='none'">
-            <div>
-              <label class="form-label mb-2">ประเมินความเสี่ยงเรียบร้อยแล้วใช่หรือไม่? <span class="required-star">*</span></label><br>
-              <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="r_riskAssessed" value="ใช่" required><label class="form-check-label">ใช่</label></div>
-              <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="r_riskAssessed" value="ไม่ใช่"><label class="form-check-label">ไม่ใช่</label></div>
-              <div class="form-check form-check-inline"><input class="form-check-input" type="radio" name="r_riskAssessed" value="ไม่เกี่ยวข้อง"><label class="form-check-label">ไม่เกี่ยวข้อง</label></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-custom">
-          <div class="section-title d-flex justify-content-between align-items-center w-100">
-            <div><i class="material-icons text-success">format_list_numbered</i> ขั้นตอนการทำงาน</div>
-            <button type="button" class="btn btn-sm btn-outline-success rounded-pill fw-bold" onclick="addStepCard()">+ เพิ่มขั้นตอน</button>
-          </div>
-          <div id="stepsContainer"></div>
-        </div>
-
-        <button type="submit" class="btn w-100 btn-main fs-5 shadow-sm" id="btnSubmit">บันทึกข้อมูล SMP</button>
-      </form>
+    <div class="chart-card" id="chartSection">
+      <h3 style="font-size: 14px; margin-top: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
+        <span class="material-symbols-rounded" style="font-size: 18px;">bar_chart</span> ปัญหาเครื่องจักรแยกตาม Line (Top 10)
+      </h3>
+      <div class="chart-wrapper">
+        <canvas id="lineIssueChart"></canvas>
+      </div>
     </div>
 
-    <!-- ================= VIEW 3: Detail ================= -->
-    <div id="detailView" class="section-view">
-      <div class="d-flex justify-content-end mb-3">
-        <button id="btnDownloadExcel" class="btn btn-success rounded-pill shadow-sm fw-bold" onclick="downloadExcel()">
-          <i class="material-icons align-middle fs-5">table_view</i> โหลดไฟล์ Excel (.xlsx)
+    <h3 style="font-size: 14px; color: var(--primary); margin-bottom: 10px; padding-left: 5px;">งานล่าสุดของทีมช่าง</h3>
+    <div class="tech-feed-container" id="techFeed"></div>
+
+    <div class="filter-section" style="margin-top: 25px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
+            <span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน
+        </h3>
+        <button class="btn-primary" style="background:#28a745; width:auto; padding:6px 12px; font-size:12px; border-radius: 8px;" onclick="exportToCSV()">
+            <span class="material-symbols-rounded" style="font-size:16px;">download</span> Export CSV
         </button>
       </div>
-      <div id="docContent" class="card-custom"></div>
+      
+      <div class="quick-filters">
+        <button class="btn-quick" onclick="setQuickFilter('week')">สัปดาห์นี้</button>
+        <button class="btn-quick" onclick="setQuickFilter('month')">เดือนนี้</button>
+        <button class="btn-quick active" onclick="setQuickFilter('all')">ทั้งหมด</button>
+      </div>
+
+      <div class="form-row" style="margin-bottom: 0;">
+        <div class="form-group"><label>วันที่เริ่ม</label><input type="date" id="fStart" onchange="renderReportTable(1)"></div>
+        <div class="form-group"><label>วันที่สิ้นสุด</label><input type="date" id="fEnd" onchange="renderReportTable(1)"></div>
+        <div class="form-group">
+          <label>Line</label>
+          <select id="fLine" onchange="renderReportTable(1)">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="A1">A1</option><option value="A2">A2</option><option value="O1">O1</option>
+            <option value="C1">C1</option><option value="C2">C2</option><option value="SB">SB</option>
+            <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
+            <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
+            <option value="IWK1">IWK1</option><option value="IWK2">IWK2</option><option value="V4">V4</option>
+            <option value="FGI">FGI</option><option value="CF3">CF3</option><option value="M1">M1</option>
+            <option value="EOL">EOL</option><option value="Utility">Utility</option><option value="Packing">Packing</option>
+            <option value="Lab">Lab</option><option value="Mixing">Mixing</option><option value="MIX-Utility">MIX-Utility</option>
+            <option value="Pre-Weight">Pre-Weight</option><option value="MIX#1">MIX#1</option><option value="MIX#2">MIX#2</option>
+            <option value="MIX#3">MIX#3</option><option value="MIX#4">MIX#4</option><option value="MIX#5">MIX#5</option>
+            <option value="MIX#6">MIX#6</option><option value="MIX#7">MIX#7</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>กะ (Shift)</label>
+          <select id="fShift" onchange="renderReportTable(1)">
+            <option value="">-- ทั้งหมด --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>สถานะงาน</label>
+          <select id="fStatus" onchange="renderReportTable(1)">
+            <option value="">-- ทุกสถานะ --</option>
+            <option value="Finished">Finished</option>
+            <option value="Ongoing">Ongoing</option>
+            <option value="Unfinished">Unfinished</option>
+          </select>
+        </div>
+        <div class="form-group" style="flex: 2;"><label>ค้นหา (Job No, ชื่อช่าง, เครื่อง)</label><input type="text" id="fText" placeholder="พิมพ์ข้อความ..." oninput="renderReportTable(1)"></div>
+      </div>
     </div>
 
+    <div id="reportContent"></div>
+    
+    <div class="pagination-container" id="paginationWrapper" style="display:none;">
+        <button class="btn-page" id="btnPrev" onclick="changePage(-1)">← ก่อนหน้า</button>
+        <span style="font-size:14px; font-weight:600; color:var(--text-muted);" id="pageIndicator">หน้า 1 / 1</span>
+        <button class="btn-page" id="btnNext" onclick="changePage(1)">ถัดไป →</button>
+    </div>
   </div>
 
-<script>
-  // =========================================================
-  // 🔴 1. เปลี่ยน URL ตรงนี้ให้เป็นลิงก์ Web App ของคุณ 🔴
-  // =========================================================
-  const API_URL = "https://script.google.com/macros/s/AKfycbw6rd64-pGhm0m6F9_cOf4nf_7Daou3hqzx9LQCrstQdKJNxG8sLOtaeulIh6YMtD0FPw/exec"; 
-
-  let smpDataList = [];
-  let currentDetailData = null;
-  let stepCounter = 0;
-
-  window.onload = () => { loadSMPList(); };
-
-  function toggleOtherType(isChecked) {
-    const inputOther = document.getElementById('f_smpTypeOther');
-    inputOther.style.display = isChecked ? 'block' : 'none';
-    if(isChecked) { inputOther.focus(); } else { inputOther.value = ''; }
-  }
-
-  function showHome() {
-    document.querySelectorAll('.section-view').forEach(e => e.classList.remove('active'));
-    document.getElementById('homeView').classList.add('active');
-    document.getElementById('headerTitle').innerText = "ระบบจัดการ SMP";
-    document.getElementById('btnBackHome').style.display = 'none';
-    loadSMPList();
-  }
-
-  function showForm() {
-    document.querySelectorAll('.section-view').forEach(e => e.classList.remove('active'));
-    document.getElementById('formView').classList.add('active');
-    document.getElementById('headerTitle').innerText = "สร้าง SMP ใหม่";
-    document.getElementById('btnBackHome').style.display = 'block';
-    
-    document.getElementById('f_smpId').value = "กำลังดึง ID...";
-    fetch(API_URL + "?action=generateId")
-      .then(res => res.json())
-      .then(data => document.getElementById('f_smpId').value = data.id)
-      .catch(err => console.error("Error fetching ID:", err));
-
-    if(stepCounter === 0) addStepCard();
-  }
-
-  function showDetail(smpId) {
-    document.querySelectorAll('.section-view').forEach(e => e.classList.remove('active'));
-    document.getElementById('detailView').classList.add('active');
-    document.getElementById('headerTitle').innerText = "เอกสาร: " + smpId;
-    document.getElementById('btnBackHome').style.display = 'block';
-    document.getElementById('docContent').innerHTML = `<div class="text-center text-muted mt-4"><div class="spinner-border text-primary mb-2"></div><p>กำลังโหลด...</p></div>`;
-    
-    fetch(API_URL + "?action=getDetails&smpId=" + smpId)
-      .then(res => res.json())
-      .then(data => renderDetail(data))
-      .catch(err => console.error("Error fetching details:", err));
-  }
-
-  function loadSMPList() {
-    fetch(API_URL + "?action=getList")
-      .then(res => res.json())
-      .then(data => { smpDataList = data; renderList(data); })
-      .catch(err => { document.getElementById('smpListContainer').innerHTML = `<p class="text-center text-danger mt-4">ไม่สามารถโหลดข้อมูลได้ โปรดตรวจสอบ API URL</p>`; });
-  }
-
-  function renderList(list) {
-    let html = '';
-    if(!list || list.length === 0) { html = '<p class="text-center mt-4 text-muted">ยังไม่มีข้อมูล SMP ในระบบ</p>'; }
-    else {
-      list.forEach(item => {
-        html += `
-        <div class="col-md-6 col-lg-4">
-          <div class="card p-3 card-smp mb-3 bg-white" onclick="showDetail('${item.smpId}')">
-            <h5 class="mb-1 text-primary fw-bold">${item.smpId}</h5>
-            <div class="fw-bold mb-2 text-dark text-truncate">${item.title}</div>
-            <div class="text-muted small mb-2"><i class="material-icons align-middle" style="font-size:14px;">calendar_today</i> ${item.date}</div>
-            <div class="text-muted small text-truncate"><i class="material-icons align-middle" style="font-size:14px;">precision_manufacturing</i> ${item.line || '-'}</div>
-            <div class="mt-2"><span class="badge bg-light text-dark border">${item.type || '-'}</span></div>
-          </div>
-        </div>`;
-      });
-    }
-    document.getElementById('smpListContainer').innerHTML = html;
-  }
-
-  function filterList() {
-    let kw = document.getElementById('searchInput').value.toLowerCase();
-    let filtered = smpDataList.filter(o => o.smpId.toLowerCase().includes(kw) || o.title.toLowerCase().includes(kw) || (o.line && o.line.toLowerCase().includes(kw)));
-    renderList(filtered);
-  }
-
-  function addStepCard() {
-    stepCounter++;
-    const html = `
-      <div class="step-card" id="step_row_${stepCounter}">
-        <div class="d-flex justify-content-between mb-3 align-items-center">
-          <h6 class="text-primary m-0 fw-bold">ขั้นตอนการทำงาน</h6>
-          <button type="button" class="btn btn-sm btn-light text-danger rounded-pill" onclick="this.closest('.step-card').remove(); updateStepNumbers();"><i class="material-icons fs-6 align-middle">delete</i> ลบ</button>
+  <!-- ฟอร์มเพิ่มข้อมูล -->
+  <div id="formView" class="container" style="display: none; margin-top: 25px;">
+    <form id="maintenanceForm" onsubmit="submitForm(event)">
+      <div class="card">
+        <div class="card-title"><span class="material-symbols-rounded">feed</span> ข้อมูลทั่วไป</div>
+        
+        <div class="form-row">
+          <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="date" required></div>
+          <div class="form-group"><label>กะ (Shift)</label><select id="shift" required><option value="" disabled selected>-- เลือกกะ --</option><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
+          <div class="form-group"><label>แผนก</label><select id="dept" required><option value="CO">CO</option><option value="PCL">PCL</option></select></div>
         </div>
-        <div class="mb-3"><label class="form-label">รายละเอียดการทำงาน <span class="required-star">*</span></label><input type="text" class="form-control s-task" required></div>
-        <div class="row mb-3">
-          <div class="col-6"><label class="form-label">เวลา (นาที)</label><input type="number" class="form-control s-time"></div>
-          <div class="col-6">
-            <label class="form-label">ประเภท <span class="required-star">*</span></label>
-            <select class="form-select s-type" required>
-              <option value="">-- เลือก --</option>
-              <option value="ความปลอดภัย">ความปลอดภัย</option>
-              <option value="คุณภาพ">คุณภาพ</option>
-              <option value="สิ่งแวดล้อม">สิ่งแวดล้อม</option>
-              <option value="การผลิต">การผลิต</option>
+
+        <div class="form-row">
+          <div class="form-group"><label>สายการผลิต (Line)</label>
+            <select id="line" onchange="toggleOther('line', 'lineOtherContainer')" required>
+              <option value="" disabled selected>-- เลือกไลน์ --</option>
+              <option value="A1">A1</option><option value="A2">A2</option><option value="O1">O1</option>
+              <option value="C1">C1</option><option value="C2">C2</option><option value="SB">SB</option>
+              <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
+              <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
+              <option value="IWK1">IWK1</option><option value="IWK2">IWK2</option><option value="V4">V4</option>
+              <option value="FGI">FGI</option><option value="CF3">CF3</option><option value="M1">M1</option>
+              <option value="EOL">EOL</option><option value="Utility">Utility</option><option value="Packing">Packing</option>
+              <option value="Lab">Lab</option><option value="Mixing">Mixing</option><option value="MIX-Utility">MIX-Utility</option>
+              <option value="Pre-Weight">Pre-Weight</option><option value="MIX#1">MIX#1</option><option value="MIX#2">MIX#2</option>
+              <option value="MIX#3">MIX#3</option><option value="MIX#4">MIX#4</option><option value="MIX#5">MIX#5</option>
+              <option value="MIX#6">MIX#6</option><option value="MIX#7">MIX#7</option>
+              <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+            <div id="lineOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="lineOther" placeholder="พิมพ์ระบุ Line อื่นๆ..."></div>
+          </div>
+          <div class="form-group"><label>เครื่องจักร</label><input type="text" id="machine" required placeholder="เช่น FILLER-01"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="material-symbols-rounded">schedule</span> ระยะเวลาดำเนินการ</div>
+        <div class="form-row">
+          <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="callHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)"><span class="time-colon">:</span><input type="text" id="callMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)"></div></div>
+          <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="startHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="startMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+          <div class="form-group"><label>ซ่อมเสร็จ</label><div class="time-input-group"><input type="text" id="endHH" placeholder="HH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="endMM" placeholder="MM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="material-symbols-rounded">build_circle</span> รายละเอียดทางเทคนิค</div>
+        <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="breakdown" rows="2" required></textarea></div>
+        <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="cause" rows="2"></textarea></div>
+        <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="solved" rows="2" required></textarea></div>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>นับเป็น Breakdown หรือไม่?</label>
+                <select id="isBreakdown" required>
+                    <option value="" disabled selected>-- เลือก --</option>
+                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
+                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ต้นทุนการซ่อม (Cost)</label>
+                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (ถ้ามี)" min="0">
+            </div>
+        </div>
+        
+        <div class="form-group" style="margin-top: 15px;">
+            <label>สถานะงาน (Result)</label>
+            <select id="result" required>
+                <option value="" disabled selected>-- เลือกสถานะ --</option>
+                <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
+                <option value="Ongoing">Ongoing (กำลังดำเนินการ)</option>
+                <option value="Unfinished">Unfinished (ยังไม่เสร็จ)</option>
+            </select>
+        </div>
+        
+        <hr style="border: 1px solid #E2E8F0; margin: 25px 0;">
+        <h3 style="font-size: 15px; color: var(--primary); margin-bottom: 15px; font-weight: 600;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:middle;">assignment</span> ส่วนของการแก้ไขแผน PM (ถ้ามี)</h3>
+        
+        <div class="form-row">
+            <div class="form-group">
+                <label>ต้องแก้ไขแผน PM หรือไม่?</label>
+                <select id="pmUpdate">
+                    <option value="" disabled selected>-- เลือก --</option>
+                    <option value="Yes">ต้องแก้ไขแผน (Yes)</option>
+                    <option value="No">ไม่ต้องแก้ไข (No)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>แก้ไข PM เสร็จแล้วรึยัง?</label>
+                <select id="pmCompleted">
+                    <option value="" disabled selected>-- เลือก --</option>
+                    <option value="Yes">เสร็จแล้ว (Yes)</option>
+                    <option value="No">ยังไม่เสร็จ (No)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>รอบ PM (เดือน)</label>
+                <input type="number" id="pmInterval" placeholder="ระบุจำนวนเดือน..." min="0">
+            </div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+            <label>รายละเอียด PM ที่แก้ไข</label>
+            <textarea id="pmDetail" rows="2" placeholder="ระบุรายละเอียดที่ต้องการปรับปรุงแผน PM..."></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="material-symbols-rounded">photo_camera</span> ภาพถ่ายอ้างอิง</div>
+        <div class="form-row">
+          <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">ภาพก่อนซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'before')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'before')"></label></div><div id="thumbBefore" class="gallery-preview"></div><button type="button" id="clearBefore" class="btn-clear" onclick="clearFiles('before')">ล้างรูปภาพ</button></div>
+          <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">ภาพหลังซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'after')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'after')"></label></div><div id="thumbAfter" class="gallery-preview"></div><button type="button" id="clearAfter" class="btn-clear" onclick="clearFiles('after')">ล้างรูปภาพ</button></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span class="material-symbols-rounded">group</span> บุคลากร</div>
+        <div class="form-group">
+          <label>วิศวกร/ช่างซ่อมบำรุง</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" class="tech-cb" value="ภูวรินทร์"> ภูวรินทร์</label>
+            <label><input type="checkbox" class="tech-cb" value="วิเชียร"> วิเชียร</label>
+            <label><input type="checkbox" class="tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
+            <label><input type="checkbox" class="tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
+            <label><input type="checkbox" class="tech-cb" value="สันติ"> สันติ</label>
+            <label><input type="checkbox" class="tech-cb" value="บัณฑิต"> บัณฑิต</label>
+            <label><input type="checkbox" class="tech-cb" value="ลิขิต"> ลิขิต</label>
+            <label><input type="checkbox" class="tech-cb" value="ศุภสิทธิ์"> ศุภสิทธิ์</label>
+            <label><input type="checkbox" class="tech-cb" value="ธงชัย"> ธงชัย</label>
+            <label><input type="checkbox" class="tech-cb" value="สุพรชัย"> สุพรชัย</label>
+            <label><input type="checkbox" class="tech-cb" value="วุฒิเดช"> วุฒิเดช</label>
+            <label><input type="checkbox" class="tech-cb" value="สัญญา"> สัญญา</label>
+            <label><input type="checkbox" class="tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
+            <label><input type="checkbox" class="tech-cb" value="ศิวกร"> ศิวกร</label>
+            <label><input type="checkbox" class="tech-cb" value="กิตติพงษ์"> กิตติพงษ์</label>
+            <label><input type="checkbox" class="tech-cb" value="ไชยยา"> ไชยยา</label>
+            <label><input type="checkbox" class="tech-cb" value="นิรุตต์"> นิรุตต์</label>
+            <label><input type="checkbox" class="tech-cb" value="เศรษฐศักดิ์"> เศรษฐศักดิ์</label>
+            <label style="grid-column: span 2;"><input type="checkbox" id="cbOther" onchange="toggleOtherTech('add')"> ระบุชื่ออื่น</label>
+          </div>
+          <div id="techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="techOther" placeholder="พิมพ์ชื่อผู้ปฏิบัติงาน..."></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>ผู้รับมอบงาน</label><input type="text" id="handover" required></div>
+        </div>
+        <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุเพิ่มเติม (ถ้ามี)</label><textarea id="remark" rows="2"></textarea></div>
+      </div>
+
+      <button type="submit" class="btn-primary" id="submitBtn"><span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ</button>
+    </form>
+  </div>
+
+  <button class="fab-main" id="fabMainBtn" onclick="toggleMainView()">
+    <span class="material-symbols-rounded" id="fabIcon" style="font-size: 30px;">add</span>
+  </button>
+
+  <div class="page-overlay" id="jobDetailsPage">
+    <div class="page-header">
+      <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">assignment</span> รายละเอียดงาน <span id="detailJobNum" style="color:var(--secondary);"></span></h2>
+      <button class="btn-close-page" onclick="document.getElementById('jobDetailsPage').style.display='none'"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="container">
+      <div class="card" id="jobDetailsContent"></div>
+      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้</button>
+    </div>
+  </div>
+
+  <!-- ฟอร์มแก้ไขข้อมูล -->
+  <div class="page-overlay" id="editJobPage" style="z-index: 250;">
+    <div class="page-header">
+      <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">update</span> อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
+      <button class="btn-close-page" onclick="document.getElementById('editJobPage').style.display='none'"><span class="material-symbols-rounded">close</span></button>
+    </div>
+    <div class="container">
+      <form id="editForm" onsubmit="submitEditForm(event)">
+        <input type="hidden" id="editJobNum">
+        
+        <div class="card">
+          <div class="card-title">ข้อมูลทั่วไป (แก้ไขได้)</div>
+          <div class="form-row">
+            <div class="form-group"><label>วันที่ปฏิบัติงาน</label><input type="date" id="edit_date" required></div>
+            <div class="form-group"><label>กะ (Shift)</label><select id="edit_shift" required><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
+            <div class="form-group"><label>แผนก</label><select id="edit_dept" required><option value="CO">CO</option><option value="PCL">PCL</option></select></div>
+          </div>
+          <div class="form-group"><label>เครื่องจักร</label><input type="text" id="edit_machine" required></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">ระยะเวลาดำเนินการ (แก้ไขได้)</div>
+          <div class="form-row">
+            <div class="form-group"><label>เวลาแจ้ง</label><div class="time-input-group"><input type="text" id="edit_callHH" maxlength="2" oninput="formatTime(this,23)"><span class="time-colon">:</span><input type="text" id="edit_callMM" maxlength="2" oninput="formatTime(this,59)"></div></div>
+            <div class="form-group"><label>เริ่มซ่อม</label><div class="time-input-group"><input type="text" id="edit_startHH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="edit_startMM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+            <div class="form-group"><label>ซ่อมเสร็จ</label><div class="time-input-group"><input type="text" id="edit_endHH" maxlength="2" oninput="formatTime(this,23)" required><span class="time-colon">:</span><input type="text" id="edit_endMM" maxlength="2" oninput="formatTime(this,59)" required></div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">รายละเอียดปัญหา และแผน PM</div>
+          <div class="form-group"><label>อาการที่พบ (Breakdown Detail)</label><textarea id="edit_breakdown" rows="2" required></textarea></div>
+          <div class="form-group"><label>สาเหตุของปัญหา (Root Cause)</label><textarea id="edit_cause" rows="2"></textarea></div>
+          <div class="form-group"><label>การแก้ไข (Action Taken)</label><textarea id="edit_solved" rows="2" required></textarea></div>
+          
+          <div class="form-row">
+            <div class="form-group">
+                <label>นับเป็น Breakdown หรือไม่?</label>
+                <select id="edit_isBreakdown" required>
+                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
+                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>ต้นทุนการซ่อม (Cost)</label>
+                <input type="number" id="edit_cost" min="0">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label>อัปเดตสถานะงาน (Result)</label>
+            <select id="edit_result" required>
+                <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
+                <option value="Ongoing">Ongoing (กำลังดำเนินการ)</option>
+                <option value="Unfinished">Unfinished (ยังไม่เสร็จ)</option>
             </select>
           </div>
+          
+          <hr style="border: 1px solid #E2E8F0; margin: 20px 0;">
+          <div class="form-row">
+              <div class="form-group"><label>ต้องแก้ไขแผน PM หรือไม่?</label><select id="edit_pmUpdate"><option value="" disabled>-- เลือก --</option><option value="Yes">ต้องแก้ไข</option><option value="No">ไม่ต้องแก้ไข</option></select></div>
+              <div class="form-group"><label>แก้ไข PM เสร็จรึยัง?</label><select id="edit_pmCompleted"><option value="" disabled>-- เลือก --</option><option value="Yes">เสร็จแล้ว</option><option value="No">ยังไม่เสร็จ</option></select></div>
+              <div class="form-group"><label>รอบ PM (เดือน)</label><input type="number" id="edit_pmInterval" min="0"></div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;"><label>รายละเอียด PM ที่แก้ไข</label><textarea id="edit_pmDetail" rows="2"></textarea></div>
         </div>
-        <div class="mb-3"><label class="form-label">คำอธิบายเพิ่มเติม</label><textarea class="form-control s-desc" rows="2"></textarea></div>
-        <div class="mb-2">
-          <label class="form-label"><i class="material-icons align-middle fs-6">image</i> ภาพถ่าย / สเก็ตช์ (สูงสุด 10 รูป)</label>
-          <input type="file" class="form-control s-imgs bg-white" accept="image/*" multiple capture="environment" onchange="compressStepImages(this)">
-          <div class="img-preview-box d-flex gap-2 mt-2 overflow-auto"></div>
+        
+        <div class="card">
+          <div class="card-title">อัปโหลดภาพเพิ่มเติม (ทางเลือก)</div>
+          <div class="form-row">
+            <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">เพิ่มภาพก่อนซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'edit_before')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'edit_before')"></label></div><div id="thumbEditBefore" class="gallery-preview"></div><button type="button" id="clearEditBefore" class="btn-clear" onclick="clearFiles('edit_before')">ล้างรูปภาพ</button></div>
+            <div class="upload-box"><div style="font-size:14px; font-weight:600; text-align:center; color: var(--primary);">เพิ่มภาพหลังซ่อม</div><div class="btn-upload-group"><label class="btn-upload primary"><span class="material-symbols-rounded" style="font-size:18px;">photo_camera</span> ถ่ายรูป<input type="file" accept="image/*" capture="environment" onchange="handleFiles(event, 'edit_after')"></label><label class="btn-upload"><span class="material-symbols-rounded" style="font-size:18px;">photo_library</span> อัลบั้ม<input type="file" accept="image/*" multiple onchange="handleFiles(event, 'edit_after')"></label></div><div id="thumbEditAfter" class="gallery-preview"></div><button type="button" id="clearEditAfter" class="btn-clear" onclick="clearFiles('edit_after')">ล้างรูปภาพ</button></div>
+          </div>
         </div>
-      </div>`;
-    document.getElementById('stepsContainer').insertAdjacentHTML('beforeend', html);
-  }
+        
+        <div class="card">
+          <div class="card-title">แก้ไขผู้รับผิดชอบ / แจกงาน</div>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" class="edit-tech-cb" value="ภูวรินทร์"> ภูวรินทร์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="วิเชียร"> วิเชียร</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ณรงฤทธิ์"> ณรงฤทธิ์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ณัฐพงค์"> ณัฐพงค์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สันติ"> สันติ</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="บัณฑิต"> บัณฑิต</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ลิขิต"> ลิขิต</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ศุภสิทธิ์"> ศุภสิทธิ์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ธงชัย"> ธงชัย</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สุพรชัย"> สุพรชัย</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="วุฒิเดช"> วุฒิเดช</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สัญญา"> สัญญา</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="สมเกียรติ"> สมเกียรติ</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ศิวกร"> ศิวกร</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="กิตติพงษ์"> กิตติพงษ์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="ไชยยา"> ไชยยา</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="นิรุตต์"> นิรุตต์</label>
+            <label><input type="checkbox" class="edit-tech-cb" value="เศรษฐศักดิ์"> เศรษฐศักดิ์</label>
+            <label style="grid-column: span 2;"><input type="checkbox" id="edit_cbOther" onchange="toggleOtherTech('edit')"> ระบุชื่ออื่น</label>
+          </div>
+          <div id="edit_techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="edit_techOther" placeholder="พิมพ์ชื่อช่าง..."></div>
+          
+          <div class="form-row" style="margin-top: 15px;">
+            <div class="form-group"><label>ผู้รับมอบงาน</label><input type="text" id="edit_handover" required></div>
+          </div>
+          <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุเพิ่มเติม (ถ้ามี)</label><textarea id="edit_remark" rows="2"></textarea></div>
+        </div>
+        <button type="submit" class="btn-primary" id="updateBtn"><span class="material-symbols-rounded">save</span> บันทึกการอัปเดต</button>
+      </form>
+    </div>
+  </div>
 
-  function updateStepNumbers() {
-    let cards = document.querySelectorAll('.step-card');
-    stepCounter = cards.length;
-  }
+  <!-- 🟢 SCRIPT LOGIC 🟢 -->
+  <script>
+    let allReportData = [];
+    let currentJobData = null; 
+    let lineChartInstance = null;
+    
+    let currentPage = 1;
+    const itemsPerPage = 200; 
+    let currentFilteredData = [];
 
-  async function compressFile(file) {
-    return new Promise((resolve) => {
-      let reader = new FileReader();
-      reader.onload = e => {
-        let img = new Image();
-        img.onload = () => {
-          let canvas = document.createElement('canvas');
-          let MAX_W = 800; let scale = img.width > MAX_W ? MAX_W / img.width : 1;
-          canvas.width = img.width * scale; canvas.height = img.height * scale;
-          let ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-          resolve(canvas.toDataURL('image/jpeg', 0.7));
-        };
-        img.src = e.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
-  }
-
-  async function compressMainImage(input) {
-    if(input.files.length > 0) {
-      const b64 = await compressFile(input.files[0]);
-      document.getElementById('f_mainImageBase64').value = b64;
-      document.getElementById('mainImagePreview').innerHTML = `<img src="${b64}" style="height:120px; border-radius:8px; border:1px solid #ccc; box-shadow:0 2px 5px rgba(0,0,0,0.1);">`;
+    function parseTimeStringToPretty(timeStr) {
+        if (!timeStr || timeStr === "-") return "-";
+        let str = timeStr.toString().trim();
+        if (str.includes("ชั่วโมง") || str.includes("นาที")) { return str.replace(" 0 นาที", ""); }
+        if (str.includes(":")) {
+            let parts = str.split(":"); let h = parseInt(parts[0], 10) || 0; let m = parseInt(parts[1], 10) || 0;
+            if (h > 0 && m > 0) return `${h} ชั่วโมง ${m} นาที`;
+            if (h > 0 && m === 0) return `${h} ชั่วโมง`; return `${m} นาที`;
+        }
+        return str;
     }
-  }
 
-  async function compressStepImages(input) {
-    const previewBox = input.nextElementSibling;
-    previewBox.innerHTML = '<span class="text-muted small">กำลังบีบอัดรูปภาพ...</span>';
-    input.compressedArray = [];
-    let files = Array.from(input.files).slice(0, 10);
-    for(let f of files) { let b64 = await compressFile(f); input.compressedArray.push(b64); }
-    previewBox.innerHTML = '';
-    input.compressedArray.forEach(b64 => { previewBox.innerHTML += `<img src="${b64}" style="height:70px; border-radius:6px; border:1px solid #e5e7eb;">`; });
-  }
+    function formatDuration(totalMins) {
+        if (isNaN(totalMins) || totalMins < 0) return "-";
+        let h = Math.floor(totalMins / 60); let m = totalMins % 60;
+        if (h > 0 && m > 0) return `${h} ชั่วโมง ${m} นาที`;
+        if (h > 0 && m === 0) return `${h} ชั่วโมง`; return `${m} นาที`;
+    }
 
-  document.getElementById('smpForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    let smpTypes = [];
-    document.querySelectorAll('.chk-smptype:checked').forEach(el => {
-      if(el.value === 'อื่นๆ') { let otherVal = document.getElementById('f_smpTypeOther').value; if(otherVal.trim() !== '') smpTypes.push(otherVal); } 
-      else { smpTypes.push(el.value); }
-    });
-    if(smpTypes.length === 0) { alert("กรุณาเลือกประเภทของ SMP อย่างน้อย 1 ข้อ"); return; }
+    function parseDateSafely(dateStr) {
+        if (!dateStr) return new Date(0); 
+        let str = dateStr.toString().trim();
+        if (str.includes('-')) { let d = new Date(str); if (!isNaN(d.getTime())) return d; }
+        if (str.includes('/')) {
+            let parts = str.split('/');
+            if (parts.length === 3) {
+                let p0 = parseInt(parts[0], 10); let p1 = parseInt(parts[1], 10); let p2 = parseInt(parts[2], 10);
+                if (p2 < 100) p2 += 2000;
+                return new Date(p2, p1 - 1, p0); 
+            }
+        }
+        let fallback = new Date(str); return isNaN(fallback.getTime()) ? new Date(0) : fallback;
+    }
 
-    const btn = document.getElementById('btnSubmit');
-    btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังบันทึกข้อมูล...';
+    function toLocalYYYYMMDD(d) {
+        let y = d.getFullYear(); let m = (d.getMonth() + 1).toString().padStart(2, '0'); let day = d.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
 
-    let formData = {
-      title: document.getElementById('f_title').value, smpId: document.getElementById('f_smpId').value,
-      presenter: document.getElementById('f_presenter').value, approver: document.getElementById('f_approver').value,
-      line: document.getElementById('f_line').value, machine: document.getElementById('f_machine').value,
-      smpType: smpTypes.join(', '), techCount: document.getElementById('f_techCount').value,
-      techTime: document.getElementById('f_techTime').value, maintType: document.getElementById('f_maintType').value,
-      workTime: document.getElementById('f_workTime').value, downtime: document.getElementById('f_downtime').value,
-      frequency: document.getElementById('f_frequency').value, mainImage: document.getElementById('f_mainImageBase64').value,
-      ppe: Array.from(document.querySelectorAll('#ppeBox .icon-checkbox')).map(el => ({name: el.dataset.val, used: !el.classList.contains('not-used')})),
-      risks: Array.from(document.querySelectorAll('#riskBox .icon-checkbox')).map(el => ({name: el.dataset.val, risk: !el.classList.contains('not-used')})),
-      loto: document.querySelector('input[name="r_loto"]:checked').value, riskAssessed: document.querySelector('input[name="r_riskAssessed"]:checked').value
+    function isNewJob(dateStr) {
+        if (!dateStr) return false;
+        let jobDate = parseDateSafely(dateStr); let diffHours = (new Date() - jobDate) / (1000 * 60 * 60);
+        return (diffHours >= -24 && diffHours <= 48); 
+    }
+
+    function validateTimes(cHH, cMM, sHH, sMM, eHH, eMM) {
+        let s = parseInt(sHH)*60 + parseInt(sMM); let e = parseInt(eHH)*60 + parseInt(eMM);
+        if (isNaN(s) || isNaN(e)) return null;
+        let c = (cHH !== "" && cMM !== "") ? parseInt(cHH)*60 + parseInt(cMM) : null;
+        if (c !== null) { if (s < c && c >= 18*60 && s <= 6*60) s += 24*60; }
+        if (e < s && s >= 18*60 && e <= 12*60) e += 24*60; 
+        if (c !== null && s < c) return "เวลา 'เริ่มซ่อม' เร็วกว่าเวลา 'ที่รับแจ้ง'";
+        if (e < s) return "เวลา 'ซ่อมเสร็จ' เร็วกว่าเวลา 'เริ่มซ่อม'";
+        return null; 
+    }
+
+    function getDiffMinutes(startHH, startMM, endHH, endMM) {
+        let s = parseInt(startHH)*60 + parseInt(startMM); let e = parseInt(endHH)*60 + parseInt(endMM);
+        if (e < s) e += 24*60; return e - s;
+    }
+
+    const CACHE_KEY = "cmms_draft_v1";
+    
+    function saveDraft() {
+        let draft = {
+            timestamp: new Date().getTime(),
+            date: document.getElementById('date').value, shift: document.getElementById('shift').value,
+            line: document.getElementById('line').value, lineOther: document.getElementById('lineOther') ? document.getElementById('lineOther').value : '',
+            machine: document.getElementById('machine').value,
+            callHH: document.getElementById('callHH').value, callMM: document.getElementById('callMM').value,
+            startHH: document.getElementById('startHH').value, startMM: document.getElementById('startMM').value,
+            endHH: document.getElementById('endHH').value, endMM: document.getElementById('endMM').value,
+            breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value,
+            solved: document.getElementById('solved').value, result: document.getElementById('result').value,
+            isBreakdown: document.getElementById('isBreakdown').value, cost: document.getElementById('cost').value,
+            pmUpdate: document.getElementById('pmUpdate').value, pmCompleted: document.getElementById('pmCompleted').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value,
+            handover: document.getElementById('handover').value, dept: document.getElementById('dept').value, remark: document.getElementById('remark').value
+        };
+        localStorage.setItem(CACHE_KEY, JSON.stringify(draft));
+        let t = document.getElementById('toast');
+        t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 1500);
+    }
+
+    function loadDraft() {
+        let saved = localStorage.getItem(CACHE_KEY);
+        if(saved) {
+            let data = JSON.parse(saved);
+            if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { 
+                ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','isBreakdown','cost','pmUpdate','pmCompleted','pmInterval','pmDetail','handover','dept','remark'].forEach(id => {
+                    if(data[id] && document.getElementById(id)) document.getElementById(id).value = data[id];
+                });
+                if(data.line === 'อื่นๆ') toggleOther('line', 'lineOtherContainer');
+            } else { localStorage.removeItem(CACHE_KEY); }
+        }
+        if(!document.getElementById('date').value) document.getElementById('date').valueAsDate = new Date();
+    }
+
+    document.getElementById('maintenanceForm').addEventListener('input', saveDraft);
+    document.getElementById('maintenanceForm').addEventListener('change', saveDraft);
+
+    window.onload = async function() {
+      loadDraft(); 
+      try {
+        const res = await callAPI("getDashboard", {});
+        if(res.status === "success") { 
+          allReportData = res.data; 
+          document.getElementById('loadingScreen').style.display = 'none';
+          document.getElementById('dashboardView').style.display = 'block';
+          renderReportTable(1); 
+        } else { alert("Error: " + res.message); }
+      } catch(err) { alert("Network Error: " + err.message); }
     };
 
-    let stepsData = [];
-    document.querySelectorAll('.step-card').forEach((card, i) => {
-      let fileInput = card.querySelector('.s-imgs');
-      stepsData.push({
-        stepNo: i + 1, stepName: card.querySelector('.s-task').value, timeTaken: card.querySelector('.s-time').value,
-        typeSymbol: card.querySelector('.s-type').value, description: card.querySelector('.s-desc').value, images: fileInput.compressedArray || []
-      });
-    });
-
-    fetch(API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ formData: formData, stepsData: stepsData })
-    })
-    .then(res => res.json())
-    .then(res => {
-      if(res.status === 'success'){
-        alert("บันทึกสำเร็จ! รหัสเอกสาร: " + res.smpId); 
-        document.getElementById('smpForm').reset();
-        document.getElementById('mainImagePreview').innerHTML = ''; 
-        document.getElementById('stepsContainer').innerHTML = '';
-        toggleOtherType(false); stepCounter = 0; showHome();
-      } else {
-        alert("ผิดพลาด: " + res.message);
-      }
-    })
-    .catch(err => alert("การเชื่อมต่อล้มเหลว: " + err))
-    .finally(() => { btn.disabled = false; btn.innerText = 'บันทึกข้อมูล SMP'; });
-  });
-
-  function getPPEIcon(name) {
-    switch(name) {
-      case 'ถุงมือ': return 'images/ppe_gloves.png'; case 'หมวกนิรภัย': return 'images/ppe_helmet.png'; 
-      case 'หน้ากาก': return 'images/ppe_mask.png'; case 'กันตกจากที่สูง': return 'images/ppe_harness.png'; 
-      case 'แว่นตา': return 'images/ppe_glasses.png'; case 'ที่อุดหู': return 'images/ppe_headphone.png';
-      case 'รองเท้าเซฟตี้': return 'images/ppe_foot.png'; case 'เสื้อสะท้อนแสง': return 'images/ppe_vis_cloth.png';
-      default: return '';                   
+    async function callAPI(actionType, dataPayload) {
+      if(!GAS_API_URL || GAS_API_URL.includes("ใส่_URL_ของ")) throw new Error("กรุณาใส่ URL ของ Google Apps Script ก่อนครับ");
+      const payload = { action: actionType, data: dataPayload };
+      const response = await fetch(GAS_API_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) });
+      return await response.json();
     }
-  }
 
-  function getRiskIcon(name) {
-    switch(name) {
-      case 'จุดหนีบ': return 'images/risk_gear.png'; case 'อุปกรณ์เครื่องมือ': return 'images/risk_wrech.png'; 
-      case 'ยกด้วยมือ': return 'images/risk_heavyobject.png'; case 'ทำงานที่สูง': return 'images/risk_highground.png'; 
-      case 'สารเคมี': return 'images/risk_chmisrty.png'; case 'เสียงดัง': return 'images/risk_loudnoise.png';  
-      case 'รถโฟล์คลิฟต์': return 'images/risk_car.png';           
-      default: return '';                    
+    function setQuickFilter(type) {
+        document.querySelectorAll('.btn-quick').forEach(b => b.classList.remove('active')); event.target.classList.add('active');
+        let today = new Date(); let fs = document.getElementById('fStart'); let fe = document.getElementById('fEnd');
+        if (type === 'all') { fs.value = ''; fe.value = ''; }
+        else if (type === 'month') { let firstDay = new Date(today.getFullYear(), today.getMonth(), 1); fs.value = toLocalYYYYMMDD(firstDay); fe.value = toLocalYYYYMMDD(today); }
+        else if (type === 'week') { let first = today.getDate() - today.getDay() + (today.getDay() === 0 ? -6 : 1); let firstDay = new Date(today.setDate(first)); fs.value = toLocalYYYYMMDD(firstDay); fe.value = toLocalYYYYMMDD(new Date()); }
+        renderReportTable(1);
     }
-  }
 
-  function renderDetail(data) {
-    currentDetailData = data;
-    let m = data.main;
-    
-    let ppeHtml = m.ppe.filter(p => p.used).map(p => `
-      <div class="d-inline-flex flex-column align-items-center justify-content-center me-4 mb-2">
-        <img src="${getPPEIcon(p.name)}" style="width: 55px; height: 55px; object-fit: contain;">
-        <span class="small fw-bold mt-2 text-secondary" style="font-size: 13px;">${p.name}</span>
-      </div>
-    `).join('') || '<span class="text-muted">ไม่มีการระบุ PPE</span>';
-
-    let riskHtml = m.risks.filter(r => r.risk).map(r => `
-      <div class="d-inline-flex flex-column align-items-center justify-content-center me-4 mb-2">
-        <img src="${getRiskIcon(r.name)}" style="width: 55px; height: 55px; object-fit: contain;">
-        <span class="small fw-bold mt-2 text-secondary" style="font-size: 13px;">${r.name}</span>
-      </div>
-    `).join('') || '<span class="text-muted">ไม่มีความเสี่ยง</span>';
-
-    let html = `
-      <div class="d-flex align-items-center border-bottom pb-3 mb-4">
-        <img src="images/logo.png" alt="Company Logo" style="height: 60px; object-fit: contain;" onerror="this.src='logo.png'">
-        <div class="flex-grow-1 text-center pe-5"><h3 class="fw-bold text-dark mb-1">${m.title}</h3><h5 class="text-primary m-0">${m.smpId}</h5></div>
-      </div>
-      
-      <div class="row mb-4 text-dark">
-        <div class="col-md-6 mb-2"><span class="text-muted small">วันที่:</span> <br><b>${m.date.split(' ')[0]}</b></div>
-        <div class="col-md-6 mb-2"><span class="text-muted small">ประเภท SMP:</span> <br><b>${m.smpType}</b></div>
-        <div class="col-md-4 mb-2"><span class="text-muted small">นำเสนอโดย:</span> <br><b>${m.presenter}</b></div>
-        <div class="col-md-4 mb-2"><span class="text-muted small">อนุมัติโดย:</span> <br><b>${m.approver || '-'}</b></div>
-        <div class="col-md-4 mb-2"><span class="text-muted small">แผนก / ไลน์:</span> <br><b>${m.line || '-'}</b></div>
-        <div class="col-md-4 mb-2"><span class="text-muted small">เครื่องจักร:</span> <br><b>${m.machine || '-'}</b></div>
-        <div class="col-md-4 mb-2"><span class="text-muted small">ประเภทบำรุงรักษา:</span> <br><b>${m.maintType}</b></div>
-        <div class="col-md-4 mb-2"><span class="text-muted small">ความถี่:</span> <br><b>${m.frequency || '-'}</b></div>
-      </div>
-      
-      <div class="p-4 bg-light rounded-4 border mb-4">
-        <h6 class="fw-bold text-dark mb-3"><i class="material-icons text-warning align-middle">security</i> ความปลอดภัย & การป้องกัน</h6>
-        <div class="mb-3 border-bottom pb-3"><p class="mb-2 text-muted small">PPE ที่ใช้งาน:</p><div class="d-flex flex-wrap">${ppeHtml}</div></div>
-        <div class="mb-3 border-bottom pb-3"><p class="mb-2 text-muted small">ความเสี่ยง:</p><div class="d-flex flex-wrap">${riskHtml}</div></div>
-      </div>
-
-      ${m.mainImage ? `<div class="mb-5 text-center"><img src="${m.mainImage}" style="max-height: 300px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>` : ''}
-
-      <h5 class="fw-bold mb-3 border-start border-4 border-success ps-2">ขั้นตอนการทำงาน</h5>
-      <div class="table-responsive">
-        <table class="table table-hover border align-middle">
-          <thead class="table-light"><tr><th width="5%" class="text-center">#</th><th width="25%">ขั้นตอน</th><th width="15%">ประเภท</th><th width="10%">เวลา(นาที)</th><th width="45%">รายละเอียด & รูปภาพ</th></tr></thead>
-          <tbody>
-    `;
-
-    data.steps.forEach((s, idx) => {
-      let badgeClass = "bg-white text-dark border";
-      if(s.typeSymbol.includes('ความปลอดภัย')) badgeClass = "bg-danger text-white border-danger";
-      else if(s.typeSymbol.includes('คุณภาพ')) badgeClass = "bg-primary text-white border-primary";
-      else if(s.typeSymbol.includes('สิ่งแวดล้อม')) badgeClass = "bg-success text-white border-success";
-      else if(s.typeSymbol.includes('การผลิต')) badgeClass = "bg-dark text-white border-dark";
-
-      let imgs = s.images.map(url => `<a href="${url}" target="_blank"><img src="${url}" style="height:60px; margin-right:5px; margin-top:5px; border-radius:6px; border:1px solid #ddd;"></a>`).join('');
-      html += `<tr><td class="text-center fw-bold text-muted">${idx}</td><td class="fw-bold">${s.stepName}</td>
-               <td><span class="badge ${badgeClass}">${s.typeSymbol}</span></td><td class="text-center">${s.timeTaken || '-'}</td>
-               <td><div style="white-space:pre-wrap; font-size:0.9rem;" class="mb-1">${s.description}</div><div>${imgs}</div></td></tr>`;
-    });
-
-    html += `</tbody></table></div>`;
-    document.getElementById('docContent').innerHTML = html;
-  }
-
-  // =========================================================
-  // 🟢 ฟังก์ชันส่งออกเป็น EXCEL (.xlsx)
-  // =========================================================
-
-  async function fetchImageAsBase64(url) {
-    try {
-      const res = await fetch(url);
-      const blob = await res.blob();
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
-    } catch (e) {
-      return null;
-    }
-  }
-
-  async function downloadExcel() {
-    if(!currentDetailData) return;
-    let m = currentDetailData.main;
-
-    const btn = document.getElementById('btnDownloadExcel');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> กำลังสร้างไฟล์ Excel...';
-    btn.disabled = true;
-
-    try {
-      const response = await fetch('SMP-Template.xlsx');
-      if (!response.ok) throw new Error("ไม่พบไฟล์ Template 'SMP-Template.xlsx'");
-      const arrayBuffer = await response.arrayBuffer();
-
-      const workbook = new ExcelJS.Workbook();
-      await workbook.xlsx.load(arrayBuffer);
-      const firstSheetName = workbook.worksheets[0].name; 
-      const worksheet = workbook.getWorksheet(firstSheetName);
-
-      // 1. ข้อมูลหัวกระดาษ (แสดงแค่วันที่ ไม่เอาเวลา)
-      worksheet.getCell('N2').value = "ชื่อเรื่อง: " + m.title;
-      worksheet.getCell('E3').value = m.line; 
-      worksheet.getCell('E4').value = m.machine; 
-      worksheet.getCell('R3').value = m.smpId;
-      worksheet.getCell('Y3').value = m.presenter;
-      worksheet.getCell('AD3').value = m.approver || ''; 
-      worksheet.getCell('AN4').value = m.date.split(' ')[0];
-
-      // 2. ข้อมูลแถวที่ 6 และติ๊กถูก (✓) ประเภท SMP จัดกึ่งกลาง
-      const tick = '✓';
-      if (m.smpType.includes('เครื่องกล')) worksheet.getCell('I6').value = tick;
-      if (m.smpType.includes('ไฟฟ้า')) worksheet.getCell('O6').value = tick;
-      
-      worksheet.getCell('S6').value = m.techCount || '';
-      worksheet.getCell('W6').value = m.techTime || '';
-      worksheet.getCell('Z6').value = m.maintType;
-      worksheet.getCell('AD6').value = m.workTime || '';
-      
-      // 🔴 แก้ปัญหา เวลาหยุด / ความถี่ ให้ลงในช่องที่ไม่ทับคำถาม
-      worksheet.getCell('AI6').value = m.downtime || ''; 
-      worksheet.getCell('AO6').value = m.frequency || ''; 
-
-      // 3. จัดตำแหน่งติ๊กถูก ✓ (LOTO & ประเมินความเสี่ยง) ให้ตรงช่องสี่เหลี่ยมเป๊ะๆ
-      if (m.loto === 'ต้องการ') worksheet.getCell('W11').value = tick;
-      else worksheet.getCell('W14').value = tick; 
-
-      if (m.riskAssessed === 'ใช่') worksheet.getCell('AP11').value = tick;
-      else if (m.riskAssessed === 'ไม่ใช่') worksheet.getCell('AP13').value = tick;
-      else worksheet.getCell('AP15').value = tick;
-
-      // จัดให้อยู่ตรงกลางสวยงาม
-      ['I6', 'O6', 'W11', 'W14', 'AP11', 'AP13', 'AP15'].forEach(cell => {
-        worksheet.getCell(cell).alignment = { horizontal: 'center', vertical: 'middle' };
-      });
-
-      // 4. วางรูปกากบาท ❌ ทับ PPE และ ความเสี่ยงที่ไม่ได้ใช้งาน
-      let crossBase64 = await fetchImageAsBase64('images/cross.png');
-      if (crossBase64) {
-        let crossId = workbook.addImage({ base64: crossBase64, extension: 'png' });
+    function exportToCSV() {
+        if(!currentFilteredData || currentFilteredData.length === 0) { alert("ไม่พบข้อมูลสำหรับ Export"); return; }
         
-        // 🔴 พิกัดกากบาท PPE: ให้ห่างช่องละ 2 คอลัมน์ (ขนาดรูปกากบาทปรับให้คลุมเซลล์)
-        const ppeCrossCoords = {
-          'ถุงมือ': { col: 5.5, row: 9.5 },         
-          'หมวกนิรภัย': { col: 7.5, row: 9.5 },     
-          'หน้ากาก': { col: 9.5, row: 9.5 },        
-          'กันตกจากที่สูง': { col: 11.5, row: 9.5 }, 
-          'แว่นตา': { col: 13.5, row: 9.5 },        
-          'ที่อุดหู': { col: 15.5, row: 9.5 },      
-          'รองเท้าเซฟตี้': { col: 17.5, row: 9.5 }, 
-          'เสื้อสะท้อนแสง': { col: 19.5, row: 9.5 } 
-        };
-
-        // 🔴 พิกัดกากบาทความเสี่ยง (ขยับตามรีเควส)
-        const riskCrossCoords = {
-          'รถโฟล์คลิฟต์': { col: 23.5, row: 10.2 },
-          'จุดหนีบ': { col: 23.5, row: 10.2 },       // ซ้าย 1
-          'อุปกรณ์เครื่องมือ': { col: 25.5, row: 10.2 }, // ซ้าย 1
-          'ยกด้วยมือ': { col: 29.5, row: 10.2 },
-          'ทำงานที่สูง': { col: 31.5, row: 10.2 },
-          'สารเคมี': { col: 35.5, row: 10.2 },       // ขวา 1
-          'เสียงดัง': { col: 37.5, row: 10.2 }       // ขวา 1
-        };
-
-        // แปะกากบาททับ PPE ที่ไม่ได้เลือก
-        m.ppe.forEach(p => { 
-          if (!p.used && ppeCrossCoords[p.name]) {
-            worksheet.addImage(crossId, { 
-              tl: { col: ppeCrossCoords[p.name].col, row: ppeCrossCoords[p.name].row }, 
-              ext: { width: 55, height: 55 } 
-            });
-          } 
+        let csvContent = "\uFEFF";
+        let headers = [
+            "No.", "วันที่", "แผนก", "Line", "Machine", 
+            "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
+            "Start Time", "End Time", "Repair Time", "Shift", "Service by", 
+            "หมายเหตุ", "ผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
+            "PM Detail", "PM Interval", "PM Completed", "Is Breakdown", "Cost"
+        ];
+        csvContent += headers.join(",") + "\n";
+        
+        currentFilteredData.forEach(r => {
+            let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
+            let rowData = [
+                r.displayNum, r.date, r.dept, r.line, r.machine,
+                r.breakdown, r.cause, r.solved, mappedResult, r.callTime,
+                r.startTime, r.endTime, r.repairTime, r.shift, r.tech,
+                r.remark, r.handover, r.imgBefore, r.imgAfter, r.pmUpdate,
+                r.pmDetail, r.pmInterval, r.pmCompleted, r.isBreakdown, r.cost
+            ];
+            let formattedRow = rowData.map(v => { let str = (v || '').toString(); return `"${str.replace(/"/g, '""')}"`; });
+            csvContent += formattedRow.join(",") + "\n";
         });
 
-        // แปะกากบาททับ Risk ที่ไม่ได้เลือก
-        m.risks.forEach(r => { 
-          if (!r.risk && riskCrossCoords[r.name]) {
-            worksheet.addImage(crossId, { 
-              tl: { col: riskCrossCoords[r.name].col, row: riskCrossCoords[r.name].row }, 
-              ext: { width: 45, height: 45 } 
-            });
-          } 
-        });
-      }
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob); let link = document.createElement("a");
+        link.href = url; link.download = `CMMS_Report_${toLocalYYYYMMDD(new Date())}.csv`; link.style.display = "none";
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
 
-      // 5. รูปการทำงานหลัก 🔴 (กึ่งกลางคอลัมน์ U และ ต่ำลงมาไม่ทับตาราง)
-      if (m.mainImage) {
-        const mainBase64 = await fetchImageAsBase64(m.mainImage);
-        if (mainBase64) {
-          const mainImgId = workbook.addImage({ base64: mainBase64, extension: 'png' });
-          worksheet.addImage(mainImgId, {
-            tl: { col: 16.5, row: 7.5 }, // ศูนย์กลางตรง U และขยับลงมาที่ขอบแถว 8
-            ext: { width: 450, height: 250 }
-          });
-        }
-      }
+    function renderReportTable(pageNumber) {
+      let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
+      let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
+      let statusFilter = document.getElementById('fStatus').value; let textFilter = document.getElementById('fText').value.toLowerCase();
 
-      // 6. ดึงสัญลักษณ์ Category จาก K11, Q16, T16, W16
-      const safetySym = worksheet.getCell('K11').value || '➕'; const safetyFont = worksheet.getCell('K11').font;
-      const qualitySym = worksheet.getCell('Q16').value || '♦'; const qualityFont = worksheet.getCell('Q16').font;
-      const envSym = worksheet.getCell('T16').value || '■'; const envFont = worksheet.getCell('T16').font;
-      const prodSym = worksheet.getCell('W16').value || '●'; const prodFont = worksheet.getCell('W16').font;
+      let fsVal = fs ? parseDateSafely(fs).setHours(0,0,0,0) : null;
+      let feVal = fe ? parseDateSafely(fe).setHours(23,59,59,999) : null;
 
-      const stepRows = [17, 23, 29, 35, 41, 47, 53, 59, 65, 71]; 
+      currentFilteredData = allReportData.filter(r => {
+        let jDateObj = parseDateSafely(r.date); let jDate = jDateObj.getTime();
+        if (fsVal && jDate < fsVal) return false;
+        if (feVal && jDate > feVal) return false;
+        if (fl && r.line !== fl) return false;
+        if (shift && r.shift !== shift) return false;
+        let mappedStatus = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
+        if (statusFilter && mappedStatus !== statusFilter) return false;
+        if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || (r.tech || "").toLowerCase().includes(textFilter) || (r.machine || "").toLowerCase().includes(textFilter) || (r.breakdown || "").toLowerCase().includes(textFilter))) return false;
+        return true;
+      });
+
+      updateDashboardStats(currentFilteredData, fl);
+
+      currentPage = pageNumber || 1;
+      let totalPages = Math.ceil(currentFilteredData.length / itemsPerPage) || 1;
+      let startIndex = (currentPage - 1) * itemsPerPage;
+      let paginated = currentFilteredData.slice(startIndex, startIndex + itemsPerPage);
+
+      let html = `<p style="font-size:14px; color:var(--text-muted); margin-bottom:15px; font-weight: 500;">พบทั้งหมด <b>${currentFilteredData.length}</b> รายการ (แสดงหน้า ${currentPage}/${totalPages})</p>`;
       
-      for (let i = 0; i < currentDetailData.steps.length; i++) {
-        let s = currentDetailData.steps[i];
-        if (i >= stepRows.length) break; 
-        let r = stepRows[i]; 
-        
-        // ลำดับขั้นตอนเริ่มที่ 0
-        worksheet.getCell('B' + r).value = i; 
-        worksheet.getCell('C' + r).value = s.stepName;
-        worksheet.getCell('J' + r).value = s.timeTaken || '';
-        worksheet.getCell('M' + r).value = s.description;
+      paginated.forEach(item => {
+        let statusFull = item.result === "F" || item.result === "Finished" ? "Finished" : (item.result === "O" || item.result === "Ongoing" ? "Ongoing" : "Unfinished");
+        let statusColor = statusFull === "Finished" ? "#38A169" : (statusFull === "Ongoing" ? "#D69E2E" : "#E53E3E");
+        let isNew = isNewJob(item.date); 
+        let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
+        let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
+        let callTimeHtml = item.callTime ? `<span class="badge-chip" style="background:#EBF8FF; color:#3182CE;"><span class="material-symbols-rounded" style="font-size:14px;">notifications_active</span> แจ้ง: ${item.callTime}</span>` : "";
+        let prettyRepairTime = parseTimeStringToPretty(item.repairTime);
+        let repairTimeHtml = (prettyRepairTime && prettyRepairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${prettyRepairTime}</span>` : "";
 
-        // วางสัญลักษณ์ Category ให้ตรงกับฟอนต์ Wingdings 
-        let targetSym = ''; let targetFont = null;
-        if(s.typeSymbol.includes('ความปลอดภัย')) { targetSym = safetySym; targetFont = safetyFont; }
-        else if(s.typeSymbol.includes('คุณภาพ')) { targetSym = qualitySym; targetFont = qualityFont; }
-        else if(s.typeSymbol.includes('สิ่งแวดล้อม')) { targetSym = envSym; targetFont = envFont; }
-        else if(s.typeSymbol.includes('การผลิต')) { targetSym = prodSym; targetFont = prodFont; }
-        
-        const cellK = worksheet.getCell('K' + r);
-        cellK.value = targetSym;
-        if(targetFont) cellK.font = targetFont;
-        cellK.alignment = { horizontal: 'center', vertical: 'middle' };
-        
-        // 7. แทรกรูปภาพย่อย 🔴 (ขยับขวาและลง ให้อยู่ในกรอบ และแบ่ง 2 แถว แถวละ 4 รูป)
-        if (s.images && s.images.length > 0) {
-          for(let imgIndex = 0; imgIndex < s.images.length; imgIndex++) {
-            const stepImgBase64 = await fetchImageAsBase64(s.images[imgIndex]); 
-            if (stepImgBase64) {
-              const stepImgId = workbook.addImage({ base64: stepImgBase64, extension: 'png' });
-              
-              // คำนวณให้ขึ้นบรรทัดใหม่เมื่อครบ 4 รูป
-              let colsPerRow = 4;
-              let cIndex = imgIndex % colsPerRow; // คอลัมน์ที่ 0, 1, 2, 3
-              let rIndex = Math.floor(imgIndex / colsPerRow); // แถวที่ 0, 1
-              
-              worksheet.addImage(stepImgId, {
-                // col: 26.5 = เริ่มที่คอลัมน์ AB/AC | row: r - 1 + 0.3 = ขยับลงมาไม่ทับ Header
-                tl: { col: 26.5 + (cIndex * 3.8), row: (r - 1) + 0.3 + (rIndex * 3.0) }, 
-                ext: { width: 120, height: 80 } 
-              });
+        html += `
+          <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
+            <div class="report-card-head">
+              <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum}</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
+              <div style="font-size:14px; font-weight:700; color:${statusColor};">${statusFull}</div>
+            </div>
+            <p class="report-detail"><b>อาการ:</b> ${item.breakdown}</p>
+            <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+              <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">person</span> ${techDisplay}</span>
+              <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">calendar_month</span> ${item.date}</span>
+              ${callTimeHtml}
+              ${repairTimeHtml}
+            </div>
+          </div>`;
+      }); 
+
+      document.getElementById('reportContent').innerHTML = html;
+      
+      let pageWrapper = document.getElementById('paginationWrapper');
+      if(totalPages > 1) {
+          pageWrapper.style.display = "flex";
+          document.getElementById('pageIndicator').innerText = `หน้า ${currentPage} / ${totalPages}`;
+          document.getElementById('btnPrev').disabled = (currentPage === 1);
+          document.getElementById('btnNext').disabled = (currentPage === totalPages);
+      } else { pageWrapper.style.display = "none"; }
+    }
+
+    function changePage(step) { renderReportTable(currentPage + step); window.scrollTo(0, document.getElementById('dashboardView').offsetTop); }
+
+    function updateDashboardStats(data, selectedLine) {
+        let newCount = 0; let doneCount = 0; let lineCounts = {}; let techLatest = {};
+        data.forEach(job => {
+            let mappedStatus = job.result === 'F' || job.result === 'Finished' ? 'Finished' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing' : 'Unfinished');
+            if(mappedStatus === 'Finished') doneCount++;
+            if(isNewJob(job.date)) newCount++; 
+            if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
+            if(job.tech) {
+                let techs = job.tech.split(',').map(t => t.trim());
+                techs.forEach(t => {
+                    let jobTime = job.lastUpdateMs || 0;
+                    if(!techLatest[t] || jobTime > techLatest[t].lastUpdateMs) {
+                        techLatest[t] = { num: job.num, displayNum: job.displayNum, machine: job.machine, line: job.line, result: mappedStatus, lastUpdateMs: jobTime };
+                    }
+                });
             }
-          }
+        });
+
+        document.getElementById('statNewTask').innerText = newCount;
+        let p = data.length ? Math.round((doneCount/data.length)*100) : 0;
+        document.getElementById('statDone').innerText = p + "%";
+
+        let chartSection = document.getElementById('chartSection');
+        if (selectedLine !== "" && selectedLine !== undefined) { chartSection.style.display = 'none'; } else {
+            chartSection.style.display = 'block';
+            let lineArray = Object.keys(lineCounts).map(k => ({line: k, count: lineCounts[k]}));
+            lineArray.sort((a,b) => b.count - a.count); lineArray = lineArray.slice(0, 10); 
+            let chartLabels = lineArray.map(i => i.line); let chartData = lineArray.map(i => i.count);
+
+            let ctx = document.getElementById('lineIssueChart').getContext('2d');
+            if(lineChartInstance) lineChartInstance.destroy();
+            lineChartInstance = new Chart(ctx, { type: 'bar', data: { labels: chartLabels, datasets: [{ label: 'จำนวนปัญหา', data: chartData, backgroundColor: '#00A5D9', borderRadius: 6 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks:{stepSize:1} } } } });
         }
-      }
 
-      const buffer = await workbook.xlsx.writeBuffer();
-      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = `SMP_${m.smpId}.xlsx`; 
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-
-    } catch (error) {
-      console.error(error);
-      alert("ระบบแจ้ง Error: " + error.message);
-    } finally {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
+        let techArr = Object.entries(techLatest).map(([tech, info]) => ({tech, ...info}));
+        techArr.sort((a, b) => b.lastUpdateMs - a.lastUpdateMs);
+        let feedHtml = "";
+        techArr.forEach(info => {
+            let col = info.result==='Finished'?'#38A169':(info.result==='Ongoing'?'#D69E2E':'#E53E3E');
+            feedHtml += `<div class="tech-chip" onclick="openJobDetails('${info.num}')" style="cursor:pointer; border-left: 4px solid ${col};"><div class="tech-chip-name"><span class="material-symbols-rounded" style="font-size:16px;">build</span> ${info.tech}</div><div class="tech-chip-job">#${info.displayNum} ${info.machine}</div></div>`;
+        });
+        document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
     }
-  }
-</script>
+
+    async function submitForm(event) {
+      event.preventDefault(); 
+      var btn = document.getElementById('submitBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true;
+      
+      let cHH = document.getElementById('callHH').value.replace(/[^0-9]/g, ''); let cMM = document.getElementById('callMM').value.replace(/[^0-9]/g, '');
+      let sHH = document.getElementById('startHH').value.replace(/[^0-9]/g, ''); let sMM = document.getElementById('startMM').value.replace(/[^0-9]/g, '');
+      let eHH = document.getElementById('endHH').value.replace(/[^0-9]/g, ''); let eMM = document.getElementById('endMM').value.replace(/[^0-9]/g, '');
+      
+      let timeError = validateTimes(cHH, cMM, sHH, sMM, eHH, eMM);
+      if(timeError) { alert("⚠️ ข้อผิดพลาดเวลา: " + timeError + "\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง"); btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled = false; return; }
+
+      let repairMins = getDiffMinutes(sHH, sMM, eHH, eMM);
+      let calculatedRepairTime = formatDuration(repairMins);
+
+      var techArray = []; document.querySelectorAll('.tech-cb:checked').forEach(cb => techArray.push(cb.value));
+      if(document.getElementById('cbOther').checked) techArray.push(document.getElementById('techOther').value);
+
+      try {
+        var baseBefore=[], baseAfter=[];
+        for(let f of filesBefore) baseBefore.push(await compressImageAsync(f));
+        for(let f of filesAfter) baseAfter.push(await compressImageAsync(f));
+
+        var formData = {
+          date: document.getElementById('date').value, dept: document.getElementById('dept').value, line: document.getElementById('line').value, lineOther: document.getElementById('lineOther')?document.getElementById('lineOther').value:'', machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value, solved: document.getElementById('solved').value, result: document.getElementById('result').value, callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'), shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, imgsBefore: baseBefore, imgsAfter: baseAfter,
+          repairTime: calculatedRepairTime, pmUpdate: document.getElementById('pmUpdate').value, pmCompleted: document.getElementById('pmCompleted').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value,
+          isBreakdown: document.getElementById('isBreakdown').value, cost: document.getElementById('cost').value
+        };
+
+        const res = await callAPI("saveReport", formData);
+        if(res.status==="success") {
+          alert(res.message); document.getElementById('maintenanceForm').reset(); document.getElementById('date').valueAsDate=new Date(); clearFiles('before'); clearFiles('after');
+          localStorage.removeItem(CACHE_KEY); toggleMainView(); document.getElementById('loadingScreen').style.display = 'flex';
+          const newRes = await callAPI("getDashboard", {});
+          if(newRes.status==="success"){ allReportData=newRes.data; renderReportTable(1); }
+          document.getElementById('loadingScreen').style.display = 'none';
+        } else { alert("เกิดข้อผิดพลาด: "+res.message); }
+      } catch(err) { alert("Error: "+err.message); }
+      btn.innerHTML='<span class="material-symbols-rounded">cloud_upload</span> บันทึกข้อมูลเข้าระบบ'; btn.disabled=false;
+    }
+
+    function toggleMainView() { const dbView = document.getElementById('dashboardView'); const formView = document.getElementById('formView'); const fabBtn = document.getElementById('fabMainBtn'); const fabIcon = document.getElementById('fabIcon'); if(formView.style.display === 'none') { dbView.style.display = 'none'; formView.style.display = 'block'; fabBtn.classList.add('close-mode'); fabIcon.style.transform = "rotate(45deg)"; document.getElementById('appTitle').innerText = "แจ้งซ่อมใหม่"; document.getElementById('appSub').innerText = "กรอกรายละเอียดปัญหาเครื่องจักร"; } else { formView.style.display = 'none'; dbView.style.display = 'block'; fabBtn.classList.remove('close-mode'); fabIcon.style.transform = "rotate(0deg)"; document.getElementById('appTitle').innerText = "CMMS System"; document.getElementById('appSub').innerText = "ศูนย์กลางติดตามและแจกงานซ่อม"; } window.scrollTo(0,0); }
+    function toggleOther(selectId, containerId) { var val = document.getElementById(selectId).value; var container = document.getElementById(containerId); var input = container.querySelector('input'); if(val === 'อื่นๆ') { container.style.display = 'block'; input.required = true; } else { container.style.display = 'none'; input.required = false; input.value = ''; } }
+    function toggleOtherTech(mode) { const prefix = mode === 'edit' ? 'edit_' : ''; const cb = document.getElementById(prefix + 'cbOther'); const container = document.getElementById(prefix + 'techOtherContainer'); const input = document.getElementById(prefix + 'techOther'); if(cb.checked) { container.style.display = 'block'; input.required = true; input.focus(); } else { container.style.display = 'none'; input.required = false; input.value = ''; } }
+    
+    function openJobDetails(numStr) { 
+        let job = allReportData.find(r => r.num.toString() === numStr.toString()); 
+        if(!job) return; currentJobData = job; 
+        document.getElementById('detailJobNum').innerText = "งานลำดับที่ #" + job.displayNum; 
+        
+        let statusFull = job.result === 'F' || job.result === 'Finished' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)');
+        let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; 
+        let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
+        
+        let downTimeStr = "-"; let repairTimeStr = parseTimeStringToPretty(job.repairTime) || "-"; let responseTimeStr = "-";
+        let st = job.startTime ? job.startTime.toString().split(':') : []; let et = job.endTime ? job.endTime.toString().split(':') : [];
+
+        if(st.length===2 && et.length===2) {
+            if (repairTimeStr === "-") { let rtMins = getDiffMinutes(st[0], st[1], et[0], et[1]); repairTimeStr = formatDuration(rtMins); }
+            if(job.callTime && job.callTime !== "") { let ct = job.callTime.toString().split(':'); if(ct.length===2 && ct[0]!=="") { let dtMins = getDiffMinutes(ct[0], ct[1], et[0], et[1]); downTimeStr = formatDuration(dtMins); let respMins = getDiffMinutes(ct[0], ct[1], st[0], st[1]); responseTimeStr = formatDuration(respMins); } else { downTimeStr = repairTimeStr; } } else { downTimeStr = repairTimeStr; }
+        }
+
+        let isBD = job.isBreakdown === 'Yes' || job.isBreakdown === 'Y' || job.isBreakdown === 'YES' ? '✅ ใช่ (Yes)' : '❌ ไม่ (No)';
+
+        let html = ` 
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;"> 
+            <div class="detail-row"><div class="detail-label">วันที่แจ้งซ่อม</div><div class="detail-value">${job.date}</div></div> 
+            <div class="detail-row"><div class="detail-label">สายการผลิต / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> 
+        </div> 
+        <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value fw-bold">${job.machine}</div></div> 
+        
+        <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> 
+            <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
+        </div> 
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px; background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
+            <div><div style="font-size:11px; color:var(--text-muted); font-weight:700;">เวลาแจ้ง</div><div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.callTime || '-'}</div></div>
+            <div><div style="font-size:11px; color:var(--text-muted); font-weight:700;">เริ่มซ่อม</div><div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.startTime || '-'}</div></div>
+            <div><div style="font-size:11px; color:var(--text-muted); font-weight:700;">ซ่อมเสร็จ</div><div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.endTime || '-'}</div></div>
+        </div>
+
+        <div class="metrics-container">
+            <div class="metric-box downtime"><div class="metric-label">Downtime</div><div class="metric-val">${downTimeStr}</div></div>
+            <div class="metric-box repair"><div class="metric-label">Repair Time</div><div class="metric-val">${repairTimeStr}</div></div>
+            <div class="metric-box response"><div class="metric-label">Response</div><div class="metric-val">${responseTimeStr}</div></div>
+        </div>
+
+        <div class="detail-row" style="margin-top:15px;"><div class="detail-label">อาการที่พบ (Breakdown Detail)</div><div class="detail-value">${job.breakdown}</div></div> 
+        <div class="detail-row"><div class="detail-label">สาเหตุ (Root Cause)</div><div class="detail-value">${job.cause || '-'}</div></div> 
+        <div class="detail-row"><div class="detail-label">วิธีแก้ไข (Action Taken)</div><div class="detail-value">${job.solved}</div></div> 
+
+        <div class="detail-row" style="background:#FFF5F5; padding:12px; border-radius:10px; border:1px solid #FC8181; margin-top:15px;">
+            <div style="display:flex; justify-content:space-between;">
+                <div><div class="detail-label" style="color:#E53E3E;">นับเป็น Breakdown</div><div class="detail-value fw-bold">${isBD}</div></div>
+                <div style="text-align: right;"><div class="detail-label" style="color:#E53E3E;">ต้นทุนการซ่อม (Cost)</div><div class="detail-value fw-bold text-danger">${job.cost ? Number(job.cost).toLocaleString() + ' บาท' : '0 บาท'}</div></div>
+            </div>
+        </div>
+        
+        <div class="detail-row" style="margin-top:15px; background:#F0F7FF; padding:12px; border-radius:10px; border:1px solid var(--secondary);">
+           <div class="detail-label" style="color:var(--secondary); font-weight:bold;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">assignment_turned_in</span> ข้อมูลเสนอแผน PM</div>
+           <div style="font-size:14px; margin-top:8px; line-height:1.6;">
+               <b>ต้องแก้ไขแผน PM หรือไม่:</b> ${job.pmUpdate || '-'}<br>
+               <b>แก้ไข PM เสร็จแล้วรึยัง:</b> ${job.pmCompleted || '-'}<br>
+               <b>รอบ PM (เดือน):</b> ${job.pmInterval ? job.pmInterval + " เดือน" : '-'}<br>
+               <b>รายละเอียดที่แก้ไข:</b> ${job.pmDetail || '-'}
+           </div>
+        </div>
+
+        <div class="detail-row"><div class="detail-label">ผู้รับมอบงาน</div><div class="detail-value">${job.handover || '-'}</div></div> 
+        <div class="detail-row"><div class="detail-label">หมายเหตุ</div><div class="detail-value">${job.remark || '-'}</div></div> 
+
+        <div class="detail-row"><div class="detail-label">ทีมช่าง / ผู้ปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> 
+        <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed var(--border);"> 
+            <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม</div> 
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">${getImgHtml(job.imgBefore)}</div> 
+            <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">imagesmode</span> ภาพหลังซ่อม</div> 
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">${getImgHtml(job.imgAfter)}</div> 
+        </div> `; 
+        document.getElementById('jobDetailsContent').innerHTML = html; document.getElementById('jobDetailsPage').style.display = 'block'; 
+    }
+
+    function openEditMode() { 
+        if(!currentJobData) return; 
+        document.getElementById('editJobNumLabel').innerText = "ลำดับที่ #" + currentJobData.displayNum; 
+        document.getElementById('editJobNum').value = currentJobData.num; 
+        
+        let dObj = parseDateSafely(currentJobData.date);
+        document.getElementById('edit_date').value = toLocalYYYYMMDD(dObj);
+        document.getElementById('edit_shift').value = currentJobData.shift;
+        document.getElementById('edit_machine').value = currentJobData.machine;
+        
+        let ct = currentJobData.callTime ? currentJobData.callTime.toString().split(':') : ['',''];
+        let st = currentJobData.startTime ? currentJobData.startTime.toString().split(':') : ['',''];
+        let et = currentJobData.endTime ? currentJobData.endTime.toString().split(':') : ['',''];
+        
+        document.getElementById('edit_callHH').value = ct[0]||''; document.getElementById('edit_callMM').value = ct[1]||'';
+        document.getElementById('edit_startHH').value = st[0]||''; document.getElementById('edit_startMM').value = st[1]||'';
+        document.getElementById('edit_endHH').value = et[0]||''; document.getElementById('edit_endMM').value = et[1]||'';
+
+        document.getElementById('edit_breakdown').value = currentJobData.breakdown; 
+        document.getElementById('edit_cause').value = currentJobData.cause || ""; 
+        document.getElementById('edit_solved').value = currentJobData.solved; 
+        
+        let currentRes = currentJobData.result;
+        if(currentRes === 'F') currentRes = 'Finished';
+        if(currentRes === 'O') currentRes = 'Ongoing';
+        if(currentRes === 'U') currentRes = 'Unfinished';
+        document.getElementById('edit_result').value = currentRes || "Finished"; 
+        
+        document.getElementById('edit_pmUpdate').value = currentJobData.pmUpdate || "";
+        document.getElementById('edit_pmCompleted').value = currentJobData.pmCompleted || "";
+        document.getElementById('edit_pmInterval').value = currentJobData.pmInterval || "";
+        document.getElementById('edit_pmDetail').value = currentJobData.pmDetail || "";
+
+        let isBD = currentJobData.isBreakdown;
+        if (isBD === 'Y' || isBD === 'Yes' || isBD === 'YES') isBD = 'Yes';
+        else if (isBD === 'N' || isBD === 'No' || isBD === 'NO') isBD = 'No';
+        else isBD = 'Yes'; // ค่า Default 
+        document.getElementById('edit_isBreakdown').value = isBD;
+        document.getElementById('edit_cost').value = currentJobData.cost || "";
+
+        document.getElementById('edit_handover').value = currentJobData.handover || "";
+        document.getElementById('edit_dept').value = currentJobData.dept || "CO";
+        document.getElementById('edit_remark').value = currentJobData.remark || "";
+
+        clearFiles('edit_before'); clearFiles('edit_after'); 
+        
+        let techString = currentJobData.tech || ""; let checkboxes = document.querySelectorAll('.edit-tech-cb'); let otherNames = []; 
+        checkboxes.forEach(cb => cb.checked = false); document.getElementById('edit_cbOther').checked = false; toggleOtherTech('edit'); 
+        let techArray = techString.split(',').map(t => t.trim()); 
+        techArray.forEach(tech => { let found = false; checkboxes.forEach(cb => { if(cb.value === tech) { cb.checked = true; found = true; }}); if(!found && tech !== "") otherNames.push(tech); }); 
+        if(otherNames.length > 0) { document.getElementById('edit_cbOther').checked = true; toggleOtherTech('edit'); document.getElementById('edit_techOther').value = otherNames.join(', '); } 
+        document.getElementById('editJobPage').style.display = 'block'; 
+    }
+
+    async function submitEditForm(event) { 
+        event.preventDefault(); 
+        var btn = document.getElementById('updateBtn'); btn.innerHTML = '<span class="material-symbols-rounded" style="animation: spin 1s linear infinite;">sync</span> กำลังบันทึก...'; btn.disabled = true; 
+        
+        let cHH = document.getElementById('edit_callHH').value.replace(/[^0-9]/g, ''); let cMM = document.getElementById('edit_callMM').value.replace(/[^0-9]/g, '');
+        let sHH = document.getElementById('edit_startHH').value.replace(/[^0-9]/g, ''); let sMM = document.getElementById('edit_startMM').value.replace(/[^0-9]/g, '');
+        let eHH = document.getElementById('edit_endHH').value.replace(/[^0-9]/g, ''); let eMM = document.getElementById('edit_endMM').value.replace(/[^0-9]/g, '');
+        
+        let timeError = validateTimes(cHH, cMM, sHH, sMM, eHH, eMM);
+        if(timeError) { alert("⚠️ ข้อผิดพลาดเวลา: " + timeError + "\nกรุณาตรวจสอบการกรอกเวลาอีกครั้ง"); btn.innerHTML='<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false; return; }
+
+        let repairMins = getDiffMinutes(sHH, sMM, eHH, eMM); let calculatedRepairTime = formatDuration(repairMins);
+        var techArray = []; document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value)); 
+        if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value); 
+        
+        try { 
+            var baseEditBefore=[], baseEditAfter=[]; 
+            for(let f of editFilesBefore) baseEditBefore.push(await compressImageAsync(f)); 
+            for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); 
+            
+            var updateData = { 
+                num: document.getElementById('editJobNum').value, date: document.getElementById('edit_date').value, shift: document.getElementById('edit_shift').value, machine: document.getElementById('edit_machine').value,
+                callTime: getTimeString('edit_call'), startTime: getTimeString('edit_start'), endTime: getTimeString('edit_end'), repairTime: calculatedRepairTime,
+                breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
+                pmUpdate: document.getElementById('edit_pmUpdate').value, pmCompleted: document.getElementById('edit_pmCompleted').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
+                isBreakdown: document.getElementById('edit_isBreakdown').value, cost: document.getElementById('edit_cost').value,
+                tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter, handover: document.getElementById('edit_handover').value, dept: document.getElementById('edit_dept').value, remark: document.getElementById('edit_remark').value
+            }; 
+            
+            const res = await callAPI("updateReport", updateData); 
+            if(res.status === "success") { alert(res.message); clearFiles('edit_before'); clearFiles('edit_after'); document.getElementById('editJobPage').style.display = 'none'; document.getElementById('jobDetailsPage').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; const newRes = await callAPI("getDashboard", {}); if(newRes.status === "success") { allReportData = newRes.data; renderReportTable(currentPage); } document.getElementById('loadingScreen').style.display = 'none'; } else { alert("เกิดข้อผิดพลาด: " + res.message); } 
+        } catch(err) { alert("Error: " + err.message); } btn.innerHTML = '<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false; 
+    }
+    
+    function formatTime(input, maxVal) { let val = input.value.replace(/[^0-9]/g, ''); if(val!==""){let num=parseInt(val,10);if(num>maxVal)val=maxVal.toString();} input.value=val; if(val.length===2){let nxt=input.nextElementSibling;if(nxt&&nxt.tagName==='SPAN')nxt=nxt.nextElementSibling;if(nxt&&nxt.tagName==='INPUT')nxt.focus();} }
+    function getTimeString(p) { let hElem = document.getElementById(p+'HH'); let mElem = document.getElementById(p+'MM'); if (!hElem || !mElem) return ""; let h = hElem.value.replace(/[^0-9]/g, ''); let m = mElem.value.replace(/[^0-9]/g, ''); if (!h && !m) return ""; return h.padStart(2,'0') + ':' + m.padStart(2,'0'); }
+
+    let filesBefore = [], filesAfter = []; let editFilesBefore = [], editFilesAfter = [];
+    function handleFiles(event, type) { const files = event.target.files; if(files.length===0) return; let targetArray; let thumbDiv; let clearBtn; if(type === 'before') { targetArray = filesBefore; thumbDiv = document.getElementById('thumbBefore'); clearBtn = document.getElementById('clearBefore'); } else if(type === 'after') { targetArray = filesAfter; thumbDiv = document.getElementById('thumbAfter'); clearBtn = document.getElementById('clearAfter'); } else if(type === 'edit_before') { targetArray = editFilesBefore; thumbDiv = document.getElementById('thumbEditBefore'); clearBtn = document.getElementById('clearEditBefore'); } else if(type === 'edit_after') { targetArray = editFilesAfter; thumbDiv = document.getElementById('thumbEditAfter'); clearBtn = document.getElementById('clearEditAfter'); } if (targetArray.length + files.length > 5) { alert("แนบรูปได้สูงสุด 5 ภาพต่อส่วนครับ"); return; } for(let i=0; i<files.length; i++) { targetArray.push(files[i]); let reader = new FileReader(); reader.onload = e => { let wrap=document.createElement('div'); wrap.className='thumb-wrap'; wrap.innerHTML=`<img src="${e.target.result}">`; thumbDiv.appendChild(wrap); }; reader.readAsDataURL(files[i]); } clearBtn.style.display="block"; event.target.value=""; }
+    function clearFiles(type) { if(type==='before'){filesBefore=[];document.getElementById('thumbBefore').innerHTML="";document.getElementById('clearBefore').style.display="none";} else if(type==='after'){filesAfter=[];document.getElementById('thumbAfter').innerHTML="";document.getElementById('clearAfter').style.display="none";} else if(type==='edit_before'){editFilesBefore=[];document.getElementById('thumbEditBefore').innerHTML="";document.getElementById('clearEditBefore').style.display="none";} else if(type==='edit_after'){editFilesAfter=[];document.getElementById('thumbEditAfter').innerHTML="";document.getElementById('clearEditAfter').style.display="none";} }
+    function compressImageAsync(file) { return new Promise((resolve) => { var reader=new FileReader(); reader.onload=function(e){ var img=new Image(); img.onload=function(){ var canvas=document.createElement('canvas'); var w=img.width,h=img.height; if(w>h){if(w>1000){h*=1000/w;w=1000;}}else{if(h>1000){w*=1000/h;h=1000;}} canvas.width=w;canvas.height=h; var ctx=canvas.getContext('2d'); ctx.drawImage(img,0,0,w,h); resolve(canvas.toDataURL('image/jpeg',0.6).split(',')[1]);}; img.src=e.target.result;}; reader.readAsDataURL(file); }); }
+  </script>
 </body>
 </html>
