@@ -237,6 +237,17 @@
       <div class="form-row" style="margin-bottom: 0;">
         <div class="form-group"><label>วันที่เริ่ม</label><input type="date" id="fStart" onchange="renderReportTable(1)"></div>
         <div class="form-group"><label>วันที่สิ้นสุด</label><input type="date" id="fEnd" onchange="renderReportTable(1)"></div>
+        
+        <!-- 🔴 เพิ่มตัวกรอง "แผนก" ตรงนี้ครับ -->
+        <div class="form-group">
+          <label>แผนก (Dept)</label>
+          <select id="fDept" onchange="renderReportTable(1)">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="CO">CO</option>
+            <option value="PCL">PCL</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Line</label>
           <select id="fLine" onchange="renderReportTable(1)">
@@ -334,20 +345,21 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label style="color:#E53E3E; font-weight:700;">นับเป็น Breakdown หรือไม่?</label>
-                <select id="isBreakdown" required style="border-color:#FC8181; background:#FFF5F5;">
-                    <option value="Yes">ใช่ (Yes)</option>
-                    <option value="No">ไม่ใช่ (No)</option>
+                <label>นับเป็น Breakdown หรือไม่?</label>
+                <select id="isBreakdown" required>
+                    <option value="" disabled selected>-- เลือก --</option>
+                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
+                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>ต้นทุนการซ่อม (Cost)</label>
-                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (บาท)" min="0">
+                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (ถ้ามี)" min="0">
             </div>
         </div>
         
         <div class="form-group" style="margin-top: 15px;">
-            <label>สถานะงานซ่อม (Result)</label>
+            <label>สถานะงาน (Result)</label>
             <select id="result" required>
                 <option value="" disabled selected>-- เลือกสถานะ --</option>
                 <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
@@ -484,10 +496,10 @@
           
           <div class="form-row">
             <div class="form-group">
-                <label style="color:#E53E3E; font-weight:700;">นับเป็น Breakdown หรือไม่?</label>
-                <select id="edit_isBreakdown" required style="border-color:#FC8181; background:#FFF5F5;">
-                    <option value="Yes">ใช่ (Yes)</option>
-                    <option value="No">ไม่ใช่ (No)</option>
+                <label>นับเป็น Breakdown หรือไม่?</label>
+                <select id="edit_isBreakdown" required>
+                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
+                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -730,6 +742,10 @@
 
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
+      
+      // 🔴 รับค่าจากฟิลเตอร์แผนก
+      let fd = document.getElementById('fDept').value; 
+      
       let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
       let statusFilter = document.getElementById('fStatus').value; let textFilter = document.getElementById('fText').value.toLowerCase();
 
@@ -740,6 +756,10 @@
         let jDateObj = parseDateSafely(r.date); let jDate = jDateObj.getTime();
         if (fsVal && jDate < fsVal) return false;
         if (feVal && jDate > feVal) return false;
+        
+        // 🔴 กรองแผนก
+        if (fd && r.dept !== fd) return false;
+        
         if (fl && r.line !== fl) return false;
         if (shift && r.shift !== shift) return false;
         let mappedStatus = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
@@ -767,7 +787,6 @@
         let prettyRepairTime = parseTimeStringToPretty(item.repairTime);
         let repairTimeHtml = (prettyRepairTime && prettyRepairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${prettyRepairTime}</span>` : "";
 
-        // 🟢 เพิ่ม [แผนก] หลังเลข Job No. ตรงนี้ครับ
         html += `
           <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
             <div class="report-card-head">
@@ -907,7 +926,6 @@
         let costNum = parseFloat(job.cost);
         let costDisplay = (!isNaN(costNum) && costNum > 0) ? costNum.toLocaleString() + ' บาท' : '0 บาท';
 
-        // 🟢 จัดเลย์เอาต์หน้า Detail ใหม่ เอาแผนกแทรกมาวางคู่กับวันที่ให้เป็นระเบียบสวยงาม
         let html = ` 
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:0px;"> 
             <div class="detail-row"><div class="detail-label">วันที่แจ้งซ่อม</div><div class="detail-value">${job.date}</div></div> 
