@@ -334,21 +334,20 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label>นับเป็น Breakdown หรือไม่?</label>
-                <select id="isBreakdown" required>
-                    <option value="" disabled selected>-- เลือก --</option>
-                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
-                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
+                <label style="color:#E53E3E; font-weight:700;">นับเป็น Breakdown หรือไม่?</label>
+                <select id="isBreakdown" required style="border-color:#FC8181; background:#FFF5F5;">
+                    <option value="Yes">ใช่ (Yes)</option>
+                    <option value="No">ไม่ใช่ (No)</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>ต้นทุนการซ่อม (Cost)</label>
-                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (ถ้ามี)" min="0">
+                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (บาท)" min="0">
             </div>
         </div>
         
         <div class="form-group" style="margin-top: 15px;">
-            <label>สถานะงาน (Result)</label>
+            <label>สถานะงานซ่อม (Result)</label>
             <select id="result" required>
                 <option value="" disabled selected>-- เลือกสถานะ --</option>
                 <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
@@ -485,10 +484,10 @@
           
           <div class="form-row">
             <div class="form-group">
-                <label>นับเป็น Breakdown หรือไม่?</label>
-                <select id="edit_isBreakdown" required>
-                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
-                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
+                <label style="color:#E53E3E; font-weight:700;">นับเป็น Breakdown หรือไม่?</label>
+                <select id="edit_isBreakdown" required style="border-color:#FC8181; background:#FFF5F5;">
+                    <option value="Yes">ใช่ (Yes)</option>
+                    <option value="No">ไม่ใช่ (No)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -706,7 +705,7 @@
             "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
             "Start Time", "End Time", "Repair Time", "Shift", "Service by", 
             "หมายเหตุ", "ผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
-            "PM Detail", "PM Interval", "PM Completed", "Is Breakdown", "Cost"
+            "PM Detail", "PM Interval", "PM Completed", "Cost", "Is Breakdown"
         ];
         csvContent += headers.join(",") + "\n";
         
@@ -717,7 +716,7 @@
                 r.breakdown, r.cause, r.solved, mappedResult, r.callTime,
                 r.startTime, r.endTime, r.repairTime, r.shift, r.tech,
                 r.remark, r.handover, r.imgBefore, r.imgAfter, r.pmUpdate,
-                r.pmDetail, r.pmInterval, r.pmCompleted, r.isBreakdown, r.cost
+                r.pmDetail, r.pmInterval, r.pmCompleted, r.cost, r.isBreakdown
             ];
             let formattedRow = rowData.map(v => { let str = (v || '').toString(); return `"${str.replace(/"/g, '""')}"`; });
             csvContent += formattedRow.join(",") + "\n";
@@ -768,10 +767,11 @@
         let prettyRepairTime = parseTimeStringToPretty(item.repairTime);
         let repairTimeHtml = (prettyRepairTime && prettyRepairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${prettyRepairTime}</span>` : "";
 
+        // 🟢 เพิ่ม [แผนก] หลังเลข Job No. ตรงนี้ครับ
         html += `
           <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
             <div class="report-card-head">
-              <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum}</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
+              <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum} [${item.dept}]</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
               <div style="font-size:14px; font-weight:700; color:${statusColor};">${statusFull}</div>
             </div>
             <p class="report-detail"><b>อาการ:</b> ${item.breakdown}</p>
@@ -904,12 +904,19 @@
 
         let isBD = job.isBreakdown === 'Yes' || job.isBreakdown === 'Y' || job.isBreakdown === 'YES' ? '✅ ใช่ (Yes)' : '❌ ไม่ (No)';
 
+        let costNum = parseFloat(job.cost);
+        let costDisplay = (!isNaN(costNum) && costNum > 0) ? costNum.toLocaleString() + ' บาท' : '0 บาท';
+
+        // 🟢 จัดเลย์เอาต์หน้า Detail ใหม่ เอาแผนกแทรกมาวางคู่กับวันที่ให้เป็นระเบียบสวยงาม
         let html = ` 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;"> 
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:0px;"> 
             <div class="detail-row"><div class="detail-label">วันที่แจ้งซ่อม</div><div class="detail-value">${job.date}</div></div> 
-            <div class="detail-row"><div class="detail-label">สายการผลิต / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> 
+            <div class="detail-row"><div class="detail-label">แผนก (Dept)</div><div class="detail-value fw-bold" style="color:var(--secondary);">${job.dept}</div></div> 
         </div> 
-        <div class="detail-row"><div class="detail-label">เครื่องจักร</div><div class="detail-value fw-bold">${job.machine}</div></div> 
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:15px;"> 
+            <div class="detail-row"><div class="detail-label">สายการผลิต (Line) / กะ</div><div class="detail-value">${job.line} (${job.shift})</div></div> 
+            <div class="detail-row"><div class="detail-label">เครื่องจักร (Machine)</div><div class="detail-value fw-bold">${job.machine}</div></div> 
+        </div>
         
         <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> 
             <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
@@ -934,7 +941,7 @@
         <div class="detail-row" style="background:#FFF5F5; padding:12px; border-radius:10px; border:1px solid #FC8181; margin-top:15px;">
             <div style="display:flex; justify-content:space-between;">
                 <div><div class="detail-label" style="color:#E53E3E;">นับเป็น Breakdown</div><div class="detail-value fw-bold">${isBD}</div></div>
-                <div style="text-align: right;"><div class="detail-label" style="color:#E53E3E;">ต้นทุนการซ่อม (Cost)</div><div class="detail-value fw-bold text-danger">${job.cost ? Number(job.cost).toLocaleString() + ' บาท' : '0 บาท'}</div></div>
+                <div style="text-align: right;"><div class="detail-label" style="color:#E53E3E;">ต้นทุนการซ่อม (Cost)</div><div class="detail-value fw-bold text-danger">${costDisplay}</div></div>
             </div>
         </div>
         
@@ -999,7 +1006,9 @@
         else if (isBD === 'N' || isBD === 'No' || isBD === 'NO') isBD = 'No';
         else isBD = 'Yes'; // ค่า Default 
         document.getElementById('edit_isBreakdown').value = isBD;
-        document.getElementById('edit_cost').value = currentJobData.cost || "";
+        
+        let costVal = parseFloat(currentJobData.cost);
+        document.getElementById('edit_cost').value = (!isNaN(costVal)) ? costVal : "";
 
         document.getElementById('edit_handover').value = currentJobData.handover || "";
         document.getElementById('edit_dept').value = currentJobData.dept || "CO";
