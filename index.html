@@ -247,8 +247,8 @@
         <h3 style="font-size: 14px; margin: 0; color: var(--primary); display: flex; align-items: center; gap: 5px;">
             <span class="material-symbols-rounded" style="font-size: 18px;">tune</span> ค้นหาและคัดกรองงาน
         </h3>
-        <button class="btn-primary" style="background:#28a745; width:auto; padding:6px 12px; font-size:12px; border-radius: 8px;" onclick="exportToExcel()">
-            <span class="material-symbols-rounded" style="font-size:16px;">download</span> โหลด Excel
+        <button class="btn-primary" style="background:#28a745; width:auto; padding:6px 12px; font-size:12px; border-radius: 8px;" onclick="exportToCSV()">
+            <span class="material-symbols-rounded" style="font-size:16px;">download</span> Export CSV
         </button>
       </div>
       
@@ -732,99 +732,38 @@
         renderReportTable(1);
     }
 
-    async function exportToExcel() {
-        if(!currentFilteredData || currentFilteredData.length === 0) { 
-            showModal("ไม่พบข้อมูล", "ไม่มีข้อมูลสำหรับ Export ในขณะนี้", "warning", "#D69E2E"); 
-            return; 
-        }
+    function exportToCSV() {
+        if(!currentFilteredData || currentFilteredData.length === 0) { alert("ไม่พบข้อมูลสำหรับ Export"); return; }
         
-        document.getElementById('loadingScreen').style.display = 'flex';
+        let csvContent = "\uFEFF";
+        let headers = [
+            "No.", "วันที่", "แผนก", "Line", "Machine", 
+            "Breakdown Detail", "Cause", "Problem solved", "Repair result", "Calling Time", 
+            "Start Time", "End Time", "Repair Time", "Shift", "Service by", 
+            "หมายเหตุ", "ผู้รับมอบงาน", "รูปก่อนซ่อม", "รูปหลังซ่อม", "PM Update", 
+            "PM Detail", "PM Interval", "PM Completed", "Cost", "Is Breakdown"
+        ];
+        csvContent += headers.join(",") + "\n";
         
-        try {
-            const workbook = new ExcelJS.Workbook();
-            const worksheet = workbook.addWorksheet('CMMS_Report');
-
-            // ล็อกความกว้างคอลัมน์ตายตัว ไม่ต้องลากใหม่ตอนเปิด
-            worksheet.columns = [
-                { header: 'No.', key: 'num', width: 8 },
-                { header: 'วันที่', key: 'date', width: 15 },
-                { header: 'แผนก', key: 'dept', width: 10 },
-                { header: 'Line', key: 'line', width: 10 },
-                { header: 'Machine', key: 'machine', width: 20 },
-                { header: 'Breakdown Detail', key: 'breakdown', width: 35 },
-                { header: 'Cause', key: 'cause', width: 35 },
-                { header: 'Problem solved', key: 'solved', width: 35 },
-                { header: 'Repair result', key: 'result', width: 15 },
-                { header: 'Calling Time', key: 'callTime', width: 12 },
-                { header: 'Start Time', key: 'startTime', width: 12 },
-                { header: 'End Time', key: 'endTime', width: 12 },
-                { header: 'Repair Time', key: 'repairTime', width: 15 },
-                { header: 'Shift', key: 'shift', width: 8 },
-                { header: 'Service by', key: 'tech', width: 25 },
-                { header: 'หมายเหตุ', key: 'remark', width: 25 },
-                { header: 'ผู้รับมอบงาน', key: 'handover', width: 20 },
-                { header: 'รูปก่อนซ่อม', key: 'imgBefore', width: 45 },
-                { header: 'รูปหลังซ่อม', key: 'imgAfter', width: 45 },
-                { header: 'PM Update', key: 'pmUpdate', width: 12 },
-                { header: 'PM Detail', key: 'pmDetail', width: 30 },
-                { header: 'PM Interval', key: 'pmInterval', width: 12 },
-                { header: 'PM Completed', key: 'pmCompleted', width: 15 },
-                { header: 'Cost', key: 'cost', width: 15 },
-                { header: 'Is Breakdown', key: 'isBreakdown', width: 15 }
+        currentFilteredData.forEach(r => {
+            let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
+            let rowData = [
+                r.displayNum, r.date, r.dept, r.line, r.machine,
+                r.breakdown, r.cause, r.solved, mappedResult, r.callTime,
+                r.startTime, r.endTime, r.repairTime, r.shift, r.tech,
+                r.remark, r.handover, r.imgBefore, r.imgAfter, r.pmUpdate,
+                r.pmDetail, r.pmInterval, r.pmCompleted, r.cost, r.isBreakdown
             ];
+            let formattedRow = rowData.map(v => { let str = (v || '').toString(); return `"${str.replace(/"/g, '""')}"`; });
+            csvContent += formattedRow.join(",") + "\n";
+        });
 
-            // ตกแต่งแถวหัวข้อ (Header) ให้เป็นสีน้ำเงิน ตัวหนา สีขาว
-            worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Prompt' };
-            worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF005EB8' } };
-            worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
-
-            // ยัดข้อมูลลง Excel
-            currentFilteredData.forEach(r => {
-                let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
-                
-                worksheet.addRow({
-                    num: r.displayNum, date: r.date, dept: r.dept, line: r.line, machine: r.machine,
-                    breakdown: r.breakdown, cause: r.cause, solved: r.solved, result: mappedResult, callTime: r.callTime,
-                    startTime: r.startTime, endTime: r.endTime, repairTime: r.repairTime, shift: r.shift, tech: r.tech,
-                    remark: r.remark, handover: r.handover, imgBefore: r.imgBefore, imgAfter: r.imgAfter, pmUpdate: r.pmUpdate,
-                    pmDetail: r.pmDetail, pmInterval: r.pmInterval, pmCompleted: r.pmCompleted, cost: r.cost, isBreakdown: r.isBreakdown
-                });
-            });
-
-            // ตีเส้นขอบตาราง และตั้งค่าตัดบรรทัด (Wrap Text) สำหรับช่องข้อความยาวๆ
-            worksheet.eachRow((row, rowNumber) => {
-                row.eachCell((cell) => {
-                    cell.border = { 
-                        top: { style: 'thin' }, left: { style: 'thin' }, 
-                        bottom: { style: 'thin' }, right: { style: 'thin' } 
-                    };
-                    if (rowNumber > 1) {
-                        cell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
-                        cell.font = { name: 'Prompt' }; // ใช้ฟอนต์ Prompt ให้เหมือนหน้าเว็บ
-                    }
-                });
-            });
-
-            // สร้างไฟล์และสั่งดาวน์โหลด
-            const buffer = await workbook.xlsx.writeBuffer();
-            const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `CMMS_Report_${toLocalYYYYMMDD(new Date())}.xlsx`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(url), 1000);
-            
-        } catch (error) {
-            console.error(error);
-            showModal("เกิดข้อผิดพลาด", "ไม่สามารถสร้างไฟล์ Excel ได้: " + error.message, "error", "#E53E3E");
-        } finally {
-            document.getElementById('loadingScreen').style.display = 'none';
-        }
+        let blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        let url = URL.createObjectURL(blob); let link = document.createElement("a");
+        link.href = url; link.download = `CMMS_Report_${toLocalYYYYMMDD(new Date())}.csv`; link.style.display = "none";
+        document.body.appendChild(link); link.click(); document.body.removeChild(link); setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-    
+
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
       
