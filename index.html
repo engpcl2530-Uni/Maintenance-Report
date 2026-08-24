@@ -732,19 +732,25 @@
         renderReportTable(1);
     }
 
-    async function exportToExcel() {
+async function exportToExcel() {
         if(!currentFilteredData || currentFilteredData.length === 0) { 
             alert("ไม่พบข้อมูลสำหรับ Export"); 
             return; 
         }
         
-        document.getElementById('loadingScreen').style.display = 'flex';
+        // โชว์หน้าโหลด และเปลี่ยนข้อความแจ้งเตือน (เพราะการโหลดรูปจะใช้เวลามากกว่าปกติ)
+        let loadingScreen = document.getElementById('loadingScreen');
+        let loadingText = document.querySelector('#loadingScreen p');
+        let originalText = loadingText.innerText;
+        
+        loadingScreen.style.display = 'flex';
+        loadingText.innerText = "กำลังดาวน์โหลดรูปภาพฝังลง Excel...\n(อาจใช้เวลาสักครู่หากมีหลายรายการ)";
         
         try {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('CMMS_Report');
 
-            // ล็อกความกว้างคอลัมน์ตายตัว ไม่ต้องลากใหม่ตอนเปิด
+            // ล็อกความกว้างคอลัมน์ตายตัว 
             worksheet.columns = [
                 { header: 'No.', key: 'num', width: 8 },
                 { header: 'วันที่', key: 'date', width: 15 },
@@ -773,25 +779,90 @@
                 { header: 'Is Breakdown', key: 'isBreakdown', width: 15 }
             ];
 
-            // ตกแต่งแถวหัวข้อ (Header) ให้เป็นสีน้ำเงิน ตัวหนา สีขาว
+            // ตกแต่งแถวหัวข้อ (Header) ให้เป็นสีน้ำเงิน
             worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Prompt' };
             worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF005EB8' } };
             worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
-            // ยัดข้อมูลลง Excel
-            currentFilteredData.forEach(r => {
+            // 🟢 ฟังก์ชันพิเศษ: ดึงรูปภาพจากลิงก์เพื่อมาทำเป็น Base64
+            async function getBase64Image(url) {
+                try {
+                    const res = await fetch(url);
+                    const blob = await res.blob();
+                    return new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(blob);
+                    });
+                } catch(e) { return null; }
+            }
+
+            let currentRow = 2; // แถวแรกคือ Header (เริ่มใส่ข้อมูลที่แถว 2)
+
+            // ยัดข้อมูลลง Excel (เปลี่ยนมาใช้ for...of เพื่อรอโหลดรูปภาพ)
+            for (const r of currentFilteredData) {
                 let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
                 
-                worksheet.addRow({
+                // 1. ใส่ข้อมูลข้อความลงไปก่อน (เว้นช่องรูปไว้ให้เป็นค่าว่าง)
+                let row = worksheet.addRow({
                     num: r.displayNum, date: r.date, dept: r.dept, line: r.line, machine: r.machine,
                     breakdown: r.breakdown, cause: r.cause, solved: r.solved, result: mappedResult, callTime: r.callTime,
                     startTime: r.startTime, endTime: r.endTime, repairTime: r.repairTime, shift: r.shift, tech: r.tech,
-                    remark: r.remark, handover: r.handover, imgBefore: r.imgBefore, imgAfter: r.imgAfter, pmUpdate: r.pmUpdate,
+                    remark: r.remark, handover: r.handover, imgBefore: '', imgAfter: '', pmUpdate: r.pmUpdate,
                     pmDetail: r.pmDetail, pmInterval: r.pmInterval, pmCompleted: r.pmCompleted, cost: r.cost, isBreakdown: r.isBreakdown
                 });
-            });
 
-            // ตีเส้นขอบตาราง และตั้งค่าตัดบรรทัด (Wrap Text) สำหรับช่องข้อความยาวๆ
+                // ขยายความสูงของแถวเพื่อให้รูปภาพอยู่ได้พอดีไม่ทับกัน
+                row.height = 75; 
+
+                // 🟢 2. ฝังรูป "ก่อนซ่อม" (คอลัมน์ที่ 18 หรือ Index 17 ใน ExcelJS)
+                if (r.imgBefore) {
+                    let urls = r.imgBefore.split(',');
+                    let imgCount = 0;
+                    for (let url of urls) {
+                        url = url.trim();
+                        if (!url) continue;
+                        let base64 = await getBase64Image(url);
+                        if (base64) {
+                            let imgId = workbook.addImage({ base64: base64, extension: 'jpeg' });
+                            worksheet.addImage(imgId, {
+                                tl: { col: 17 + (imgCount * 0.35), row: currentRow - 1 + 0.1 }, // เรียงรูปซ้อนๆ กันทางขวา
+                                ext: { width: 85, height: 85 } // ขนาดรูปใน Excel
+                            });
+                            imgCount++;
+                        } else {
+                            // ถ้ารูปโหลดไม่ได้ (ติดสิทธิ์) ให้วางลิงก์ข้อความเผื่อไว้
+                            row.getCell('imgBefore').value += url + '\n';
+                        }
+                    }
+                }
+
+                // 🟢 3. ฝังรูป "หลังซ่อม" (คอลัมน์ที่ 19 หรือ Index 18 ใน ExcelJS)
+                if (r.imgAfter) {
+                    let urls = r.imgAfter.split(',');
+                    let imgCount = 0;
+                    for (let url of urls) {
+                        url = url.trim();
+                        if (!url) continue;
+                        let base64 = await getBase64Image(url);
+                        if (base64) {
+                            let imgId = workbook.addImage({ base64: base64, extension: 'jpeg' });
+                            worksheet.addImage(imgId, {
+                                tl: { col: 18 + (imgCount * 0.35), row: currentRow - 1 + 0.1 },
+                                ext: { width: 85, height: 85 }
+                            });
+                            imgCount++;
+                        } else {
+                            row.getCell('imgAfter').value += url + '\n';
+                        }
+                    }
+                }
+
+                currentRow++;
+            }
+
+            // ตีเส้นขอบตาราง และตั้งค่าให้ข้อความอยู่ตรงกลาง/ชิดซ้ายสวยงาม
             worksheet.eachRow((row, rowNumber) => {
                 row.eachCell((cell) => {
                     cell.border = { 
@@ -799,8 +870,8 @@
                         bottom: { style: 'thin' }, right: { style: 'thin' } 
                     };
                     if (rowNumber > 1) {
-                        cell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
-                        cell.font = { name: 'Prompt' }; // ใช้ฟอนต์ Prompt ให้เหมือนหน้าเว็บ
+                        cell.alignment = { vertical: 'middle', horizontal: 'left', wrapText: true };
+                        cell.font = { name: 'Prompt' }; 
                     }
                 });
             });
@@ -821,7 +892,9 @@
             console.error(error);
             alert("ไม่สามารถสร้างไฟล์ Excel ได้: " + error.message);
         } finally {
-            document.getElementById('loadingScreen').style.display = 'none';
+            // คืนค่าข้อความโหลดกลับเป็นเหมือนเดิม และซ่อนหน้าโหลด
+            loadingText.innerText = originalText; 
+            loadingScreen.style.display = 'none';
         }
     }
     
