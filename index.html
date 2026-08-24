@@ -750,7 +750,7 @@ async function exportToExcel() {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('CMMS_Report');
 
-            // 🔴 ปรับความกว้างคอลัมน์กลับมาเป็นขนาดมาตรฐานที่ดูง่าย
+            // ปรับความกว้างคอลัมน์มาตรฐาน
             worksheet.columns = [
                 { header: 'No.', key: 'num', width: 8 },
                 { header: 'วันที่', key: 'date', width: 12 },
@@ -769,7 +769,7 @@ async function exportToExcel() {
                 { header: 'Service by', key: 'tech', width: 25 },
                 { header: 'หมายเหตุ', key: 'remark', width: 25 },
                 { header: 'ผู้รับมอบงาน', key: 'handover', width: 18 },
-                { header: 'รูปก่อนซ่อม (Links)', key: 'imgBefore', width: 50 }, // ความกว้างกำลังดีสำหรับลิงก์
+                { header: 'รูปก่อนซ่อม (Links)', key: 'imgBefore', width: 50 }, 
                 { header: 'รูปหลังซ่อม (Links)', key: 'imgAfter', width: 50 },
                 { header: 'PM Update', key: 'pmUpdate', width: 12 },
                 { header: 'PM Detail', key: 'pmDetail', width: 30 },
@@ -784,10 +784,13 @@ async function exportToExcel() {
             worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF005EB8' } };
             worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
-            currentFilteredData.forEach(r => {
+            // 🔴 ก๊อปปี้ข้อมูลและสั่งให้เรียงลำดับจากน้อยไปมาก (จากงาน 1 ไปงานล่าสุด) ก่อนจะ Export
+            let exportData = [...currentFilteredData].sort((a, b) => a.displayNum - b.displayNum);
+
+            exportData.forEach(r => {
                 let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
                 
-                // 🔴 ฟังก์ชันจัดเรียงลิงก์: ถ้างามมีหลายรูป จะจับแยกบรรทัดให้อัตโนมัติ
+                // ฟังก์ชันจัดเรียงลิงก์แยกบรรทัด
                 let formatLinks = (imgStr) => {
                     if (!imgStr || imgStr.trim() === "") return "-";
                     let urls = imgStr.split(',');
@@ -799,8 +802,8 @@ async function exportToExcel() {
                     breakdown: r.breakdown, cause: r.cause, solved: r.solved, result: mappedResult, callTime: r.callTime,
                     startTime: r.startTime, endTime: r.endTime, repairTime: r.repairTime, shift: r.shift, tech: r.tech,
                     remark: r.remark, handover: r.handover, 
-                    imgBefore: formatLinks(r.imgBefore), // ใช้ฟังก์ชันจัดฟอร์แมต
-                    imgAfter: formatLinks(r.imgAfter),   // ใช้ฟังก์ชันจัดฟอร์แมต
+                    imgBefore: formatLinks(r.imgBefore), 
+                    imgAfter: formatLinks(r.imgAfter),   
                     pmUpdate: r.pmUpdate, pmDetail: r.pmDetail, pmInterval: r.pmInterval, pmCompleted: r.pmCompleted, 
                     cost: r.cost, isBreakdown: r.isBreakdown
                 });
@@ -839,8 +842,7 @@ async function exportToExcel() {
             loadingText.innerText = originalText; 
             loadingScreen.style.display = 'none';
         }
-    }
-    
+    }    
     
     
     function renderReportTable(pageNumber) {
