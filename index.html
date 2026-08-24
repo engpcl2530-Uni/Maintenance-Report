@@ -738,19 +738,18 @@ async function exportToExcel() {
             return; 
         }
         
-        // โชว์หน้าโหลด และเปลี่ยนข้อความแจ้งเตือน (เพราะการโหลดรูปจะใช้เวลามากกว่าปกติ)
         let loadingScreen = document.getElementById('loadingScreen');
         let loadingText = document.querySelector('#loadingScreen p');
         let originalText = loadingText.innerText;
         
         loadingScreen.style.display = 'flex';
-        loadingText.innerText = "กำลังดาวน์โหลดรูปภาพฝังลง Excel...\n(อาจใช้เวลาสักครู่หากมีหลายรายการ)";
+        loadingText.innerText = "กำลังดาวน์โหลดรูปภาพและจัดเรียงลง Excel...\n(อาจใช้เวลาสักครู่หากมีรูปภาพจำนวนมาก)";
         
         try {
             const workbook = new ExcelJS.Workbook();
             const worksheet = workbook.addWorksheet('CMMS_Report');
 
-            // ล็อกความกว้างคอลัมน์ตายตัว 
+            // ล็อกความกว้างคอลัมน์ (ขยายช่องรูปภาพให้กว้างขึ้นเป็น 70 เพื่อรองรับหลายรูปแนวนอน)
             worksheet.columns = [
                 { header: 'No.', key: 'num', width: 8 },
                 { header: 'วันที่', key: 'date', width: 15 },
@@ -769,8 +768,8 @@ async function exportToExcel() {
                 { header: 'Service by', key: 'tech', width: 25 },
                 { header: 'หมายเหตุ', key: 'remark', width: 25 },
                 { header: 'ผู้รับมอบงาน', key: 'handover', width: 20 },
-                { header: 'รูปก่อนซ่อม', key: 'imgBefore', width: 45 },
-                { header: 'รูปหลังซ่อม', key: 'imgAfter', width: 45 },
+                { header: 'รูปก่อนซ่อม', key: 'imgBefore', width: 70 }, // 🔴 ขยายกว้างขึ้น
+                { header: 'รูปหลังซ่อม', key: 'imgAfter', width: 70 },  // 🔴 ขยายกว้างขึ้น
                 { header: 'PM Update', key: 'pmUpdate', width: 12 },
                 { header: 'PM Detail', key: 'pmDetail', width: 30 },
                 { header: 'PM Interval', key: 'pmInterval', width: 12 },
@@ -779,12 +778,12 @@ async function exportToExcel() {
                 { header: 'Is Breakdown', key: 'isBreakdown', width: 15 }
             ];
 
-            // ตกแต่งแถวหัวข้อ (Header) ให้เป็นสีน้ำเงิน
+            // ตกแต่งแถวหัวข้อ (Header)
             worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Prompt' };
             worksheet.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF005EB8' } };
             worksheet.getRow(1).alignment = { vertical: 'middle', horizontal: 'center' };
 
-            // 🟢 ฟังก์ชันพิเศษ: ดึงรูปภาพจากลิงก์เพื่อมาทำเป็น Base64
+            // 🟢 ดึงรูปภาพจากลิงก์
             async function getBase64Image(url) {
                 try {
                     const res = await fetch(url);
@@ -798,13 +797,10 @@ async function exportToExcel() {
                 } catch(e) { return null; }
             }
 
-            let currentRow = 2; // แถวแรกคือ Header (เริ่มใส่ข้อมูลที่แถว 2)
-
-            // ยัดข้อมูลลง Excel (เปลี่ยนมาใช้ for...of เพื่อรอโหลดรูปภาพ)
+            // ยัดข้อมูลลง Excel ทีละแถว
             for (const r of currentFilteredData) {
                 let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
                 
-                // 1. ใส่ข้อมูลข้อความลงไปก่อน (เว้นช่องรูปไว้ให้เป็นค่าว่าง)
                 let row = worksheet.addRow({
                     num: r.displayNum, date: r.date, dept: r.dept, line: r.line, machine: r.machine,
                     breakdown: r.breakdown, cause: r.cause, solved: r.solved, result: mappedResult, callTime: r.callTime,
@@ -813,11 +809,11 @@ async function exportToExcel() {
                     pmDetail: r.pmDetail, pmInterval: r.pmInterval, pmCompleted: r.pmCompleted, cost: r.cost, isBreakdown: r.isBreakdown
                 });
 
-                // ขยายความสูงของแถวเพื่อให้รูปภาพอยู่ได้พอดีไม่ทับกัน
+                // ล็อกความสูงแถวให้กว้างพอใส่รูป
                 row.height = 75; 
 
-                // 🟢 2. ฝังรูป "ก่อนซ่อม" (คอลัมน์ที่ 18 หรือ Index 17 ใน ExcelJS)
-                if (r.imgBefore) {
+                // 🟢 จัดการรูปก่อนซ่อม (Index 17)
+                if (r.imgBefore && r.imgBefore.trim() !== "") {
                     let urls = r.imgBefore.split(',');
                     let imgCount = 0;
                     for (let url of urls) {
@@ -827,19 +823,20 @@ async function exportToExcel() {
                         if (base64) {
                             let imgId = workbook.addImage({ base64: base64, extension: 'jpeg' });
                             worksheet.addImage(imgId, {
-                                tl: { col: 17 + (imgCount * 0.35), row: currentRow - 1 + 0.1 }, // เรียงรูปซ้อนๆ กันทางขวา
-                                ext: { width: 85, height: 85 } // ขนาดรูปใน Excel
+                                // ขยับรูปถัดไปให้ห่างออกไปทางขวา 0.15 ส่วนของเซลล์ (จะได้เรียงแนวนอนสวยๆ)
+                                tl: { col: 17 + (imgCount * 0.15), row: row.number - 1 + 0.1 },
+                                ext: { width: 65, height: 65 }, // ขนาดรูปภาพ
+                                editAs: 'oneCell' // 🔴 บังคับตอกหมุดรูปไว้ในเซลล์นี้เท่านั้น ห้ามไหลไปแถวอื่น!
                             });
                             imgCount++;
                         } else {
-                            // ถ้ารูปโหลดไม่ได้ (ติดสิทธิ์) ให้วางลิงก์ข้อความเผื่อไว้
-                            row.getCell('imgBefore').value += url + '\n';
+                            row.getCell('imgBefore').value += (row.getCell('imgBefore').value ? '\n' : '') + url;
                         }
                     }
                 }
 
-                // 🟢 3. ฝังรูป "หลังซ่อม" (คอลัมน์ที่ 19 หรือ Index 18 ใน ExcelJS)
-                if (r.imgAfter) {
+                // 🟢 จัดการรูปหลังซ่อม (Index 18)
+                if (r.imgAfter && r.imgAfter.trim() !== "") {
                     let urls = r.imgAfter.split(',');
                     let imgCount = 0;
                     for (let url of urls) {
@@ -849,20 +846,19 @@ async function exportToExcel() {
                         if (base64) {
                             let imgId = workbook.addImage({ base64: base64, extension: 'jpeg' });
                             worksheet.addImage(imgId, {
-                                tl: { col: 18 + (imgCount * 0.35), row: currentRow - 1 + 0.1 },
-                                ext: { width: 85, height: 85 }
+                                tl: { col: 18 + (imgCount * 0.15), row: row.number - 1 + 0.1 },
+                                ext: { width: 65, height: 65 },
+                                editAs: 'oneCell' // 🔴 บังคับตอกหมุด
                             });
                             imgCount++;
                         } else {
-                            row.getCell('imgAfter').value += url + '\n';
+                            row.getCell('imgAfter').value += (row.getCell('imgAfter').value ? '\n' : '') + url;
                         }
                     }
                 }
-
-                currentRow++;
             }
 
-            // ตีเส้นขอบตาราง และตั้งค่าให้ข้อความอยู่ตรงกลาง/ชิดซ้ายสวยงาม
+            // ตีเส้นขอบตาราง และตั้งค่าตำแหน่งอักษร
             worksheet.eachRow((row, rowNumber) => {
                 row.eachCell((cell) => {
                     cell.border = { 
@@ -876,7 +872,6 @@ async function exportToExcel() {
                 });
             });
 
-            // สร้างไฟล์และสั่งดาวน์โหลด
             const buffer = await workbook.xlsx.writeBuffer();
             const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
             const url = URL.createObjectURL(blob);
@@ -892,12 +887,10 @@ async function exportToExcel() {
             console.error(error);
             alert("ไม่สามารถสร้างไฟล์ Excel ได้: " + error.message);
         } finally {
-            // คืนค่าข้อความโหลดกลับเป็นเหมือนเดิม และซ่อนหน้าโหลด
             loadingText.innerText = originalText; 
             loadingScreen.style.display = 'none';
         }
-    }
-    
+    }    
     function renderReportTable(pageNumber) {
       let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
       let fd = document.getElementById('fDept').value; 
