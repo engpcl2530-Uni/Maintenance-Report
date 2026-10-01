@@ -249,6 +249,7 @@ function renderReportTable(pageNumber) {
   let fd = document.getElementById('fDept').value; 
   let fl = document.getElementById('fLine').value; let shift = document.getElementById('fShift').value;
   let statusFilter = document.getElementById('fStatus').value; let textFilter = document.getElementById('fText').value.toLowerCase();
+  let ft = document.getElementById('fType') ? document.getElementById('fType').value : "";
 
   let fsVal = fs ? parseDateSafely(fs).setHours(0,0,0,0) : null;
   let feVal = fe ? parseDateSafely(fe).setHours(23,59,59,999) : null;
@@ -262,6 +263,13 @@ function renderReportTable(pageNumber) {
     
     if (fl && r.line !== fl) return false;
     if (shift && r.shift !== shift) return false;
+    
+    // เงื่อนไขสำหรับฟิลเตอร์เฉพาะ Breakdown
+    if (ft === 'BD') {
+        let isBD = (r.isBreakdown === 'Yes' || r.isBreakdown === 'Y' || r.isBreakdown === 'YES');
+        if (!isBD) return false;
+    }
+
     let mappedStatus = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
     if (statusFilter && mappedStatus !== statusFilter) return false;
     if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || (r.tech || "").toLowerCase().includes(textFilter) || (r.machine || "").toLowerCase().includes(textFilter) || (r.breakdown || "").toLowerCase().includes(textFilter))) return false;
@@ -496,6 +504,21 @@ function openEditMode() {
     document.getElementById('edit_shift').value = currentJobData.shift;
     document.getElementById('edit_machine').value = currentJobData.machine;
     
+    // ตั้งค่าข้อมูล Line ในแบบฟอร์มแก้ไข
+    let editLineSelect = document.getElementById('edit_line');
+    if(editLineSelect) {
+        let currentLine = currentJobData.line || "";
+        let optionExists = Array.from(editLineSelect.options).some(opt => opt.value === currentLine);
+        if(optionExists) {
+            editLineSelect.value = currentLine;
+            toggleOther('edit_line', 'edit_lineOtherContainer');
+        } else {
+            editLineSelect.value = "อื่นๆ";
+            toggleOther('edit_line', 'edit_lineOtherContainer');
+            document.getElementById('edit_lineOther').value = currentLine;
+        }
+    }
+    
     let ct = currentJobData.callTime ? currentJobData.callTime.toString().split(':') : ['',''];
     let st = currentJobData.startTime ? currentJobData.startTime.toString().split(':') : ['',''];
     let et = currentJobData.endTime ? currentJobData.endTime.toString().split(':') : ['',''];
@@ -560,13 +583,23 @@ async function submitEditForm(event) {
     var techArray = []; document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value)); 
     if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value); 
     
+    // อ่านค่าของ Line จากการแก้ไข
+    let updatedLine = document.getElementById('edit_line') ? document.getElementById('edit_line').value : "";
+    if(updatedLine === "อื่นๆ" && document.getElementById('edit_lineOther')) {
+        updatedLine = document.getElementById('edit_lineOther').value;
+    }
+    
     try { 
         var baseEditBefore=[], baseEditAfter=[]; 
         for(let f of editFilesBefore) baseEditBefore.push(await compressImageAsync(f)); 
         for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); 
         
         var updateData = { 
-            num: document.getElementById('editJobNum').value, date: document.getElementById('edit_date').value, shift: document.getElementById('edit_shift').value, machine: document.getElementById('edit_machine').value,
+            num: document.getElementById('editJobNum').value, 
+            date: document.getElementById('edit_date').value, 
+            shift: document.getElementById('edit_shift').value, 
+            line: updatedLine, // ส่งค่า Line ใหม่กลับไปบันทึก
+            machine: document.getElementById('edit_machine').value,
             callTime: getTimeString('edit_call'), startTime: getTimeString('edit_start'), endTime: getTimeString('edit_end'), repairTime: calculatedRepairTime,
             breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
             pmUpdate: document.getElementById('edit_pmUpdate').value, pmCompleted: document.getElementById('edit_pmCompleted').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
