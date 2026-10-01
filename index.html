@@ -124,6 +124,13 @@
             <option value="Unfinished">Unfinished</option>
           </select>
         </div>
+        <div class="form-group">
+          <label>ประเภทงาน</label>
+          <select id="fType" onchange="renderReportTable(1)">
+            <option value="">-- ทั้งหมด --</option>
+            <option value="BD">เฉพาะ Breakdown (BD)</option>
+          </select>
+        </div>
         <div class="form-group" style="flex: 2;"><label>ค้นหา (Job No, ชื่อช่าง, เครื่อง)</label><input type="text" id="fText" placeholder="พิมพ์ข้อความ..." oninput="renderReportTable(1)"></div>
       </div>
     </div>
@@ -320,7 +327,28 @@
             <div class="form-group"><label>กะ (Shift)</label><select id="edit_shift" required><option value="M">M</option><option value="A">A</option><option value="N">N</option><option value="DW">DW</option></select></div>
             <div class="form-group"><label>แผนก</label><select id="edit_dept" required><option value="CO">CO</option><option value="PCL">PCL</option></select></div>
           </div>
-          <div class="form-group"><label>เครื่องจักร</label><input type="text" id="edit_machine" required></div>
+          
+          <div class="form-row">
+            <div class="form-group"><label>สายการผลิต (Line)</label>
+              <select id="edit_line" onchange="toggleOther('edit_line', 'edit_lineOtherContainer')" required>
+                <option value="" disabled selected>-- เลือกไลน์ --</option>
+                <option value="A1">A1</option><option value="A2">A2</option><option value="O1">O1</option>
+                <option value="C1">C1</option><option value="C2">C2</option><option value="SB">SB</option>
+                <option value="R1">R1</option><option value="R2">R2</option><option value="R3">R3</option>
+                <option value="R4">R4</option><option value="R5">R5</option><option value="R6">R6</option>
+                <option value="IWK1">IWK1</option><option value="IWK2">IWK2</option><option value="V4">V4</option>
+                <option value="FGI">FGI</option><option value="CF3">CF3</option><option value="M1">M1</option>
+                <option value="EOL">EOL</option><option value="Utility">Utility</option><option value="Packing">Packing</option>
+                <option value="Lab">Lab</option><option value="Mixing">Mixing</option><option value="MIX-Utility">MIX-Utility</option>
+                <option value="Pre-Weight">Pre-Weight</option><option value="MIX#1">MIX#1</option><option value="MIX#2">MIX#2</option>
+                <option value="MIX#3">MIX#3</option><option value="MIX#4">MIX#4</option><option value="MIX#5">MIX#5</option>
+                <option value="MIX#6">MIX#6</option><option value="MIX#7">MIX#7</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+              </select>
+              <div id="edit_lineOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="edit_lineOther" placeholder="พิมพ์ระบุ Line อื่นๆ..."></div>
+            </div>
+            <div class="form-group"><label>เครื่องจักร</label><input type="text" id="edit_machine" required></div>
+          </div>
         </div>
 
         <div class="card">
