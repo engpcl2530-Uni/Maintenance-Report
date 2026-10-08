@@ -9,6 +9,28 @@ let currentPage = 1;
 const itemsPerPage = 200; 
 let currentFilteredData = [];
 
+// 🔴 โชว์/ซ่อน กล่อง "รอ Spare Part"
+function toggleSparePart(mode) {
+    let prefix = mode === 'edit' ? 'edit_' : '';
+    let resSelect = document.getElementById(prefix + 'result');
+    if(!resSelect) return;
+    
+    let res = resSelect.value;
+    let container = document.getElementById(prefix + 'sparePartContainer');
+    let input = document.getElementById(prefix + 'sparePart');
+    
+    if(res === 'Waiting Spare Part') {
+        if(container) container.style.display = 'block';
+        if(input) input.required = true;
+    } else {
+        if(container) container.style.display = 'none';
+        if(input) {
+            input.required = false;
+            input.value = '';
+        }
+    }
+}
+
 function parseTimeStringToPretty(timeStr) {
     if (!timeStr || timeStr === "-") return "-";
     let str = timeStr.toString().trim();
@@ -85,7 +107,10 @@ function saveDraft() {
         solved: document.getElementById('solved').value, result: document.getElementById('result').value,
         isBreakdown: document.getElementById('isBreakdown').value, cost: document.getElementById('cost').value,
         pmUpdate: document.getElementById('pmUpdate').value, pmCompleted: document.getElementById('pmCompleted').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value,
-        handover: document.getElementById('handover').value, dept: document.getElementById('dept').value, remark: document.getElementById('remark').value
+        handover: document.getElementById('handover').value, dept: document.getElementById('dept').value, remark: document.getElementById('remark').value,
+        sparePart: document.getElementById('sparePart') ? document.getElementById('sparePart').value : '', 
+        forwardTo: document.getElementById('forwardTo') ? document.getElementById('forwardTo').value : '', 
+        pendingAction: document.getElementById('pendingAction') ? document.getElementById('pendingAction').value : ''
     };
     localStorage.setItem(CACHE_KEY, JSON.stringify(draft));
     let t = document.getElementById('toast');
@@ -97,10 +122,11 @@ function loadDraft() {
     if(saved) {
         let data = JSON.parse(saved);
         if(new Date().getTime() - data.timestamp < 6 * 60 * 60 * 1000) { 
-            ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','isBreakdown','cost','pmUpdate','pmCompleted','pmInterval','pmDetail','handover','dept','remark'].forEach(id => {
+            ['date','shift','line','machine','callHH','callMM','startHH','startMM','endHH','endMM','breakdown','cause','solved','result','isBreakdown','cost','pmUpdate','pmCompleted','pmInterval','pmDetail','handover','dept','remark','sparePart','forwardTo','pendingAction'].forEach(id => {
                 if(data[id] && document.getElementById(id)) document.getElementById(id).value = data[id];
             });
             if(data.line === 'อื่นๆ') toggleOther('line', 'lineOtherContainer');
+            toggleSparePart('add');
         } else { localStorage.removeItem(CACHE_KEY); }
     }
     if(!document.getElementById('date').value) document.getElementById('date').valueAsDate = new Date();
@@ -115,6 +141,17 @@ window.onload = async function() {
     const res = await callAPI("getDashboard", {});
     if(res.status === "success") { 
       allReportData = res.data; 
+      
+      // 🔴 สร้างลิสต์จำชื่อผู้ถูกส่งต่อ (Datalist)
+      let fwdSet = new Set();
+      allReportData.forEach(r => { if(r.forwardTo && r.forwardTo.trim() !== "") fwdSet.add(r.forwardTo.trim()); });
+      let fwdHtml = "";
+      fwdSet.forEach(name => { fwdHtml += `<option value="${name}">`; });
+      let fwdListAdd = document.getElementById('forwardToList');
+      let fwdListEdit = document.getElementById('edit_forwardToList');
+      if(fwdListAdd) fwdListAdd.innerHTML = fwdHtml;
+      if(fwdListEdit) fwdListEdit.innerHTML = fwdHtml;
+
       document.getElementById('loadingScreen').style.display = 'none';
       document.getElementById('dashboardView').style.display = 'block';
       renderReportTable(1); 
@@ -143,14 +180,11 @@ async function exportToExcel() {
         alert("ไม่พบข้อมูลสำหรับ Export"); 
         return; 
     }
-    
     let loadingScreen = document.getElementById('loadingScreen');
     let loadingText = document.querySelector('#loadingScreen p');
     let originalText = loadingText.innerText;
-    
     loadingScreen.style.display = 'flex';
     loadingText.innerText = "กำลังสร้างไฟล์ Excel...\nกรุณารอสักครู่";
-    
     try {
         const workbook = new ExcelJS.Workbook();
         const worksheet = workbook.addWorksheet('CMMS_Report');
@@ -180,7 +214,14 @@ async function exportToExcel() {
             { header: 'PM Interval', key: 'pmInterval', width: 12 },
             { header: 'PM Completed', key: 'pmCompleted', width: 15 },
             { header: 'Cost', key: 'cost', width: 12 },
-            { header: 'Is Breakdown', key: 'isBreakdown', width: 15 }
+            { header: 'Is Breakdown', key: 'isBreakdown', width: 15 },
+            { header: 'Created At', key: 'createdAt', width: 15 },
+            { header: 'Spare Part', key: 'sparePart', width: 20 },
+            { header: 'Forward To', key: 'forwardTo', width: 20 },
+            { header: 'Pending Action', key: 'pendingAction', width: 30 },
+            { header: 'Last Updated', key: 'lastUpdated', width: 15 },
+            { header: 'Editor Name', key: 'editorName', width: 20 },
+            { header: 'Edit Reason', key: 'editReason', width: 30 }
         ];
 
         worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' }, name: 'Prompt' };
@@ -190,7 +231,7 @@ async function exportToExcel() {
         let exportData = [...currentFilteredData].sort((a, b) => a.displayNum - b.displayNum);
 
         exportData.forEach(r => {
-            let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
+            let mappedResult = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'Waiting Spare Part' ? 'Waiting Spare Part' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : 'Unfinished'));
             
             let formatLinks = (imgStr) => {
                 if (!imgStr || imgStr.trim() === "") return "-";
@@ -202,47 +243,30 @@ async function exportToExcel() {
                 num: r.displayNum, date: r.date, dept: r.dept, line: r.line, machine: r.machine,
                 breakdown: r.breakdown, cause: r.cause, solved: r.solved, result: mappedResult, callTime: r.callTime,
                 startTime: r.startTime, endTime: r.endTime, repairTime: r.repairTime, shift: r.shift, tech: r.tech,
-                remark: r.remark, handover: r.handover, 
-                imgBefore: formatLinks(r.imgBefore), 
-                imgAfter: formatLinks(r.imgAfter),   
+                remark: r.remark, handover: r.handover, imgBefore: formatLinks(r.imgBefore), imgAfter: formatLinks(r.imgAfter),   
                 pmUpdate: r.pmUpdate, pmDetail: r.pmDetail, pmInterval: r.pmInterval, pmCompleted: r.pmCompleted, 
-                cost: r.cost, isBreakdown: r.isBreakdown
+                cost: r.cost, isBreakdown: r.isBreakdown,
+                createdAt: r.createdAt, sparePart: r.sparePart, forwardTo: r.forwardTo, pendingAction: r.pendingAction,
+                lastUpdated: r.lastUpdated, editorName: r.editorName, editReason: r.editReason
             });
         });
 
         worksheet.eachRow((row, rowNumber) => {
             row.eachCell((cell) => {
-                cell.border = { 
-                    top: { style: 'thin' }, left: { style: 'thin' }, 
-                    bottom: { style: 'thin' }, right: { style: 'thin' } 
-                };
-                if (rowNumber > 1) {
-                    cell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true };
-                    cell.font = { name: 'Prompt' }; 
-                }
+                cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+                if (rowNumber > 1) { cell.alignment = { vertical: 'top', horizontal: 'left', wrapText: true }; cell.font = { name: 'Prompt' }; }
             });
         });
 
         const buffer = await workbook.xlsx.writeBuffer();
         const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
+        const url = URL.createObjectURL(blob); const link = document.createElement("a"); link.href = url;
         link.download = `CMMS_Report_${toLocalYYYYMMDD(new Date())}.xlsx`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        document.body.appendChild(link); link.click(); document.body.removeChild(link);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
         
-    } catch (error) {
-        console.error(error);
-        alert("ไม่สามารถสร้างไฟล์ Excel ได้: " + error.message);
-    } finally {
-        loadingText.innerText = originalText; 
-        loadingScreen.style.display = 'none';
-    }
+    } catch (error) { console.error(error); alert("ไม่สามารถสร้างไฟล์ Excel ได้: " + error.message); } finally { loadingText.innerText = originalText; loadingScreen.style.display = 'none'; }
 }    
-
 
 function renderReportTable(pageNumber) {
   let fs = document.getElementById('fStart').value; let fe = document.getElementById('fEnd').value;
@@ -258,19 +282,13 @@ function renderReportTable(pageNumber) {
     let jDateObj = parseDateSafely(r.date); let jDate = jDateObj.getTime();
     if (fsVal && jDate < fsVal) return false;
     if (feVal && jDate > feVal) return false;
-    
     if (fd && r.dept !== fd) return false;
-    
     if (fl && r.line !== fl) return false;
     if (shift && r.shift !== shift) return false;
     
-    // เงื่อนไขสำหรับฟิลเตอร์เฉพาะ Breakdown
-    if (ft === 'BD') {
-        let isBD = (r.isBreakdown === 'Yes' || r.isBreakdown === 'Y' || r.isBreakdown === 'YES');
-        if (!isBD) return false;
-    }
+    if (ft === 'BD') { let isBD = (r.isBreakdown === 'Yes' || r.isBreakdown === 'Y' || r.isBreakdown === 'YES'); if (!isBD) return false; }
 
-    let mappedStatus = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : (r.result === 'U' || r.result === 'Unfinished' ? 'Unfinished' : r.result));
+    let mappedStatus = r.result === 'F' || r.result === 'Finished' ? 'Finished' : (r.result === 'Waiting Spare Part' ? 'Waiting Spare Part' : (r.result === 'O' || r.result === 'Ongoing' ? 'Ongoing' : 'Unfinished'));
     if (statusFilter && mappedStatus !== statusFilter) return false;
     if (textFilter && !(r.num.toString().toLowerCase().includes(textFilter) || (r.tech || "").toLowerCase().includes(textFilter) || (r.machine || "").toLowerCase().includes(textFilter) || (r.breakdown || "").toLowerCase().includes(textFilter))) return false;
     return true;
@@ -286,8 +304,8 @@ function renderReportTable(pageNumber) {
   let html = `<p style="font-size:14px; color:var(--text-muted); margin-bottom:15px; font-weight: 500;">พบทั้งหมด <b>${currentFilteredData.length}</b> รายการ (แสดงหน้า ${currentPage}/${totalPages})</p>`;
   
   paginated.forEach(item => {
-    let statusFull = item.result === "F" || item.result === "Finished" ? "Finished" : (item.result === "O" || item.result === "Ongoing" ? "Ongoing" : "Unfinished");
-    let statusColor = statusFull === "Finished" ? "#38A169" : (statusFull === "Ongoing" ? "#D69E2E" : "#E53E3E");
+    let statusFull = item.result === "F" || item.result === "Finished" ? "Finished" : (item.result === "Waiting Spare Part" ? "Waiting Spare Part" : (item.result === "O" || item.result === "Ongoing" ? "Ongoing" : "Unfinished"));
+    let statusColor = statusFull === "Finished" ? "#38A169" : (statusFull === "Waiting Spare Part" ? "#DD6B20" : (statusFull === "Ongoing" ? "#D69E2E" : "#E53E3E"));
     let isNew = isNewJob(item.date); 
     let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
     let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
@@ -296,7 +314,7 @@ function renderReportTable(pageNumber) {
     let repairTimeHtml = (prettyRepairTime && prettyRepairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${prettyRepairTime}</span>` : "";
 
     html += `
-      <div class="report-card status-${statusFull} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
+      <div class="report-card status-${statusFull.split(' ')[0]} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
         <div class="report-card-head">
           <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum} [${item.dept}]</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
           <div style="font-size:14px; font-weight:700; color:${statusColor};">${statusFull}</div>
@@ -307,6 +325,10 @@ function renderReportTable(pageNumber) {
           <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">calendar_month</span> ${item.date}</span>
           ${callTimeHtml}
           ${repairTimeHtml}
+        </div>
+        <!-- 🔴 โชว์ Time Stamp -->
+        <div style="font-size:12px; color:var(--text-muted); margin-top:10px; display:flex; align-items:center; gap:4px; padding-top:10px; border-top:1px dashed #E2E8F0;">
+            <span class="material-symbols-rounded" style="font-size:14px;">schedule</span> สร้างคำสั่ง: <span style="font-weight:600;">${item.createdAt || 'ไม่มีข้อมูล (งานเก่า)'}</span>
         </div>
       </div>`;
   }); 
@@ -327,7 +349,7 @@ function changePage(step) { renderReportTable(currentPage + step); window.scroll
 function updateDashboardStats(data, selectedLine) {
     let newCount = 0; let doneCount = 0; let lineCounts = {}; let techLatest = {};
     data.forEach(job => {
-        let mappedStatus = job.result === 'F' || job.result === 'Finished' ? 'Finished' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing' : 'Unfinished');
+        let mappedStatus = job.result === 'F' || job.result === 'Finished' ? 'Finished' : (job.result === 'Waiting Spare Part' ? 'Waiting Spare Part' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing' : 'Unfinished'));
         if(mappedStatus === 'Finished') doneCount++;
         if(isNewJob(job.date)) newCount++; 
         if(job.line) { lineCounts[job.line] = (lineCounts[job.line] || 0) + 1; }
@@ -362,7 +384,7 @@ function updateDashboardStats(data, selectedLine) {
     techArr.sort((a, b) => b.lastUpdateMs - a.lastUpdateMs);
     let feedHtml = "";
     techArr.forEach(info => {
-        let col = info.result==='Finished'?'#38A169':(info.result==='Ongoing'?'#D69E2E':'#E53E3E');
+        let col = info.result==='Finished'?'#38A169':(info.result==='Waiting Spare Part'?'#DD6B20':(info.result==='Ongoing'?'#D69E2E':'#E53E3E'));
         feedHtml += `<div class="tech-chip" onclick="openJobDetails('${info.num}')" style="cursor:pointer; border-left: 4px solid ${col};"><div class="tech-chip-name"><span class="material-symbols-rounded" style="font-size:16px;">build</span> ${info.tech}</div><div class="tech-chip-job">#${info.displayNum} ${info.machine}</div></div>`;
     });
     document.getElementById('techFeed').innerHTML = feedHtml || "<span style='font-size:13px; color:#718096;'>ไม่พบข้อมูลช่างในช่วงนี้</span>";
@@ -393,7 +415,12 @@ async function submitForm(event) {
     var formData = {
       date: document.getElementById('date').value, dept: document.getElementById('dept').value, line: document.getElementById('line').value, lineOther: document.getElementById('lineOther')?document.getElementById('lineOther').value:'', machine: document.getElementById('machine').value, breakdown: document.getElementById('breakdown').value, cause: document.getElementById('cause').value, solved: document.getElementById('solved').value, result: document.getElementById('result').value, callTime: getTimeString('call'), startTime: getTimeString('start'), endTime: getTimeString('end'), shift: document.getElementById('shift').value, serviceBy: techArray.join(', '), handover: document.getElementById('handover').value, remark: document.getElementById('remark').value, imgsBefore: baseBefore, imgsAfter: baseAfter,
       repairTime: calculatedRepairTime, pmUpdate: document.getElementById('pmUpdate').value, pmCompleted: document.getElementById('pmCompleted').value, pmInterval: document.getElementById('pmInterval').value, pmDetail: document.getElementById('pmDetail').value,
-      isBreakdown: document.getElementById('isBreakdown').value, cost: document.getElementById('cost').value
+      isBreakdown: document.getElementById('isBreakdown').value, cost: document.getElementById('cost').value,
+      
+      // 🔴 ส่งข้อมูลฟิลด์ใหม่ให้หลังบ้าน
+      sparePart: document.getElementById('sparePart') ? document.getElementById('sparePart').value : '', 
+      forwardTo: document.getElementById('forwardTo') ? document.getElementById('forwardTo').value : '', 
+      pendingAction: document.getElementById('pendingAction') ? document.getElementById('pendingAction').value : ''
     };
 
     const res = await callAPI("saveReport", formData);
@@ -401,7 +428,18 @@ async function submitForm(event) {
       alert(res.message); document.getElementById('maintenanceForm').reset(); document.getElementById('date').valueAsDate=new Date(); clearFiles('before'); clearFiles('after');
       localStorage.removeItem(CACHE_KEY); toggleMainView(); document.getElementById('loadingScreen').style.display = 'flex';
       const newRes = await callAPI("getDashboard", {});
-      if(newRes.status==="success"){ allReportData=newRes.data; renderReportTable(1); }
+      if(newRes.status==="success"){ 
+          allReportData=newRes.data; 
+          let fwdSet = new Set();
+          allReportData.forEach(r => { if(r.forwardTo && r.forwardTo.trim() !== "") fwdSet.add(r.forwardTo.trim()); });
+          let fwdHtml = "";
+          fwdSet.forEach(name => { fwdHtml += `<option value="${name}">`; });
+          let fwdListAdd = document.getElementById('forwardToList');
+          let fwdListEdit = document.getElementById('edit_forwardToList');
+          if(fwdListAdd) fwdListAdd.innerHTML = fwdHtml;
+          if(fwdListEdit) fwdListEdit.innerHTML = fwdHtml;
+          renderReportTable(1); 
+      }
       document.getElementById('loadingScreen').style.display = 'none';
     } else { alert("เกิดข้อผิดพลาด: "+res.message); }
   } catch(err) { alert("Error: "+err.message); }
@@ -417,9 +455,10 @@ function openJobDetails(numStr) {
     if(!job) return; currentJobData = job; 
     document.getElementById('detailJobNum').innerText = "งานลำดับที่ #" + job.displayNum; 
     
-    let statusFull = job.result === 'F' || job.result === 'Finished' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)');
+    let statusFull = job.result === 'F' || job.result === 'Finished' ? 'Finished (เสร็จสมบูรณ์)' : (job.result === 'Waiting Spare Part' ? 'รออะไหล่ (Waiting Spare Part)' : (job.result === 'O' || job.result === 'Ongoing' ? 'Ongoing (กำลังดำเนินการ)' : 'Unfinished (ยังไม่เสร็จ)'));
     let getImgHtml = (urls) => { if(!urls) return '<span style="color:var(--text-muted); font-size:13px;">ไม่มีรูปภาพแนบ</span>'; return urls.split(',').filter(u=>u).map(u => `<img src="${u.trim()}" onclick="window.open('${u.trim()}','_blank')" style="height:90px; width:90px; object-fit:cover; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow-sm); cursor:pointer;">`).join(' '); }; 
     let techDisplay = (job.tech && job.tech.trim() !== "") ? job.tech : '<span style="color:#E53E3E; font-weight:700;">รอจ่ายงาน (คลิกปุ่มด้านล่างเพื่อระบุช่าง)</span>'; 
+    let forwardDisplay = (job.forwardTo && job.forwardTo.trim() !== "") ? `<span style="color:var(--secondary); font-weight:bold;">${job.forwardTo}</span>` : '-';
     
     let downTimeStr = "-"; let repairTimeStr = parseTimeStringToPretty(job.repairTime) || "-"; let responseTimeStr = "-";
     let st = job.startTime ? job.startTime.toString().split(':') : []; let et = job.endTime ? job.endTime.toString().split(':') : [];
@@ -430,9 +469,36 @@ function openJobDetails(numStr) {
     }
 
     let isBD = job.isBreakdown === 'Yes' || job.isBreakdown === 'Y' || job.isBreakdown === 'YES' ? '✅ ใช่ (Yes)' : '❌ ไม่ (No)';
-
     let costNum = parseFloat(job.cost);
     let costDisplay = (!isNaN(costNum) && costNum > 0) ? costNum.toLocaleString() + ' บาท' : '0 บาท';
+
+    // 🔴 โชว์ฟิลด์ รอ Part และ สิ่งที่ต้องทำต่อ ถ้าระบุไว้
+    let sparePartHtml = "";
+    if (job.result === 'Waiting Spare Part' || (job.sparePart && job.sparePart.trim() !== "")) {
+        sparePartHtml = `<div class="detail-row" style="background:#FFF5F5; padding:12px; border-radius:10px; border:1px solid #FC8181; margin-top:10px;">
+            <div class="detail-label" style="color:#E53E3E; font-weight:bold;">อะไหล่ที่กำลังรอ (Spare Part)</div><div class="detail-value fw-bold">${job.sparePart || '-'}</div>
+        </div>`;
+    }
+
+    let pendingHtml = "";
+    if (job.pendingAction && job.pendingAction.trim() !== "") {
+        pendingHtml = `<div class="detail-row" style="background:#F0F7FF; padding:12px; border-radius:10px; border:1px solid var(--secondary); margin-top:10px;">
+            <div class="detail-label" style="color:var(--secondary); font-weight:bold;">สิ่งที่ต้องทำต่อ (Pending Action)</div><div class="detail-value">${job.pendingAction}</div>
+        </div>`;
+    }
+
+    // 🔴 บล็อก Audit Trail
+    let auditHtml = `
+        <div style="background: #F8FAFC; border: 2px dashed #CBD5E0; border-radius: 12px; padding: 15px; margin-top: 25px;">
+            <h3 style="margin:0 0 10px; font-size:14px; color:#4A5568; display:flex; align-items:center; gap:5px;"><span class="material-symbols-rounded" style="font-size:18px;">manage_search</span> บันทึกการเคลื่อนไหวของระบบ</h3>
+            <div style="font-size:13px; color:#4A5568; line-height:1.8;">
+                <div><b>สร้างคำสั่งครั้งแรกเมื่อ:</b> ${job.createdAt || '-'}</div>
+                <div><b>อัปเดตข้อมูลล่าสุดเมื่อ:</b> ${job.lastUpdated || '-'}</div>
+                <div><b>อัปเดตครั้งล่าสุดโดย:</b> <span style="color:var(--primary); font-weight:600;">${job.editorName || '-'}</span></div>
+                <div><b>เหตุผลการอัปเดต:</b> ${job.editReason || '-'}</div>
+            </div>
+        </div>
+    `;
 
     let html = ` 
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-bottom:0px;"> 
@@ -447,6 +513,9 @@ function openJobDetails(numStr) {
     <div class="detail-row" style="background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border);"> 
         <div class="detail-label">สถานะงานซ่อมปัจจุบัน</div><div class="detail-value fw-bold">${statusFull}</div> 
     </div> 
+    
+    ${sparePartHtml}
+    ${pendingHtml}
     
     <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:10px; margin-top:15px; background:#F8FAFC; padding:12px; border-radius:10px; border:1px solid var(--border); text-align:center;">
         <div><div style="font-size:11px; color:var(--text-muted); font-weight:700;">เวลาแจ้ง</div><div style="font-size:14px; font-weight:600; color:var(--text-main);">${job.callTime || '-'}</div></div>
@@ -481,16 +550,23 @@ function openJobDetails(numStr) {
        </div>
     </div>
 
-    <div class="detail-row"><div class="detail-label">ผู้รับมอบงาน</div><div class="detail-value">${job.handover || '-'}</div></div> 
+    <div class="detail-row"><div class="detail-label">ผู้รับมอบงาน (Production)</div><div class="detail-value">${job.handover || '-'}</div></div> 
     <div class="detail-row"><div class="detail-label">หมายเหตุ</div><div class="detail-value">${job.remark || '-'}</div></div> 
 
-    <div class="detail-row"><div class="detail-label">ทีมช่าง / ผู้ปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> 
-    <div style="margin-top: 25px; padding-top:15px; border-top:2px dashed var(--border);"> 
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px; margin-top:15px; padding-top:15px; border-top:1px dashed #E2E8F0;"> 
+        <div class="detail-row" style="border:none;"><div class="detail-label">ทีมช่างปฏิบัติงาน</div><div class="detail-value">${techDisplay}</div></div> 
+        <div class="detail-row" style="border:none;"><div class="detail-label">ส่งต่องานให้</div><div class="detail-value">${forwardDisplay}</div></div> 
+    </div>
+
+    <div style="margin-top: 10px; padding-top:15px; border-top:2px dashed var(--border);"> 
         <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">image</span> ภาพก่อนซ่อม</div> 
         <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:20px;">${getImgHtml(job.imgBefore)}</div> 
         <div class="detail-label" style="color:var(--primary); font-size:14px; margin-bottom:10px;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:text-bottom;">imagesmode</span> ภาพหลังซ่อม</div> 
         <div style="display:flex; gap:12px; flex-wrap:wrap;">${getImgHtml(job.imgAfter)}</div> 
-    </div> `; 
+    </div> 
+    
+    ${auditHtml}
+    `; 
     document.getElementById('jobDetailsContent').innerHTML = html; document.getElementById('jobDetailsPage').style.display = 'block'; 
 }
 
@@ -504,7 +580,6 @@ function openEditMode() {
     document.getElementById('edit_shift').value = currentJobData.shift;
     document.getElementById('edit_machine').value = currentJobData.machine;
     
-    // ตั้งค่าข้อมูล Line ในแบบฟอร์มแก้ไข
     let editLineSelect = document.getElementById('edit_line');
     if(editLineSelect) {
         let currentLine = currentJobData.line || "";
@@ -533,9 +608,10 @@ function openEditMode() {
     
     let currentRes = currentJobData.result;
     if(currentRes === 'F') currentRes = 'Finished';
-    if(currentRes === 'O') currentRes = 'Ongoing';
+    if(currentRes === 'O' || currentRes === 'Ongoing') currentRes = 'Unfinished'; 
     if(currentRes === 'U') currentRes = 'Unfinished';
     document.getElementById('edit_result').value = currentRes || "Finished"; 
+    toggleSparePart('edit'); // ซ่อน/โชว์กล่องรออะไหล่ตามค่าของงานเก่า
     
     document.getElementById('edit_pmUpdate').value = currentJobData.pmUpdate || "";
     document.getElementById('edit_pmCompleted').value = currentJobData.pmCompleted || "";
@@ -554,9 +630,14 @@ function openEditMode() {
     document.getElementById('edit_handover').value = currentJobData.handover || "";
     document.getElementById('edit_dept').value = currentJobData.dept || "CO";
     document.getElementById('edit_remark').value = currentJobData.remark || "";
+    
+    // ตั้งค่ากล่องข้อมูลใหม่
+    if(document.getElementById('edit_sparePart')) document.getElementById('edit_sparePart').value = currentJobData.sparePart || "";
+    if(document.getElementById('edit_forwardTo')) document.getElementById('edit_forwardTo').value = currentJobData.forwardTo || "";
+    if(document.getElementById('edit_pendingAction')) document.getElementById('edit_pendingAction').value = currentJobData.pendingAction || "";
 
-    document.getElementById('edit_editorName').value = "";
-    document.getElementById('edit_editReason').value = "";
+    if(document.getElementById('edit_editorName')) document.getElementById('edit_editorName').value = "";
+    if(document.getElementById('edit_editReason')) document.getElementById('edit_editReason').value = "";
 
     clearFiles('edit_before'); clearFiles('edit_after'); 
     
@@ -583,7 +664,6 @@ async function submitEditForm(event) {
     var techArray = []; document.querySelectorAll('.edit-tech-cb:checked').forEach(cb => techArray.push(cb.value)); 
     if(document.getElementById('edit_cbOther').checked) techArray.push(document.getElementById('edit_techOther').value); 
     
-    // อ่านค่าของ Line จากการแก้ไข
     let updatedLine = document.getElementById('edit_line') ? document.getElementById('edit_line').value : "";
     if(updatedLine === "อื่นๆ" && document.getElementById('edit_lineOther')) {
         updatedLine = document.getElementById('edit_lineOther').value;
@@ -595,22 +675,37 @@ async function submitEditForm(event) {
         for(let f of editFilesAfter) baseEditAfter.push(await compressImageAsync(f)); 
         
         var updateData = { 
-            num: document.getElementById('editJobNum').value, 
-            date: document.getElementById('edit_date').value, 
-            shift: document.getElementById('edit_shift').value, 
-            line: updatedLine, // ส่งค่า Line ใหม่กลับไปบันทึก
-            machine: document.getElementById('edit_machine').value,
+            num: document.getElementById('editJobNum').value, date: document.getElementById('edit_date').value, shift: document.getElementById('edit_shift').value, line: updatedLine, machine: document.getElementById('edit_machine').value,
             callTime: getTimeString('edit_call'), startTime: getTimeString('edit_start'), endTime: getTimeString('edit_end'), repairTime: calculatedRepairTime,
             breakdown: document.getElementById('edit_breakdown').value, cause: document.getElementById('edit_cause').value, solved: document.getElementById('edit_solved').value, result: document.getElementById('edit_result').value, 
             pmUpdate: document.getElementById('edit_pmUpdate').value, pmCompleted: document.getElementById('edit_pmCompleted').value, pmInterval: document.getElementById('edit_pmInterval').value, pmDetail: document.getElementById('edit_pmDetail').value,
             isBreakdown: document.getElementById('edit_isBreakdown').value, cost: document.getElementById('edit_cost').value,
             tech: techArray.join(', '), imgsBefore: baseEditBefore, imgsAfter: baseEditAfter, handover: document.getElementById('edit_handover').value, dept: document.getElementById('edit_dept').value, remark: document.getElementById('edit_remark').value,
-            editorName: document.getElementById('edit_editorName').value,
-            editReason: document.getElementById('edit_editReason').value
+            sparePart: document.getElementById('edit_sparePart') ? document.getElementById('edit_sparePart').value : '', 
+            forwardTo: document.getElementById('edit_forwardTo') ? document.getElementById('edit_forwardTo').value : '', 
+            pendingAction: document.getElementById('edit_pendingAction') ? document.getElementById('edit_pendingAction').value : '',
+            editorName: document.getElementById('edit_editorName') ? document.getElementById('edit_editorName').value : '', 
+            editReason: document.getElementById('edit_editReason') ? document.getElementById('edit_editReason').value : ''
         };
         
         const res = await callAPI("updateReport", updateData); 
-        if(res.status === "success") { alert(res.message); clearFiles('edit_before'); clearFiles('edit_after'); document.getElementById('editJobPage').style.display = 'none'; document.getElementById('jobDetailsPage').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; const newRes = await callAPI("getDashboard", {}); if(newRes.status === "success") { allReportData = newRes.data; renderReportTable(currentPage); } document.getElementById('loadingScreen').style.display = 'none'; } else { alert("เกิดข้อผิดพลาด: " + res.message); } 
+        if(res.status === "success") { 
+            alert(res.message); clearFiles('edit_before'); clearFiles('edit_after'); document.getElementById('editJobPage').style.display = 'none'; document.getElementById('jobDetailsPage').style.display = 'none'; document.getElementById('loadingScreen').style.display = 'flex'; 
+            const newRes = await callAPI("getDashboard", {}); 
+            if(newRes.status === "success") { 
+                allReportData = newRes.data; 
+                let fwdSet = new Set();
+                allReportData.forEach(r => { if(r.forwardTo && r.forwardTo.trim() !== "") fwdSet.add(r.forwardTo.trim()); });
+                let fwdHtml = "";
+                fwdSet.forEach(name => { fwdHtml += `<option value="${name}">`; });
+                let fwdListAdd = document.getElementById('forwardToList');
+                let fwdListEdit = document.getElementById('edit_forwardToList');
+                if(fwdListAdd) fwdListAdd.innerHTML = fwdHtml;
+                if(fwdListEdit) fwdListEdit.innerHTML = fwdHtml;
+                renderReportTable(currentPage); 
+            } 
+            document.getElementById('loadingScreen').style.display = 'none'; 
+        } else { alert("เกิดข้อผิดพลาด: " + res.message); } 
     } catch(err) { alert("Error: " + err.message); } btn.innerHTML = '<span class="material-symbols-rounded">save</span> บันทึกการอัปเดต'; btn.disabled = false; 
 }
 
