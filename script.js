@@ -307,31 +307,55 @@ function renderReportTable(pageNumber) {
     let statusFull = item.result === "F" || item.result === "Finished" ? "Finished" : (item.result === "Waiting Spare Part" ? "Waiting Spare Part" : (item.result === "O" || item.result === "Ongoing" ? "Ongoing" : "Unfinished"));
     let statusColor = statusFull === "Finished" ? "#38A169" : (statusFull === "Waiting Spare Part" ? "#DD6B20" : (statusFull === "Ongoing" ? "#D69E2E" : "#E53E3E"));
     let isNew = isNewJob(item.date); 
+    
+    // 🔴 1. ระบบ Visual Warning แจ้งเตือนงานค้างเกิน 3 วัน
+    let jobDateObj = parseDateSafely(item.date);
+    let diffDays = Math.floor((new Date() - jobDateObj) / (1000 * 60 * 60 * 24));
+    let isOverdue = (diffDays >= 3 && statusFull !== 'Finished'); // เตือนเมื่องานไม่เสร็จและเลย 3 วัน
+    
+    // ป้าย Badge ด้านบนของชื่อการ์ด
     let newBadgeHtml = isNew ? `<div class="badge-new"><span class="material-symbols-rounded" style="font-size:12px;">campaign</span> NEW</div>` : "";
+    let overdueBadgeHtml = isOverdue ? `<div class="badge-new" style="background:#E53E3E;"><span class="material-symbols-rounded" style="font-size:12px;">warning</span> ค้างมา ${diffDays} วัน</div>` : "";
+    
     let techDisplay = (item.tech && item.tech.trim() !== "") ? item.tech : '<span style="color:#E53E3E;">ยังไม่ระบุช่าง</span>';
     let callTimeHtml = item.callTime ? `<span class="badge-chip" style="background:#EBF8FF; color:#3182CE;"><span class="material-symbols-rounded" style="font-size:14px;">notifications_active</span> แจ้ง: ${item.callTime}</span>` : "";
     let prettyRepairTime = parseTimeStringToPretty(item.repairTime);
     let repairTimeHtml = (prettyRepairTime && prettyRepairTime !== "-") ? `<span class="badge-chip" style="background:#F0FFF4; color:#38A169;"><span class="material-symbols-rounded" style="font-size:14px;">timer</span> ซ่อม: ${prettyRepairTime}</span>` : "";
 
+    // 🔴 2. ดึงชื่ออะไหล่ และผู้รับส่งต่อ มาโชว์ในการ์ดหน้าแรก
+    let sparePartBadge = (statusFull === "Waiting Spare Part" && item.sparePart && item.sparePart.trim() !== "") 
+        ? `<div style="margin-top:8px; font-size:13px; color:#DD6B20; font-weight:600; display:flex; align-items:center; gap:4px; background:#FFFAF0; padding:6px 10px; border-radius:8px; border:1px dashed #F6AD55;"><span class="material-symbols-rounded" style="font-size:16px;">inventory_2</span> รออะไหล่: ${item.sparePart}</div>` : "";
+        
+    let forwardBadge = (item.forwardTo && item.forwardTo.trim() !== "") 
+        ? `<div style="margin-top:8px; font-size:13px; color:var(--secondary); font-weight:600; display:flex; align-items:center; gap:4px; background:#EBF8FF; padding:6px 10px; border-radius:8px; border:1px dashed #90CDF4;"><span class="material-symbols-rounded" style="font-size:16px;">forward_to_inbox</span> ส่งต่อให้: ${item.forwardTo}</div>` : "";
+
+    // เปลี่ยนสีกรอบการ์ดเป็นสีแดงถ่างานค้างนาน
+    let cardBorderAlert = isOverdue ? 'border: 2px solid #FC8181; background: #FFF5F5;' : '';
+
     html += `
-      <div class="report-card status-${statusFull.split(' ')[0]} ${isNew?'is-new':''}" onclick="openJobDetails('${item.num}')">
+      <div class="report-card status-${statusFull.split(' ')[0]} ${isNew?'is-new':''}" style="${cardBorderAlert}" onclick="openJobDetails('${item.num}')">
         <div class="report-card-head">
-          <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum} [${item.dept}]</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml}</div>
+          <div class="report-card-title"><span style="color:var(--secondary); margin-right:5px;">#${item.displayNum} [${item.dept}]</span> ${item.machine} <span style="font-weight:400; color:var(--text-muted);">(${item.line})</span> ${newBadgeHtml} ${overdueBadgeHtml}</div>
           <div style="font-size:14px; font-weight:700; color:${statusColor};">${statusFull}</div>
         </div>
         <p class="report-detail"><b>อาการ:</b> ${item.breakdown}</p>
-        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+        
+        <!-- แทรกกล่องข้อมูลอะไหล่/ส่งต่อ ตรงนี้ -->
+        ${sparePartBadge}
+        ${forwardBadge}
+
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
           <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">person</span> ${techDisplay}</span>
           <span class="badge-chip"><span class="material-symbols-rounded" style="font-size:14px;">calendar_month</span> ${item.date}</span>
           ${callTimeHtml}
           ${repairTimeHtml}
         </div>
-        <!-- 🔴 โชว์ Time Stamp -->
+        
         <div style="font-size:12px; color:var(--text-muted); margin-top:10px; display:flex; align-items:center; gap:4px; padding-top:10px; border-top:1px dashed #E2E8F0;">
             <span class="material-symbols-rounded" style="font-size:14px;">schedule</span> สร้างคำสั่ง: <span style="font-weight:600;">${item.createdAt || 'ไม่มีข้อมูล (งานเก่า)'}</span>
         </div>
       </div>`;
-  }); 
+  });
 
   document.getElementById('reportContent').innerHTML = html;
   
