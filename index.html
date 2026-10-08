@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="logo.png">
   
   <!-- 🔴 เชื่อมต่อไฟล์ CSS -->
-  <link rel="stylesheet" href="style.css?v=1.0">
+  <link rel="stylesheet" href="style.css?v=1.1">
 
 </head>
 <body>
@@ -119,9 +119,10 @@
           <label>สถานะงาน</label>
           <select id="fStatus" onchange="renderReportTable(1)">
             <option value="">-- ทุกสถานะ --</option>
-            <option value="Finished">Finished</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Unfinished">Unfinished</option>
+            <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
+            <!-- 🔴 เปลี่ยนจาก Ongoing เป็น รออะไหล่ -->
+            <option value="Waiting Spare Part">รออะไหล่ (Waiting Spare Part)</option>
+            <option value="Unfinished">Unfinished (ยังไม่เสร็จ)</option>
           </select>
         </div>
         <div class="form-group">
@@ -144,8 +145,14 @@
     </div>
   </div>
 
-  <!-- ฟอร์มเพิ่มข้อมูล -->
+  <!-- ================= FORM ADD VIEW ================= -->
   <div id="formView" class="container" style="display: none; margin-top: 25px;">
+    
+    <!-- 🔴 ปุ่มย้อนกลับหน้าหลักชัดเจน -->
+    <button type="button" class="btn-primary" style="margin-bottom: 20px; background: #E2E8F0; color: var(--primary); box-shadow: none;" onclick="toggleMainView()">
+        <span class="material-symbols-rounded">arrow_back</span> ย้อนกลับหน้า Dashboard
+    </button>
+
     <form id="maintenanceForm" onsubmit="submitForm(event)">
       <div class="card">
         <div class="card-title"><span class="material-symbols-rounded">feed</span> ข้อมูลทั่วไป</div>
@@ -196,31 +203,47 @@
         
         <div class="form-row">
             <div class="form-group">
-                <label>นับเป็น Breakdown หรือไม่?</label>
-                <select id="isBreakdown" required>
+                <label style="color:#E53E3E; font-weight:700;">นับเป็น Breakdown หรือไม่?</label>
+                <select id="isBreakdown" required style="border-color:#FC8181; background:#FFF5F5;">
                     <option value="" disabled selected>-- เลือก --</option>
-                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
-                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
+                    <option value="Yes">ใช่ (Yes)</option>
+                    <option value="No">ไม่ใช่ (No)</option>
                 </select>
             </div>
             <div class="form-group">
                 <label>ต้นทุนการซ่อม (Cost)</label>
-                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (ถ้ามี)" min="0">
+                <input type="number" id="cost" placeholder="ระบุตัวเลขต้นทุน (บาท)" min="0">
             </div>
         </div>
         
-        <div class="form-group" style="margin-top: 15px;">
-            <label>สถานะงาน (Result)</label>
-            <select id="result" required>
+        <hr style="border: 1px solid #E2E8F0; margin: 25px 0;">
+        <h3 style="font-size: 15px; color: var(--primary); margin-bottom: 15px; font-weight: 600;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:middle;">assignment_turned_in</span> สถานะงานปัจจุบัน</h3>
+        
+        <div class="form-group">
+            <label>สถานะ (Result)</label>
+            <select id="result" required onchange="toggleSparePart('add')">
                 <option value="" disabled selected>-- เลือกสถานะ --</option>
                 <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
-                <option value="Ongoing">Ongoing (กำลังดำเนินการ)</option>
+                <!-- 🔴 เปลี่ยนจาก Ongoing เป็น รออะไหล่ -->
+                <option value="Waiting Spare Part">รออะไหล่ (Waiting Spare Part)</option>
                 <option value="Unfinished">Unfinished (ยังไม่เสร็จ)</option>
             </select>
         </div>
         
+        <!-- 🔴 โผล่เมื่อเลือกรออะไหล่ -->
+        <div id="sparePartContainer" style="display:none; background:#FFF5F5; border:1px solid #FC8181; padding:15px; border-radius:10px; margin-bottom:15px;">
+           <label style="color:#E53E3E; font-weight:bold;">ระบุ Spare Part ที่กำลังรอ *</label>
+           <input type="text" id="sparePart" placeholder="ระบุชื่ออะไหล่ หรือ Part Number..." style="border-color:#FC8181;">
+        </div>
+
+        <!-- 🔴 Pending Action -->
+        <div class="form-group" style="margin-bottom:0;">
+            <label>Pending Action (สิ่งที่ต้องทำต่อ)</label>
+            <textarea id="pendingAction" rows="2" placeholder="ระบุสิ่งที่ต้องทำหากอะไหล่มาถึง หรือแผนงานขั้นต่อไป..."></textarea>
+        </div>
+        
         <hr style="border: 1px solid #E2E8F0; margin: 25px 0;">
-        <h3 style="font-size: 15px; color: var(--primary); margin-bottom: 15px; font-weight: 600;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:middle;">assignment</span> ส่วนของการแก้ไขแผน PM (ถ้ามี)</h3>
+        <h3 style="font-size: 15px; color: var(--primary); margin-bottom: 15px; font-weight: 600;"><span class="material-symbols-rounded" style="font-size:18px; vertical-align:middle;">build</span> ส่วนของการแก้ไขแผน PM (ถ้ามี)</h3>
         
         <div class="form-row">
             <div class="form-group">
@@ -285,8 +308,16 @@
           </div>
           <div id="techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="techOther" placeholder="พิมพ์ชื่อผู้ปฏิบัติงาน..."></div>
         </div>
+        
+        <!-- 🔴 ระบบส่งต่อให้ (Datalist จำชื่อ) -->
+        <div class="form-group" style="margin-top:20px;">
+            <label style="color:var(--secondary); font-weight:600;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">forward_to_inbox</span> ส่งต่องานให้ (ถ้ามี)</label>
+            <input type="text" id="forwardTo" list="forwardToList" placeholder="เลือกหรือพิมพ์ชื่อเพื่อส่งต่องาน...">
+            <datalist id="forwardToList"></datalist> <!-- รายชื่อจะถูกดึงมาใส่ตรงนี้อัตโนมัติ -->
+        </div>
+
         <div class="form-row">
-          <div class="form-group"><label>ผู้รับมอบงาน</label><input type="text" id="handover" required></div>
+          <div class="form-group"><label>ผู้รับมอบงาน (Production)</label><input type="text" id="handover" required></div>
         </div>
         <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุเพิ่มเติม (ถ้ามี)</label><textarea id="remark" rows="2"></textarea></div>
       </div>
@@ -299,23 +330,31 @@
     <span class="material-symbols-rounded" id="fabIcon" style="font-size: 30px;">add</span>
   </button>
 
+  <!-- ================= JOB DETAILS OVERLAY ================= -->
   <div class="page-overlay" id="jobDetailsPage">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">assignment</span> รายละเอียดงาน <span id="detailJobNum" style="color:var(--secondary);"></span></h2>
-      <button class="btn-close-page" onclick="document.getElementById('jobDetailsPage').style.display='none'"><span class="material-symbols-rounded">close</span></button>
+      <!-- 🔴 ปุ่มย้อนกลับแบบชัดเจน -->
+      <button type="button" class="btn-primary" style="width: auto; padding: 8px 16px; border-radius: 8px; font-size: 14px; box-shadow: none;" onclick="document.getElementById('jobDetailsPage').style.display='none'">
+        <span class="material-symbols-rounded" style="font-size: 18px;">arrow_back</span> ย้อนกลับ
+      </button>
     </div>
     <div class="container">
       <div class="card" id="jobDetailsContent"></div>
-      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> แจกงาน / แก้ไขอัปเดตงานนี้</button>
+      <button class="btn-edit" onclick="openEditMode()"><span class="material-symbols-rounded">edit_document</span> อัปเดตข้อมูล / ปิดงานนี้</button>
     </div>
   </div>
 
-  <!-- ฟอร์มแก้ไขข้อมูล -->
-  <div class="page-overlay" id="editJobPage" style="z-index: 250;">
+  <!-- ================= EDIT JOB OVERLAY ================= -->
+  <div class="page-overlay" id="editJobPage" style="z-index: 2050;">
     <div class="page-header">
       <h2 style="margin:0; font-size:18px; font-weight:700; color:var(--primary);"><span class="material-symbols-rounded" style="vertical-align: bottom;">update</span> อัปเดตข้อมูล <span id="editJobNumLabel" style="color:var(--secondary);"></span></h2>
-      <button class="btn-close-page" onclick="document.getElementById('editJobPage').style.display='none'"><span class="material-symbols-rounded">close</span></button>
+      <!-- 🔴 ปุ่มย้อนกลับแบบชัดเจน -->
+      <button type="button" class="btn-primary" style="width: auto; padding: 8px 16px; border-radius: 8px; font-size: 14px; background: #E2E8F0; color: var(--primary); box-shadow: none;" onclick="document.getElementById('editJobPage').style.display='none'">
+        <span class="material-symbols-rounded" style="font-size: 18px;">arrow_back</span> ยกเลิก
+      </button>
     </div>
+    
     <div class="container">
       <form id="editForm" onsubmit="submitEditForm(event)">
         <input type="hidden" id="editJobNum">
@@ -368,10 +407,10 @@
           
           <div class="form-row">
             <div class="form-group">
-                <label>นับเป็น Breakdown หรือไม่?</label>
-                <select id="edit_isBreakdown" required>
-                    <option value="Yes">นับเป็น Breakdown (Yes)</option>
-                    <option value="No">ไม่นับเป็น Breakdown (No)</option>
+                <label style="color:#E53E3E; font-weight:700;">นับเป็น Breakdown หรือไม่?</label>
+                <select id="edit_isBreakdown" required style="border-color:#FC8181; background:#FFF5F5;">
+                    <option value="Yes">ใช่ (Yes)</option>
+                    <option value="No">ไม่ใช่ (No)</option>
                 </select>
             </div>
             <div class="form-group">
@@ -380,13 +419,26 @@
             </div>
           </div>
           
+          <hr style="border: 1px solid #E2E8F0; margin: 25px 0;">
+          
           <div class="form-group">
             <label>อัปเดตสถานะงาน (Result)</label>
-            <select id="edit_result" required>
+            <select id="edit_result" required onchange="toggleSparePart('edit')">
                 <option value="Finished">Finished (เสร็จสมบูรณ์)</option>
-                <option value="Ongoing">Ongoing (กำลังดำเนินการ)</option>
+                <option value="Waiting Spare Part">รออะไหล่ (Waiting Spare Part)</option>
                 <option value="Unfinished">Unfinished (ยังไม่เสร็จ)</option>
             </select>
+          </div>
+          
+          <!-- 🔴 โผล่เมื่อเลือกรออะไหล่ (โหมดแก้) -->
+          <div id="edit_sparePartContainer" style="display:none; background:#FFF5F5; border:1px solid #FC8181; padding:15px; border-radius:10px; margin-bottom:15px;">
+             <label style="color:#E53E3E; font-weight:bold;">ระบุ Spare Part ที่กำลังรอ *</label>
+             <input type="text" id="edit_sparePart" placeholder="ระบุชื่ออะไหล่ หรือ Part Number..." style="border-color:#FC8181; background:white;">
+          </div>
+  
+          <div class="form-group">
+              <label>Pending Action (สิ่งที่ต้องทำต่อ)</label>
+              <textarea id="edit_pendingAction" rows="2" placeholder="ระบุสิ่งที่ต้องทำหากอะไหล่มาถึง..."></textarea>
           </div>
           
           <hr style="border: 1px solid #E2E8F0; margin: 20px 0;">
@@ -431,12 +483,19 @@
           </div>
           <div id="edit_techOtherContainer" style="display:none; margin-top:10px;"><input type="text" id="edit_techOther" placeholder="พิมพ์ชื่อช่าง..."></div>
           
+          <div class="form-group" style="margin-top:20px;">
+              <label style="color:var(--secondary); font-weight:600;"><span class="material-symbols-rounded" style="font-size:16px; vertical-align:middle;">forward_to_inbox</span> ส่งต่องานให้ (ถ้ามี)</label>
+              <input type="text" id="edit_forwardTo" list="edit_forwardToList" placeholder="เลือกหรือพิมพ์ชื่อเพื่อส่งต่องาน...">
+              <datalist id="edit_forwardToList"></datalist>
+          </div>
+          
           <div class="form-row" style="margin-top: 15px;">
-            <div class="form-group"><label>ผู้รับมอบงาน</label><input type="text" id="edit_handover" required></div>
+            <div class="form-group"><label>ผู้รับมอบงาน (Production)</label><input type="text" id="edit_handover" required></div>
           </div>
           <div class="form-group" style="margin-bottom:0;"><label>หมายเหตุเพิ่มเติม (ถ้ามี)</label><textarea id="edit_remark" rows="2"></textarea></div>
         </div>
 
+        <!-- 🔴 ส่วนของ Audit Trail (บังคับกรอก) -->
         <div class="card" style="border: 2px solid #CBD5E0; background: #F8FAFC;">
           <div class="card-title" style="color: #4A5568;"><span class="material-symbols-rounded">security</span> บันทึกการแก้ไข (Audit Trail)</div>
           <div class="form-row">
@@ -461,7 +520,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <!-- 🔴 เชื่อมต่อไฟล์ Javascript -->
-  <script src="script.js?v=1.0"></script>
+  <script src="script.js?v=1.1"></script>
   
 </body>
 </html>
